@@ -45,37 +45,34 @@ else {
 	if (!defined('KIT_IDEA_LANGUAGE')) define('KIT_IDEA_LANGUAGE', LANGUAGE); // die Konstante gibt an in welcher Sprache kitIdea aktuell arbeitet
 }
 
-require_once(WB_PATH.'/modules/kit_tools/class.droplets.php');
+if (!class_exists('Dwoo')) {
+	require_once WB_PATH.'/modules/dwoo/include.php';
+}
+
+$cache_path = WB_PATH.'/temp/cache';
+if (!file_exists($cache_path)) mkdir($cache_path, 0755, true);
+$compiled_path = WB_PATH.'/temp/compiled';
+if (!file_exists($compiled_path)) mkdir($compiled_path, 0755, true);
+
+global $parser;
+if (!is_object($parser)) $parser = new Dwoo($compiled_path, $cache_path);
+
+if (!class_exists('dbconnectle')) {
+	require_once WB_PATH.'/modules/dbconnect_le/include.php';
+}
+
+if (!class_exists('kitToolsLibrary')) {
+	require_once WB_PATH.'/modules/kit_tools/class.tools.php';
+}
+global $kitTools;
+if (!is_object($kitTools)) $kitTools = new kitToolsLibrary();
+
 require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.idea.php';
 
-global $admin;
+global $dbIdeaCfg;
+if (!is_object($dbIdeaCfg)) $dbIdeaCfg = new dbIdeaCfg();
 
-$tables = array('dbIdeaCfg');
-$error = '';
+require_once WB_PATH.'/framework/functions.php';
 
-foreach ($tables as $table) {
-	$delete = null;
-	$delete = new $table();
-	if ($delete->sqlTableExists()) {
-		if (!$delete->sqlDeleteTable()) {
-			$error .= sprintf('<p>[UNINSTALL] %s</p>', $delete->getError());
-		}
-	}
-}
-
-// remove Droplets
-$dbDroplets = new dbDroplets();
-$droplets = array();
-foreach ($droplets as $droplet) {
-	$where = array(dbDroplets::field_name => $droplet);
-	if (!$dbDroplets->sqlDeleteRecord($where)) {
-		$message = sprintf('[UPGRADE] Error uninstalling Droplet: %s', $dbDroplets->getError());
-	}	
-}
-
-// Prompt Errors
-if (!empty($error)) {
-	$admin->print_error($error);
-}
 
 ?>

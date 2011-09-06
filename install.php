@@ -35,21 +35,22 @@ else {
 	require_once(WB_PATH .'/modules/kit_tools/languages/' .LANGUAGE .'.php');
 }
 
-// include language file for MARKET PLACE
+// include language file for kitIdea
 if(!file_exists(WB_PATH .'/modules/'.basename(dirname(__FILE__)).'/languages/' .LANGUAGE .'.php')) {
 	require_once(WB_PATH .'/modules/'.basename(dirname(__FILE__)).'/languages/DE.php'); // Vorgabe: DE verwenden 
-	if (!defined('KIT_IDEA_LANGUAGE')) define('KIT_IDEA_LANGUAGE', 'DE'); // die Konstante gibt an in welcher Sprache KIT MarketPlace aktuell arbeitet
+	if (!defined('KIT_IDEA_LANGUAGE')) define('KIT_IDEA_LANGUAGE', 'DE'); // die Konstante gibt an in welcher Sprache kitIdea aktuell arbeitet
 }
 else {
 	require_once(WB_PATH .'/modules/'.basename(dirname(__FILE__)).'/languages/' .LANGUAGE .'.php');
-	if (!defined('KIT_IDEA_LANGUAGE')) define('KIT_IDEA_LANGUAGE', LANGUAGE); // die Konstante gibt an in welcher Sprache KIT MarketPlace aktuell arbeitet
+	if (!defined('KIT_IDEA_LANGUAGE')) define('KIT_IDEA_LANGUAGE', LANGUAGE); // die Konstante gibt an in welcher Sprache kitIdea aktuell arbeitet
 }
 
 require_once(WB_PATH.'/modules/kit_tools/class.droplets.php');
+require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.idea.php';
 
 global $admin;
 
-$tables = array();
+$tables = array('dbIdeaCfg');
 $error = '';
 
 foreach ($tables as $table) {
