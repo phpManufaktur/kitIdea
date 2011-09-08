@@ -14,10 +14,7 @@
  *
  * Use {dump()} to get a list of all in this template available variables!
  *}
-<script type="text/javascript">
-  var WB_URL = '{$WB_URL}';
-</script>
-<div class="idea_backend">
+<div class="idea_frontend">
   <ul class="nav_tab">
   {foreach $navigation nav}
     {if $nav.active == 1}

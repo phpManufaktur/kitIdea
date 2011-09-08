@@ -199,7 +199,7 @@ class kitIdeaBackend {
   		$this->show(self::action_about, $this->dlgAbout());
   		break;
   	default:
-  		$this->show(self::action_list, $this->dlgAbout());
+  		$this->show(self::action_about, $this->dlgAbout());
   		break;
   	endswitch;
   } // action

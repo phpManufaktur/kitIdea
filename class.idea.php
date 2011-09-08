@@ -27,6 +27,65 @@ if (defined('WB_PATH')) {
 }
 // end include LEPTON class.secure.php
 
+class dbIdeaProject extends dbConnectLE {
+	
+	const field_id						= 'project_id';
+	const field_title					= 'project_title';
+	const field_desc_short		= 'project_desc_short';
+	const field_desc_long			= 'project_desc_long';
+	const field_keywords			= 'project_keywords';
+	const field_access				= 'project_access';
+	const field_kit_cats			= 'project_kit_cats';
+	const field_status				= 'project_status';
+	const field_timestamp			= 'project_timestamp';
+	
+	const status_active				= 1;
+	const status_locked				= 2; 
+	const status_deleted			= 4;
+	
+	public $status_array = array(
+		array('value' => self::status_active, 'text' => idea_str_status_active),
+		array('value' => self::status_locked, 'text' => idea_str_status_locked),
+		array('value' => self::status_deleted, 'text' => idea_str_status_deleted)		
+	);
+	
+	const access_public				= 1;
+	const access_closed				= 2;
+	
+	public $access_array = array(
+		array('value' => self::access_public, 'text' => idea_str_access_public),
+		array('value' => self::access_closed, 'text' => idea_str_access_closed)		
+	);
+	
+	private $createTables 		= false;
+  
+  public function __construct($createTables = false) {
+  	$this->createTables = $createTables;
+  	parent::__construct();
+  	$this->setTableName('mod_kit_idea_project');
+  	$this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
+  	$this->addFieldDefinition(self::field_title, "VARCHAR(128) NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_desc_short, "VARCHAR(255) NOT NULL DEFAULT ''", false, false, true);
+  	$this->addFieldDefinition(self::field_desc_long, "TEXT NOT NULL DEFAULT ''", false, false, true);
+  	$this->addFieldDefinition(self::field_keywords, "TEXT NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_access, "TINYINT NOT NULL DEFAULT '".self::access_public."'");
+  	$this->addFieldDefinition(self::field_kit_cats, "VARCHAR(255) NOT NULL DEFAULT ''");
+		$this->addFieldDefinition(self::field_status, "TINYINT NOT NULL DEFAULT '".self::status_active."'");
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->checkFieldDefinitions();
+  	// Tabelle erstellen
+  	if ($this->createTables) {
+  		if (!$this->sqlTableExists()) {
+  			if (!$this->sqlCreateTable()) {
+  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->getError()));
+  			}
+  		}
+  	}
+  	date_default_timezone_set(idea_cfg_time_zone);
+  } // __construct()
+	
+} // dbIdeaProject
+
 class dbIdeaCfg extends dbConnectLE {
 	
 	const field_id						= 'cfg_id';
@@ -70,9 +129,21 @@ class dbIdeaCfg extends dbConnectLE {
   private $message					= '';
 
   const cfgMediaDir							= 'cfgMediaDir';	
+  const cfgKITcategory					= 'cfgKITcategory';
+  const cfgKITformDlgLogin			= 'cfgKITformDlgLogin';
+  const cfgKITformDlgAccount		= 'cfgKITformDlgAccount';
+  const cfgKITformDlgRegister		= 'cfgKITformDlgRegister';
+  const cfgWYSIWYGeditorWidth		= 'cfgWYSIWYGeditorWidth';
+  const cfgWYSIWYGeditorHeight	= 'cfgWYSIWYGeditorHeight';
   
   public $config_array = array(
   	array('idea_label_cfg_media_dir', self::cfgMediaDir, self::type_string, '/kit_idea', 'idea_desc_cfg_media_dir'),
+  	array('idea_label_cfg_kit_category', self::cfgKITcategory, self::type_string, 'kitIdea', 'idea_desc_cfg_kit_category'),
+  	array('idea_label_cfg_kit_form_dlg_login', self::cfgKITformDlgLogin, self::type_string, 'idea_login', 'idea_desc_cfg_kit_form_dlg_login'),
+  	array('idea_label_cfg_kit_form_dlg_account', self::cfgKITformDlgAccount, self::type_string, 'idea_account', 'idea_desc_cfg_kit_form_dlg_account'),
+  	array('idea_label_cfg_kit_form_dlg_register', self::cfgKITformDlgRegister, self::type_string, 'idea_register', 'idea_desc_cfg_kit_form_dlg_register'),
+  	array('idea_label_cfg_wysiwyg_editor_height', self::cfgWYSIWYGeditorHeight, self::type_string, '200px', 'idea_desc_cfg_wysiwyg_editor_height'),
+  	array('idea_label_cfg_wysiwyg_editor_width', self::cfgWYSIWYGeditorWidth, self::type_string, '100%', 'idea_desc_cfg_wysiwyg_editor_width'),
   );  
   
   public function __construct($createTables = false) {

@@ -27,6 +27,10 @@ if (defined('WB_PATH')) {
 }
 // end include LEPTON class.secure.php
 
+// for extended error reporting set to true!
+if (!defined('KIT_DEBUG')) define('KIT_DEBUG', true);
+require_once(WB_PATH.'/modules/kit_tools/debug.php');
+
 // include GENERAL language file
 if(!file_exists(WB_PATH .'/modules/kit_tools/languages/' .LANGUAGE .'.php')) {
 	require_once(WB_PATH .'/modules/kit_tools/languages/DE.php'); // Vorgabe: DE verwenden 
@@ -71,8 +75,16 @@ require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.idea.php';
 
 global $dbIdeaCfg;
 if (!is_object($dbIdeaCfg)) $dbIdeaCfg = new dbIdeaCfg();
+global $dbIdeaProject;
+if (!is_object($dbIdeaProject)) $dbIdeaProject = new dbIdeaProject();
 
+// WYSIWYG editor
+require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.editor.php';
+
+// general needed LEPTON functions
 require_once WB_PATH.'/framework/functions.php';
 
+// load the KeepInTouch Interface
+if (!class_exists('kitContactInterface')) require_once(WB_PATH.'/modules/kit/class.interface.php');	
 
 ?>

@@ -46,6 +46,31 @@ global $database;
 
 $error = '';
 
+// import forms from /forms to kitForm
+$kitForm = new dbKITform();
+$dir_name = WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/forms/';
+$folder = opendir($dir_name); 
+$names = array();
+while (false !== ($file = readdir($folder))) {
+	$ff = array();
+	$ff = explode('.', $file);
+	$ext = end($ff);
+	if ($ext	==	'kit_form') {
+		$names[] = $file; 
+	}			
+}
+closedir($folder);
+$message = '';
+foreach ($names as $file_name) {
+	$form_file = $dir_name.$file_name;
+	$form_id = -1;
+	$msg = '';
+	if (!$kitForm->importFormFile($form_file, '', $form_id, $msg, true)) {
+		if ($kitForm->isError()) $error .= sprintf('[IMPORT FORM %s] %s', $file_name, $kitForm->getError());
+	}
+	$message .= $msg;
+} 
+
 // remove Droplets
 $dbDroplets = new dbDroplets();
 // the array contains the droplets to remove
@@ -53,7 +78,7 @@ $droplets = array();
 foreach ($droplets as $droplet) {
 	$where = array(dbDroplets::field_name => $droplet);
 	if (!$dbDroplets->sqlDeleteRecord($where)) {
-		$message = sprintf('[UPGRADE] Error uninstalling Droplet: %s', $dbDroplets->getError());
+		$message .= sprintf('[UPGRADE] Error uninstalling Droplet: %s', $dbDroplets->getError());
 	}	
 }
 
@@ -62,10 +87,10 @@ $droplets = new checkDroplets();
 $droplets->droplet_path = WB_PATH.'/modules/kit_idea/droplets/';
 
 if ($droplets->insertDropletsIntoTable()) {
-  $message = sprintf(tool_msg_install_droplets_success, 'kitIdea');
+  $message .= sprintf(tool_msg_install_droplets_success, 'kitIdea');
 }
 else {
-  $message = sprintf(tool_msg_install_droplets_failed, 'kitIdea', $droplets->getError());
+  $message .= sprintf(tool_msg_install_droplets_failed, 'kitIdea', $droplets->getError());
 }
 if ($message != "") {
   echo '<script language="javascript">alert ("'.$message.'");</script>';

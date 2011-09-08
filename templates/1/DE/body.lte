@@ -17,7 +17,7 @@
 <script type="text/javascript">
   var WB_URL = '{$WB_URL}';
 </script>
-<div class="idea_backend">
+<div class="idea_frontend">
   <ul class="nav_tab">
   {foreach $navigation nav}
     {if $nav.active == 1}
@@ -26,7 +26,7 @@
       <li><a href="{$nav.url}">{$nav.text}</a></li>
     {/if}
   {/foreach}
-  </ul>
+  </ul> 
 {if $error == 1}
   <div class="error">
 {else}

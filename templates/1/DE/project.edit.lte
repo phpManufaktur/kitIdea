@@ -1,0 +1,70 @@
+{*
+ * kitIdea
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *
+ * Please consult the Dwoo Documentation & WIKI to get further informations 
+ * and hints for the usage of the Dwoo template engine.
+ *
+ * @link http://wiki.dwoo.org/
+ *
+ * Use {dump()} to get a list of all in this template available variables!
+ *}
+<div class="idea_frontend">
+  <form name="{$form.name}" action="{$page_link}" method="post">
+    <input type="hidden" name="{$main_action.name}" value="{$main_action.value}" />
+    <input type="hidden" name="{$project_action.name}" value="{$project_action.value}" />
+    <h2>{$head}</h2>
+    <div class="{if $is_message == 1}message{else}intro{/if}">{$intro}</div>
+    <table width="100%">
+      <colgroup>
+        <col width="200" /> 
+        <col width="*" />
+        <col width="200" />
+      </colgroup>
+      {if ($project.project_id.value > 0)}
+      <tr>
+        <td class="project_label">{$project.project_id.label}</td>
+        <td class="project_value">{string_format($project.project_id.value, '%05d')}</td>
+        <td class="project_hint">{$project.project_id.hint}</td>
+      </tr>
+      <tr>
+        <td class="project_label">{$project.project_timestamp.label}</td>
+        <td class="project_value">{date_format($project.project_timestamp.value, '%d.%m.%Y - %H:%M%:%S')}</td>
+        <td class="project_hint">{$project.project_id.hint}</td>
+      </tr>
+      {/if}
+      <tr>
+        <td class="project_label">{$project.project_title.label}</td>
+        <td class="project_value"><input type="text" name="{$project.project_title.name}" value="{$project.project_title.value}" /></td>
+        <td class="project_hint">{$project.project_id.hint}</td>
+      </tr>
+      <tr>
+        <td class="project_label">{$project.project_desc_short.label}</td>
+        <td class="project_value"><textarea name="{$project.project_desc_short.name}">{$project.project_desc_short.value}</textarea></td>
+        <td class="project_hint">{$project.project_desc_short.hint}</td>
+      </tr>
+      <tr>
+        <td class="project_label">{$project.project_desc_long.label}</td>
+        <td class="project_value">{$project.project_desc_long.editor}</td>
+        <td class="project_hint">{$project.project_desc_long.hint}</td>
+      </tr>
+      <tr>
+        <td class="project_label">{$project.project_keywords.label}</td>
+        <td class="project_value"><textarea name="{$project.project_keywords.name}">{$project.project_keywords.value}</textarea></td>
+        <td class="project_hint">{$project.project_keywords.hint}</td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td colspan="2">
+          <input type="submit" value="{$form.btn.ok}" />&nbsp;
+          <input type="button" value="{$form.btn.abort}" onclick="javascript: window.location = '{$page_link}'; return false;" />
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>

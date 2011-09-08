@@ -1,0 +1,37 @@
+{*
+ * kitIdea
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *
+ * Please consult the Dwoo Documentation & WIKI to get further informations 
+ * and hints for the usage of the Dwoo template engine.
+ *
+ * @link http://wiki.dwoo.org/
+ *
+ * Use {dump()} to get a list of all in this template available variables!
+ *}
+<div class="idea_frontend">
+  {if $projects.count > 0}
+    {foreach $projects.items project}
+    <div class="idea_project_overview">
+      <h2>{$project.title}</h2>
+      <div>{$project.desc_short}</div>
+    </div>
+    {/foreach}
+  {else}
+  <div>
+    Es sind zur Zeit keine Projekte aktiv!
+  </div>
+  {/if}
+  <div class="idea_footer">
+    {if $authenticated == 1}
+    <a href="{$projects.action.create_url}">Neues Projekt anlegen</a> 
+    {else}
+    <a href="{$login_url}">Melden Sie sich bitte an</a> um ein neues Projekt anzulegen.
+    {/if}
+  </div>
+</div>

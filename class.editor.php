@@ -1,4 +1,5 @@
 <?php
+
 /**
  * kitIdea
  * 
@@ -7,6 +8,8 @@
  * @copyright 2011
  * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
  * @version $Id$
+ * 
+ * FOR VERSION- AND RELEASE NOTES PLEASE LOOK AT INFO.TXT!
  */
 
 // try to include LEPTON class.secure.php to protect this file and the whole CMS!
@@ -27,9 +30,18 @@ if (defined('WB_PATH')) {
 }
 // end include LEPTON class.secure.php
 
-require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.backend.php';
+if (!defined('WYSIWYG_EDITOR') || 
+		WYSIWYG_EDITOR == "none" || 
+		!file_exists(WB_PATH.'/modules/'.WYSIWYG_EDITOR.'/include.php')) {
+	// no WYSIWYG editor present...
+	function show_wysiwyg_editor($name, $id, $content, $width, $height) {
+			echo '<textarea name="'.$name.'" id="'.$id.'" style="width: '.$width.'; height: '.$height.';">'.$content.'</textarea>';
+	}
+} 
+else {
+	// include default WYSIWYG editor
+	require_once(WB_PATH.'/modules/'.WYSIWYG_EDITOR.'/include.php');
+}
 
-$backend = new kitIdeaBackend();
-$backend->action();
 
 ?>
