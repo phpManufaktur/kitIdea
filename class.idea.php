@@ -29,15 +29,18 @@ if (defined('WB_PATH')) {
 
 class dbIdeaProject extends dbConnectLE {
 	
-	const field_id						= 'project_id';
-	const field_title					= 'project_title';
-	const field_desc_short		= 'project_desc_short';
-	const field_desc_long			= 'project_desc_long';
-	const field_keywords			= 'project_keywords';
-	const field_access				= 'project_access';
-	const field_kit_cats			= 'project_kit_cats';
-	const field_status				= 'project_status';
-	const field_timestamp			= 'project_timestamp';
+	const field_id							= 'project_id';
+	const field_number					= 'project_number';
+	const field_title						= 'project_title';
+	const field_desc_short			= 'project_desc_short';
+	const field_desc_long				= 'project_desc_long';
+	const field_keywords				= 'project_keywords';
+	const field_access					= 'project_access';
+	const field_kit_categories	= 'project_kit_categories';
+	const field_author					= 'project_author';
+	const field_revision				= 'project_revision';
+	const field_status					= 'project_status';
+	const field_timestamp				= 'project_timestamp';
 	
 	const status_active				= 1;
 	const status_locked				= 2; 
@@ -64,12 +67,15 @@ class dbIdeaProject extends dbConnectLE {
   	parent::__construct();
   	$this->setTableName('mod_kit_idea_project');
   	$this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
+  	$this->addFieldDefinition(self::field_number, "INT(11) NOT NULL DEFAULT '0'");
   	$this->addFieldDefinition(self::field_title, "VARCHAR(128) NOT NULL DEFAULT ''");
   	$this->addFieldDefinition(self::field_desc_short, "VARCHAR(255) NOT NULL DEFAULT ''", false, false, true);
   	$this->addFieldDefinition(self::field_desc_long, "TEXT NOT NULL DEFAULT ''", false, false, true);
   	$this->addFieldDefinition(self::field_keywords, "TEXT NOT NULL DEFAULT ''");
   	$this->addFieldDefinition(self::field_access, "TINYINT NOT NULL DEFAULT '".self::access_public."'");
-  	$this->addFieldDefinition(self::field_kit_cats, "VARCHAR(255) NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_kit_categories, "VARCHAR(255) NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_author, "VARCHAR(64) NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_revision, "INT(11) NOT NULL DEFAULT '1'");
 		$this->addFieldDefinition(self::field_status, "TINYINT NOT NULL DEFAULT '".self::status_active."'");
   	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
   	$this->checkFieldDefinitions();
@@ -84,7 +90,97 @@ class dbIdeaProject extends dbConnectLE {
   	date_default_timezone_set(idea_cfg_time_zone);
   } // __construct()
 	
-} // dbIdeaProject
+} // class dbIdeaProject
+
+class dbIdeaProjectSections extends dbConnectLE {
+	
+	const field_id						= 'section_id';
+	const field_project_id		= 'project_id';
+	const field_text					= 'section_text';
+	const field_identifier		= 'section_identifier';
+	const field_order					= 'section_order';
+	const field_timestamp			= 'section_timestamp';
+	
+	private $createTables 		= false;
+  
+  public function __construct($createTables = false) {
+  	$this->createTables = $createTables;
+  	parent::__construct();
+  	$this->setTableName('mod_kit_idea_project_sections');
+  	$this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
+  	$this->addFieldDefinition(self::field_project_id, "INT(11) NOT NULL DEFAULT '-1'");
+  	$this->addFieldDefinition(self::field_text, "VARCHAR(64) NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_identifier, "VARCHAR(64) NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_order, "VARCHAR(255) NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->checkFieldDefinitions();
+  	// Tabelle erstellen
+  	if ($this->createTables) {
+  		if (!$this->sqlTableExists()) {
+  			if (!$this->sqlCreateTable()) {
+  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->getError()));
+  			}
+  		}
+  	}
+  	date_default_timezone_set(idea_cfg_time_zone);
+  } // __construct()
+	
+} // class dbIdeaProjectSections
+
+class dbIdeaProjectArticles extends dbConnectLE {
+	
+	const field_id									= 'article_id';
+	const field_project_id					= 'project_id';
+	const field_section_identifier	= 'section_identifier';
+	const field_title								= 'article_title';
+	const field_content_html				= 'article_content_html';
+	const field_content_text				= 'article_content_text';
+	const field_revision						= 'article_revision';
+	const field_status							= 'article_status';
+	const field_author							= 'article_author';
+	const field_kit_contact_id			= 'kit_contact_id';
+	const field_timestamp						= 'article_timestamp';
+	
+	const status_active				= 1;
+	const status_locked				= 2; 
+	const status_deleted			= 4;
+	
+	public $status_array = array(
+		array('value' => self::status_active, 'text' => idea_str_status_active),
+		array('value' => self::status_locked, 'text' => idea_str_status_locked),
+		array('value' => self::status_deleted, 'text' => idea_str_status_deleted)		
+	);
+	
+	private $createTables 		= false;
+  
+  public function __construct($createTables = false) {
+  	$this->createTables = $createTables;
+  	parent::__construct();
+  	$this->setTableName('mod_kit_idea_project_articles');
+  	$this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
+  	$this->addFieldDefinition(self::field_project_id, "INT(11) NOT NULL DEFAULT '-1'");
+  	$this->addFieldDefinition(self::field_section_identifier, "VARCHAR(64) NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_title, "VARCHAR(255) NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_content_html, "TEXT NOT NULL DEFAULT ''", false, false, true);
+  	$this->addFieldDefinition(self::field_content_text, "TEXT NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_revision, "INT(11) NOT NULL DEFAULT '1'");
+  	$this->addFieldDefinition(self::field_status, "TINYINT NOT NULL DEFAULT '".self::status_active."'");
+  	$this->addFieldDefinition(self::field_author, "VARCHAR(64) NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_kit_contact_id, "INT(11) NOT NULl DEFAULT '-1'");
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->checkFieldDefinitions();
+  	// Tabelle erstellen
+  	if ($this->createTables) {
+  		if (!$this->sqlTableExists()) {
+  			if (!$this->sqlCreateTable()) {
+  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->getError()));
+  			}
+  		}
+  	}
+  	date_default_timezone_set(idea_cfg_time_zone);
+  } // __construct()
+	
+} // class dbIdeaProjectArticles
 
 class dbIdeaCfg extends dbConnectLE {
 	
@@ -128,13 +224,14 @@ class dbIdeaCfg extends dbConnectLE {
   private $createTables 		= false;
   private $message					= '';
 
-  const cfgMediaDir							= 'cfgMediaDir';	
-  const cfgKITcategory					= 'cfgKITcategory';
-  const cfgKITformDlgLogin			= 'cfgKITformDlgLogin';
-  const cfgKITformDlgAccount		= 'cfgKITformDlgAccount';
-  const cfgKITformDlgRegister		= 'cfgKITformDlgRegister';
-  const cfgWYSIWYGeditorWidth		= 'cfgWYSIWYGeditorWidth';
-  const cfgWYSIWYGeditorHeight	= 'cfgWYSIWYGeditorHeight';
+  const cfgMediaDir								= 'cfgMediaDir';	
+  const cfgKITcategory						= 'cfgKITcategory';
+  const cfgKITformDlgLogin				= 'cfgKITformDlgLogin';
+  const cfgKITformDlgAccount			= 'cfgKITformDlgAccount';
+  const cfgKITformDlgRegister			= 'cfgKITformDlgRegister';
+  const cfgWYSIWYGeditorWidth			= 'cfgWYSIWYGeditorWidth';
+  const cfgWYSIWYGeditorHeight		= 'cfgWYSIWYGeditorHeight';
+  const cfgProjectDefaultSections	= 'cfgProjectDefaultSections';
   
   public $config_array = array(
   	array('idea_label_cfg_media_dir', self::cfgMediaDir, self::type_string, '/kit_idea', 'idea_desc_cfg_media_dir'),
@@ -144,6 +241,8 @@ class dbIdeaCfg extends dbConnectLE {
   	array('idea_label_cfg_kit_form_dlg_register', self::cfgKITformDlgRegister, self::type_string, 'idea_register', 'idea_desc_cfg_kit_form_dlg_register'),
   	array('idea_label_cfg_wysiwyg_editor_height', self::cfgWYSIWYGeditorHeight, self::type_string, '200px', 'idea_desc_cfg_wysiwyg_editor_height'),
   	array('idea_label_cfg_wysiwyg_editor_width', self::cfgWYSIWYGeditorWidth, self::type_string, '100%', 'idea_desc_cfg_wysiwyg_editor_width'),
+  	array('idea_label_cfg_project_default_sections', self::cfgProjectDefaultSections, self::type_array, 'Die Idee|secIdea', 'idea_desc_cfg_project_default_sections'),
+  	
   );  
   
   public function __construct($createTables = false) {

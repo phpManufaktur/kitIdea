@@ -24,7 +24,7 @@
       <colgroup>
         <col width="200" /> 
         <col width="*" />
-        <col width="300" />
+        <col width="450" />
       </colgroup>
       <tr>
         <th>{$header.identifier}</th>

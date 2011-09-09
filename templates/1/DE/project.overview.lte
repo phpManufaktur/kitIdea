@@ -1,0 +1,73 @@
+{*
+ * kitIdea
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *
+ * Please consult the Dwoo Documentation & WIKI to get further informations 
+ * and hints for the usage of the Dwoo template engine.
+ *
+ * @link http://wiki.dwoo.org/
+ *
+ * Use {dump()} to get a list of all in this template available variables!
+ *}
+<div class="idea_frontend">
+  {* the top area shows the title and the full description of the project! *}
+  <div class="idea_project_description">
+    <h2>{$project.fields.project_title.value}</h2>
+    <div class="idea_project_content">{$project.fields.project_desc_long.value}</div>
+    <div class="idea_project_author">{$project.fields.project_author.value}, {date_format($project.fields.project_timestamp.value, '%d.%m.%Y - %H:%M:%S')} - Revision {$project.fields.project_revision.value}</div>
+    <div class="idea_project_commands"><a href="{$project.edit.url}">[ {$project.edit.text} ]</a></div>
+  </div>
+  {* the second area shows the navigation pane for the project sections *}
+  <div class="idea_project_navigation">
+    <ul class="project_sections">
+      {foreach $project.sections section}
+      {if $section.active == 1}
+      <li class="selected"><a href="{$section.link}">{$section.text}</a></li>
+      {else}
+      <li><a href="{$section.link}">{$section.text}</a></li>
+      {/if}
+      {/foreach}
+    </ul>
+  </div>
+  {* show introduction or message to the last action *}
+  <div class="{if $is_message == 1}message{else}intro{/if}">{$intro}</div>
+  {* show the articles for this section *}
+  <div class="idea_articles_list">
+    {foreach $article.list item}
+    <div class="idea_article">
+      <h3>{$item.fields.article_title.value}</h3>
+      {$item.fields.article_content_html.value}
+      <div class="idea_article_author">{$item.fields.article_author.value}, {date_format($item.fields.article_timestamp.value, '%d.%m.%Y - %H:%M:%S')}</div>
+      <div class="idea_article_commands">[ <a href="{$item.links.edit.url}">{$item.links.edit.text}</a> ]</div>
+    </div>
+    {/foreach}
+  </div>
+  {* this section contains the WYSIWYG editor to create and edit articles *}
+  <div class="idea_article_edit">
+    <form name="{$form.name}" action="{$page_link}" method="post">
+      <input type="hidden" name="{$main_action.name}" value="{$main_action.value}" />
+      <input type="hidden" name="{$project_action.name}" value="{$project_action.value}" />
+      <input type="hidden" name="{$project.fields.project_id.name}" value="{$project.fields.project_id.value}" />
+      <input type="hidden" name="{$article.fields.section_identifier.name}" value="{$article.fields.section_identifier.value}" />
+      <input type="hidden" name="{$article.fields.article_id.name}" value="{$article.fields.article_id.value}" />
+      <input type="hidden" name="{$article.fields.article_revision.name}" value="{$article.fields.article_revision.value}" />
+      <input type="hidden" name="{$article.fields.article_status.name}" value="{$article.fields.article_status.value}" />
+      <div class="idea_article_edit_header">
+        {$article.edit.title.label}&nbsp;<input type="text" name="{$article.edit.title.name}" value="{$article.edit.title.value}" />
+      </div>
+      <div class="idea_article_edit_wysiwyg">
+        {$article.edit.editor.label}<br />
+        {$article.edit.editor.value}
+      </div>
+      <div class="idea_article_edit_btn">
+        <input type="submit" value="{$form.btn.ok}" />&nbsp;
+        <input type="button" value="{$form.btn.abort}" onclick="javascript: window.location = '{$page_link}'; return false;" />
+      </div>
+    </form>
+  </div>
+</div>

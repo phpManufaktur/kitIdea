@@ -18,6 +18,8 @@
   <form name="{$form.name}" action="{$page_link}" method="post">
     <input type="hidden" name="{$main_action.name}" value="{$main_action.value}" />
     <input type="hidden" name="{$project_action.name}" value="{$project_action.value}" />
+    <input type="hidden" name="{$project.project_id.name}" value="{$project.project_id.value}" />
+    <input type="hidden" name="{$project.project_kit_categories.name}" value="{$project.project_kit_categories.value}" />
     <h2>{$head}</h2>
     <div class="{if $is_message == 1}message{else}intro{/if}">{$intro}</div>
     <table width="100%">
@@ -34,7 +36,7 @@
       </tr>
       <tr>
         <td class="project_label">{$project.project_timestamp.label}</td>
-        <td class="project_value">{date_format($project.project_timestamp.value, '%d.%m.%Y - %H:%M%:%S')}</td>
+        <td class="project_value">{date_format($project.project_timestamp.value, '%d.%m.%Y - %H:%M:%S')}</td>
         <td class="project_hint">{$project.project_id.hint}</td>
       </tr>
       {/if}
@@ -58,6 +60,29 @@
         <td class="project_value"><textarea name="{$project.project_keywords.name}">{$project.project_keywords.value}</textarea></td>
         <td class="project_hint">{$project.project_keywords.hint}</td>
       </tr>
+      <tr>
+        <td class="project_label">{$project.project_access.label}</td>
+        <td class="project_value">
+          <select name="{$project.project_access.name}">
+          {foreach $project.project_access.items access}
+          <option value="{$access.value}"{if $access.value == $project.project_access.value} selected="selected"{/if}>{$access.text}</option>
+          {/foreach}
+          </select>
+        </td>
+        <td class="project_hint">{$project.project_access.hint}</td>
+      </tr>
+      <tr>
+        <td class="project_label">{$project.project_status.label}</td>
+        <td class="project_value">
+          <select name="{$project.project_status.name}">
+          {foreach $project.project_status.items status}
+          <option value="{$status.value}"{if $status.value == $project.project_status.value} selected="selected"{/if}>{$status.text}</option>
+          {/foreach}
+          </select>
+        </td>
+        <td class="project_hint">{$project.project_status.hint}</td>
+      </tr>
+      <tr><td colspan="3">&nbsp;</td></tr>
       <tr>
         <td>&nbsp;</td>
         <td colspan="2">

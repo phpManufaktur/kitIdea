@@ -77,6 +77,10 @@ global $dbIdeaCfg;
 if (!is_object($dbIdeaCfg)) $dbIdeaCfg = new dbIdeaCfg();
 global $dbIdeaProject;
 if (!is_object($dbIdeaProject)) $dbIdeaProject = new dbIdeaProject();
+global $dbIdeaProjectSections;
+if (!is_object($dbIdeaProjectSections)) $dbIdeaProjectSections = new dbIdeaProjectSections();
+global $dbIdeaProjectArticles;
+if (!is_object($dbIdeaProjectArticles)) $dbIdeaProjectArticles = new dbIdeaProjectArticles();
 
 // WYSIWYG editor
 require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.editor.php';

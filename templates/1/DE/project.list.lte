@@ -19,7 +19,8 @@
     {foreach $projects.items project}
     <div class="idea_project_overview">
       <h2>{$project.title}</h2>
-      <div>{$project.desc_short}</div>
+      <div class="idea_project_overview_description">{$project.desc_short}</div>
+      <div class="idea_project_overview_action"><a href="{$project.detail_url}">Projekt anzeigen ...</a></div>
     </div>
     {/foreach}
   {else}

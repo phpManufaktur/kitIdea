@@ -76,7 +76,10 @@ input[name=kit_zip] {
 input[name=kit_city] {
   width: auto;
 }
-
+input[name=article_title] {
+  width: 400px;
+}
+.project_sections,
 .nav_tab
 {
   padding: 3px 0 3px 10px;
@@ -85,11 +88,16 @@ input[name=kit_city] {
   list-style-type: none;
   text-align: right; /*set to left, center, or right to align the menu as desired*/
 }
+.project_sections {
+  text-align: left;
+}
+.project_sections li,
 .nav_tab li
 {
   display: inline;
   margin: 0;
 }
+.project_sections li a,
 .nav_tab li a
 {
   text-decoration: none;
@@ -99,22 +107,28 @@ input[name=kit_city] {
   border-bottom: none;
   background-color: #E8E8E8;
 }
+.project_sections li a:link,
+.project_sections li a:visited,
 .nav_tab li a:link,
 .nav_tab li a:visited
 {
   color: #AFAFAF;
   background-color: #e8e8e8;
 }
+.project_sections li.extra_tab a,
 .nav_tab li.extra_tab a {
   color:#003366;
   background-color: #e8e8e8;
 }
+.project_sections li a:hover,
+.project_sections li a:active,
 .nav_tab li a:hover,
 .nav_tab li a:active
 {
   background-color: #FFFFCC;
   color: #000;
 }
+.project_sections li.selected a,
 .nav_tab li.selected a
 { /*selected tab effect*/
   position: relative;
@@ -123,4 +137,20 @@ input[name=kit_city] {
   color: #000;
   background-color: #fff;
   font-weight: bold;
+}
+.idea_article_edit {
+  margin: 20px 0 0 0;
+  padding: 20px 0 0 0;
+  border-top: 1px solid #808080;
+}
+.idea_article_edit_header {
+  margin: 0 0 20px 0;
+}
+.idea_article_commands {
+  text-align: right;
+}
+.idea_article_author {
+  margin: 10px 0 10px 0;
+  text-align: right;
+  font-style: italic;
 }
