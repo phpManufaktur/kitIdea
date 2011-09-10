@@ -1,0 +1,51 @@
+{*
+ * kitIdea
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *
+ * Please consult the Dwoo Documentation & WIKI to get further informations 
+ * and hints for the usage of the Dwoo template engine.
+ *
+ * @link http://wiki.dwoo.org/
+ *
+ * Use {dump()} to get a list of all in this template available variables!
+ *}
+<div class="idea_frontend">
+  <form name="{$form.name}" action="{$page_link}" method="post">
+    <input type="hidden" name="{$main_action.name}" value="{$main_action.value}" />
+    <input type="hidden" name="{$project_action.name}" value="{$project_action.value}" />
+    <input type="hidden" name="{$project_id.name}" value="{$project_id.value}" />
+    <input id="sorter_table" type="hidden" name="sorter_table" value="{$sorter_table}" />
+    <input id="sorter_value" type="hidden" name="sorter_value" value="{$sorter_value}" />
+    <input id="sorter_active" type="hidden" name="sorter_active" value="{$sorter_active}" />
+    <h2>{$head}</h2>
+    <div class="{if $is_message == 1}message{else}intro{/if}">{$intro}</div>
+    {*
+     Für Rückmeldungen des jQuery Sorter den folgenden Container einfügen!
+     <div id="response"></div>
+    *}
+    <div id="response"></div>
+    <div id="sorter">
+      <table width="100%">
+        <colgroup>
+          <col width="200" /> 
+          <col width="*" />
+          <col width="400" />
+        </colgroup>
+        <tbody>
+          {foreach $sections section}
+          <tr id="rowID_{$section.id}">
+            <td>&nbsp;</td>
+            <td><input name="{$section.name}" value="{$section.value}" /></td>
+            <td>&nbsp;</td>
+          </tr>
+          {/foreach}
+        </tbody>
+      </table>
+    </div>
+  </form>
+</div>

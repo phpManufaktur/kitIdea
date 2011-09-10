@@ -46,15 +46,6 @@ define('idea_cfg_time_str',											'H:i');
 define('idea_cfg_time_zone',										'Europe/Berlin');
 define('idea_cfg_title',												'Herr,Frau');
 
-define('idea_desc_cfg_kit_category',						'KeepInTouch (KIT) Kategorie, der ein Nutzer zugeordnet sein muss, damit er ein Konto in kitIdea einrichten kann.');
-define('idea_desc_cfg_kit_form_dlg_account',		'Der kitForm Dialog, der von kitIdea für die Verwaltung der Benutzerkonten verwendet wird.');
-define('idea_desc_cfg_kit_form_dlg_login',			'Der kitForm Dialog, der von kitIdea für die Anmeldung von Benutzern verwendet wird.');
-define('idea_desc_cfg_kit_form_dlg_register',		'Der kitForm Dialog, der von kitIdea für die Registrierung von Benutzern verwendet wird.');
-define('idea_desc_cfg_media_dir',								'Verzeichnis im /MEDIA Ordner das für die MEDIA-Daten von kitIdea verwendet wird.');
-define('idea_desc_cfg_project_default_sections','Die Standard Projektbereiche dienen zur Strukturierung der Projekte. Geben Sie mindestens einen Bereich vor, die Benutzer können weitere Bereiche hinzufügen. Der Bereich <b>Dateien</b> wird von kitIdea automatisch hinzugefügt und kann nicht entfernt oder geändert werden.<br />Die Definition eines Bereich besteht aus dem <b>Text</b>, der in der Navigation angezeigt werden soll, einem senkrechten Strich (Pipe) <b>|</b> als <b>Trenner</b> und einem eindeutigen <b>Bezeichner</b>, der keine Leerzeichen, Sonderzeichen Umlaute etc. enthalten darf. Trennen sie die einzelnen Bereiche mit einem Komma.');
-define('idea_desc_cfg_wysiwyg_editor_height',		'Die angezeigte Höhe des verwendeten WYSIWYG Editor. Die Angabe kann in Pixel (px) oder in Prozent (%) erfolgen.');
-define('idea_desc_cfg_wysiwyg_editor_width',		'Die angezeigte Breite des verwendeten WYSIWYG Editor. Die Angabe kann in Pixel (px) oder in Prozent (%) erfolgen.');
-
 define('idea_error_access_not_auth',						'<p>Dieser Zugriff ist nicht autorisiert. Bitte melden Sie sich zunächst an!</p><p><b>Hinweis:</b> <i>Sie erhalten diese Meldung eventuell auf dann, wenn Sie längere Zeit inaktiv waren und Ihre Sitzung automatisch beendet wurde.</i></p>');
 define('idea_error_auth_wrong_category',				'<p>Ihr Benutzerkonto gestattet Ihnen leider keinen Zugriff auf die Verwaltung von kitIdea.</p><p>Bitte wenden Sie sich an den Service, dieser kann Sie für kitIdea freischalten!</p>');
 define('idea_error_illegal_function_call',			'<p>Illegaler Funktionsaufruf, Zugriff verweigert!</p>');
@@ -66,7 +57,19 @@ define('idea_error_undefined',									'<p>Es ist ein nicht näher spezifizierte
 
 define('idea_head_project_create',							'Projekt erstellen');
 define('idea_head_project_edit',								'Projekt bearbeiten');
+define('idea_head_section_edit',								'Abschnitte bearbeiten');
 
+define('idea_hint_cfg_compare_differ_prefix',		'HTML TAG, der die Kennzeichnung von Unterschieden beim Revisionsvergleich von Texten <i>einleitet</i>.');
+define('idea_hint_cfg_compare_differ_suffix',		'HTML TAG, der die Kennzeichnung von Unterschieden beim Revisionsvergleich von Texten <i>beendet</i>.');
+define('idea_hint_cfg_compare_revisions',				'Änderungen in Projektbeschreibungen und Artikeln feststellen und anzeigen (Revisionen vergleichen). 1=AN, 0=Aus');
+define('idea_hint_cfg_kit_category',						'KeepInTouch (KIT) Kategorie, der ein Nutzer zugeordnet sein muss, damit er ein Konto in kitIdea einrichten kann.');
+define('idea_hint_cfg_kit_form_dlg_account',		'Der kitForm Dialog, der von kitIdea für die Verwaltung der Benutzerkonten verwendet wird.');
+define('idea_hint_cfg_kit_form_dlg_login',			'Der kitForm Dialog, der von kitIdea für die Anmeldung von Benutzern verwendet wird.');
+define('idea_hint_cfg_kit_form_dlg_register',		'Der kitForm Dialog, der von kitIdea für die Registrierung von Benutzern verwendet wird.');
+define('idea_hint_cfg_media_dir',								'Verzeichnis im /MEDIA Ordner das für die MEDIA-Daten von kitIdea verwendet wird.');
+define('idea_hint_cfg_project_default_sections','Die Standard Projektbereiche dienen zur Strukturierung der Projekte. Geben Sie mindestens einen Bereich vor, die Benutzer können weitere Bereiche hinzufügen. Der Bereich <b>Dateien</b> wird von kitIdea automatisch hinzugefügt und kann nicht entfernt oder geändert werden.<br />Die Definition eines Bereich besteht aus dem <b>Text</b>, der in der Navigation angezeigt werden soll, einem senkrechten Strich (Pipe) <b>|</b> als <b>Trenner</b> und einem eindeutigen <b>Bezeichner</b>, der keine Leerzeichen, Sonderzeichen Umlaute etc. enthalten darf. Trennen sie die einzelnen Bereiche mit einem Komma.');
+define('idea_hint_cfg_wysiwyg_editor_height',		'Die angezeigte Höhe des verwendeten WYSIWYG Editor. Die Angabe kann in Pixel (px) oder in Prozent (%) erfolgen.');
+define('idea_hint_cfg_wysiwyg_editor_width',		'Die angezeigte Breite des verwendeten WYSIWYG Editor. Die Angabe kann in Pixel (px) oder in Prozent (%) erfolgen.');
 define('idea_hint_project_access',							'');
 define('idea_hint_project_author',							'');
 define('idea_hint_project_desc_long',						'Ausführliche Beschreibung, Einführung');
@@ -82,6 +85,7 @@ define('idea_hint_project_title',								'');
 
 define('idea_intro_project_edit',								'Mit diesem Dialog können Sie neue Projekte anlegen bzw. bestehende Projekte bearbeiten.');
 define('idea_intro_project_view',								'Fügen Sie dem Projekt neue Artikel hinzu oder bearbeiten Sie bereits vorhandene Artikel.');
+define('idea_intro_section_edit',								'<p>Fügen sie neue Abschnitte hinzu, löschen oder verschieben Sie Abschnitte.</p><p>Der Abschnitt <b>Dateien</b> kann weder umbenannt noch gelöscht oder verschoben werden und wird hier nicht angezeigt.</p>');
 
 define('idea_label_article_author',							'Autor');
 define('idea_label_article_content_html',				'Artikel Inhalt (HTML)');
@@ -92,6 +96,9 @@ define('idea_label_article_section',						'Abschnitt');
 define('idea_label_article_status',							'Status');
 define('idea_label_article_timestamp',					'Letzte Änderung');
 define('idea_label_article_title',							'Artikel Titel');
+define('idea_label_cfg_compare_differ_prefix',	'Revisionsvergleich, Prefix');
+define('idea_label_cfg_compare_differ_suffix',	'Revisionsvergleich, Suffix');
+define('idea_label_cfg_compare_revisions',			'Revisionen vergleichen');
 define('idea_label_cfg_kit_category',						'KeepInTouch (KIT) Kategorie');
 define('idea_label_cfg_kit_form_dlg_account',		'kitForm Dialog: Benutzerkonto');
 define('idea_label_cfg_kit_form_dlg_login',			'kitForm Dialog: Anmeldung');
@@ -117,7 +124,7 @@ define('idea_label_project_title',							'Titel');
 define('idea_msg_article_inserted',							'<p>Der Artikel mit der <b>ID %05d</b> wurde erfolgreich angelegt.</p>');
 define('idea_msg_article_updated',							'<p>Der Artikel mit der <b>ID %05d</b> wurde aktualisiert.</p>');
 define('idea_msg_login_welcome',								'<p>Herzlich willkommen bei kitIdea!</p><p>Sie haben Zugriff auf die verschiedenen <a href="%s">Projekte</a> und auf Ihre <a href="%s">persönlichen Einstellungen</a>.</p>');
-define('idea_msg_project_inserted',							'<p>Das Projekt mit der <b>ID %05d</b> wurde erfolgreich angelegt.</p>');
+define('idea_msg_project_inserted',							'<p>Das Projekt mit der <b>ID %05d</b> wurde erfolgreich angelegt.</p><p>Fügen Sie dem Projekt jetzt gleich den ersten Artikel hinzu!</p>');
 define('idea_msg_project_must_field_missing',		'<p>Das Feld <b>%s</b> muss einen gültigen Wert enthalten!</p>');
 define('idea_msg_project_updated',							'<p>Das Projekt mit der <b>ID %05d</b> wurde aktualisiert.</p>');
 

@@ -81,6 +81,10 @@ global $dbIdeaProjectSections;
 if (!is_object($dbIdeaProjectSections)) $dbIdeaProjectSections = new dbIdeaProjectSections();
 global $dbIdeaProjectArticles;
 if (!is_object($dbIdeaProjectArticles)) $dbIdeaProjectArticles = new dbIdeaProjectArticles();
+global $dbIdeaRevisionArchive;
+if (!is_object($dbIdeaRevisionArchive)) $dbIdeaRevisionArchive = new dbIdeaRevisionArchive();
+global $dbIdeaTableSort;
+if (!is_object($dbIdeaTableSort)) $dbIdeaTableSort = new dbIdeaTableSort();
 
 // WYSIWYG editor
 require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.editor.php';
@@ -90,5 +94,9 @@ require_once WB_PATH.'/framework/functions.php';
 
 // load the KeepInTouch Interface
 if (!class_exists('kitContactInterface')) require_once(WB_PATH.'/modules/kit/class.interface.php');	
+
+// load class to compare text
+require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.compare.php';
+
 
 ?>

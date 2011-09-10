@@ -30,7 +30,6 @@ if (defined('WB_PATH')) {
 class dbIdeaProject extends dbConnectLE {
 	
 	const field_id							= 'project_id';
-	const field_number					= 'project_number';
 	const field_title						= 'project_title';
 	const field_desc_short			= 'project_desc_short';
 	const field_desc_long				= 'project_desc_long';
@@ -67,7 +66,6 @@ class dbIdeaProject extends dbConnectLE {
   	parent::__construct();
   	$this->setTableName('mod_kit_idea_project');
   	$this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
-  	$this->addFieldDefinition(self::field_number, "INT(11) NOT NULL DEFAULT '0'");
   	$this->addFieldDefinition(self::field_title, "VARCHAR(128) NOT NULL DEFAULT ''");
   	$this->addFieldDefinition(self::field_desc_short, "VARCHAR(255) NOT NULL DEFAULT ''", false, false, true);
   	$this->addFieldDefinition(self::field_desc_long, "TEXT NOT NULL DEFAULT ''", false, false, true);
@@ -182,6 +180,45 @@ class dbIdeaProjectArticles extends dbConnectLE {
 	
 } // class dbIdeaProjectArticles
 
+class dbIdeaRevisionArchive extends dbConnectLE {
+	
+	const field_id								= 'revision_id';
+	const field_archived_id				= 'revision_archived_id';
+	const field_archived_type			= 'revision_archived_type';
+	const field_archived_revision	= 'revision_archived_revision';
+	const field_archived_record		= 'revision_archived_record';
+	const field_timestamp					= 'revision_timestamp';
+
+	const archive_type_undefined	= 1;
+	const archive_type_project		= 2;
+	const archive_type_article		= 4;
+	
+	private $createTables 		= false;
+  
+  public function __construct($createTables = false) {
+  	$this->createTables = $createTables;
+  	parent::__construct();
+  	$this->setTableName('mod_kit_idea_revision_archive');
+  	$this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
+  	$this->addFieldDefinition(self::field_archived_id, "INT(11) NOT NULL DEFAULT '-1'");
+  	$this->addFieldDefinition(self::field_archived_type, "TINYINT NOT NULL DEFAULT '".self::archive_type_undefined."'");
+  	$this->addFieldDefinition(self::field_archived_revision, "INT(11) NOT NULL DEFAULT '0'");
+  	$this->addFieldDefinition(self::field_archived_record, "LONGTEXT NOT NULL DEFAULT ''", false, false, true);
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->checkFieldDefinitions();
+  	// Tabelle erstellen
+  	if ($this->createTables) {
+  		if (!$this->sqlTableExists()) {
+  			if (!$this->sqlCreateTable()) {
+  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->getError()));
+  			}
+  		}
+  	}
+  	date_default_timezone_set(idea_cfg_time_zone);
+  } // __construct()
+	
+} // classIdeaRevisionArchive
+
 class dbIdeaCfg extends dbConnectLE {
 	
 	const field_id						= 'cfg_id';
@@ -232,17 +269,22 @@ class dbIdeaCfg extends dbConnectLE {
   const cfgWYSIWYGeditorWidth			= 'cfgWYSIWYGeditorWidth';
   const cfgWYSIWYGeditorHeight		= 'cfgWYSIWYGeditorHeight';
   const cfgProjectDefaultSections	= 'cfgProjectDefaultSections';
+  const cfgCompareRevisions				= 'cfgCompareRevisions';					
+  const cfgCompareDifferPrefix		= 'cfgCompareDifferPrefix';
+  const cfgCompareDifferSuffix		= 'cfgCompareDifferSuffix';
   
   public $config_array = array(
-  	array('idea_label_cfg_media_dir', self::cfgMediaDir, self::type_string, '/kit_idea', 'idea_desc_cfg_media_dir'),
-  	array('idea_label_cfg_kit_category', self::cfgKITcategory, self::type_string, 'kitIdea', 'idea_desc_cfg_kit_category'),
-  	array('idea_label_cfg_kit_form_dlg_login', self::cfgKITformDlgLogin, self::type_string, 'idea_login', 'idea_desc_cfg_kit_form_dlg_login'),
-  	array('idea_label_cfg_kit_form_dlg_account', self::cfgKITformDlgAccount, self::type_string, 'idea_account', 'idea_desc_cfg_kit_form_dlg_account'),
-  	array('idea_label_cfg_kit_form_dlg_register', self::cfgKITformDlgRegister, self::type_string, 'idea_register', 'idea_desc_cfg_kit_form_dlg_register'),
-  	array('idea_label_cfg_wysiwyg_editor_height', self::cfgWYSIWYGeditorHeight, self::type_string, '200px', 'idea_desc_cfg_wysiwyg_editor_height'),
-  	array('idea_label_cfg_wysiwyg_editor_width', self::cfgWYSIWYGeditorWidth, self::type_string, '100%', 'idea_desc_cfg_wysiwyg_editor_width'),
-  	array('idea_label_cfg_project_default_sections', self::cfgProjectDefaultSections, self::type_array, 'Die Idee|secIdea', 'idea_desc_cfg_project_default_sections'),
-  	
+  	array('idea_label_cfg_media_dir', self::cfgMediaDir, self::type_string, '/kit_idea', 'idea_hint_cfg_media_dir'),
+  	array('idea_label_cfg_kit_category', self::cfgKITcategory, self::type_string, 'kitIdea', 'idea_hint_cfg_kit_category'),
+  	array('idea_label_cfg_kit_form_dlg_login', self::cfgKITformDlgLogin, self::type_string, 'idea_login', 'idea_hint_cfg_kit_form_dlg_login'),
+  	array('idea_label_cfg_kit_form_dlg_account', self::cfgKITformDlgAccount, self::type_string, 'idea_account', 'idea_hint_cfg_kit_form_dlg_account'),
+  	array('idea_label_cfg_kit_form_dlg_register', self::cfgKITformDlgRegister, self::type_string, 'idea_register', 'idea_hint_cfg_kit_form_dlg_register'),
+  	array('idea_label_cfg_wysiwyg_editor_height', self::cfgWYSIWYGeditorHeight, self::type_string, '200px', 'idea_hint_cfg_wysiwyg_editor_height'),
+  	array('idea_label_cfg_wysiwyg_editor_width', self::cfgWYSIWYGeditorWidth, self::type_string, '100%', 'idea_hint_cfg_wysiwyg_editor_width'),
+  	array('idea_label_cfg_project_default_sections', self::cfgProjectDefaultSections, self::type_array, 'Die Idee|secIdea', 'idea_hint_cfg_project_default_sections'),
+  	array('idea_label_cfg_compare_differ_prefix', self::cfgCompareDifferPrefix, self::type_string, '<span class="compare_differ">', 'idea_hint_cfg_compare_differ_prefix'),
+  	array('idea_label_cfg_compare_differ_suffix', self::cfgCompareDifferSuffix, self::type_string, '</span>', 'idea_hint_cfg_compare_differ_suffix'),
+  	array('idea_label_cfg_compare_revisions', self::cfgCompareRevisions, self::type_boolean, '1', 'idea_hint_cfg_compare_revisions')
   );  
   
   public function __construct($createTables = false) {
@@ -534,5 +576,36 @@ class dbIdeaCfg extends dbConnectLE {
 	  
 } // class dbIdeaCfg
 
+class dbIdeaTableSort extends dbConnectLE {
+	
+	const field_id				= 'sort_id';
+	const field_table			= 'sort_table';
+	const field_value			= 'sort_value';
+	const field_order			= 'sort_order';
+	const field_timestamp	= 'sort_timestamp';
+	
+	private $create_tables = false;
+	
+	public function __construct($create_tables=false) {
+		$this->create_tables = $create_tables;
+		parent::__construct();
+		$this->setTableName('mod_kit_idea_table_sort');
+		$this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
+		$this->addFieldDefinition(self::field_table, "VARCHAR(64) NOT NULL DEFAULT ''");
+		$this->addFieldDefinition(self::field_value, "VARCHAR(255) NOT NULL DEFAULT ''");
+		$this->addFieldDefinition(self::field_order, "TEXT NOT NULL DEFAULT ''");
+		$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
+		$this->checkFieldDefinitions();
+		if ($this->create_tables) {
+			if (!$this->sqlTableExists()) {
+				if (!$this->sqlCreateTable()) {
+					$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->getError()));
+					return false;
+				}
+			}
+		}
+	} // __construct()	
+	
+} // class dbIdeaTableSort
 
 ?>

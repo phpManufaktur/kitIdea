@@ -182,6 +182,7 @@ class kitIdeaBackend {
   public function action() {
   	$html_allowed = array();
   	foreach ($_REQUEST as $key => $value) {
+  		if (strpos($key, 'idea_cfg_') == 0) continue; // ignore config values!
   		if (!in_array($key, $html_allowed)) {
   			$_REQUEST[$key] = $this->xssPrevent($value);	  			
   		} 

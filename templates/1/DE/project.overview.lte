@@ -19,20 +19,21 @@
   <div class="idea_project_description">
     <h2>{$project.fields.project_title.value}</h2>
     <div class="idea_project_content">{$project.fields.project_desc_long.value}</div>
-    <div class="idea_project_author">{$project.fields.project_author.value}, {date_format($project.fields.project_timestamp.value, '%d.%m.%Y - %H:%M:%S')} - Revision {$project.fields.project_revision.value}</div>
+    <div class="idea_project_author">{$project.fields.project_author.value}, {date_format($project.fields.project_timestamp.value, '%d.%m.%Y - %H:%M:%S')} - Rev. {$project.fields.project_revision.value}</div>
     <div class="idea_project_commands"><a href="{$project.edit.url}">[ {$project.edit.text} ]</a></div>
   </div>
   {* the second area shows the navigation pane for the project sections *}
   <div class="idea_project_navigation">
     <ul class="project_sections">
-      {foreach $project.sections section}
-      {if $section.active == 1}
-      <li class="selected"><a href="{$section.link}">{$section.text}</a></li>
+      {foreach $project.sections.navigation navigation}
+      {if $navigation.active == 1}
+      <li class="selected"><a href="{$navigation.link}">{$navigation.text}</a></li>
       {else}
-      <li><a href="{$section.link}">{$section.text}</a></li>
+      <li><a href="{$navigation.link}">{$navigation.text}</a></li>
       {/if}
       {/foreach}
     </ul>
+    <div class="project_navigation_commands">[ <a href="{$project.sections.edit.url}">{$project.sections.edit.text}</a> ]</div>
   </div>
   {* show introduction or message to the last action *}
   <div class="{if $is_message == 1}message{else}intro{/if}">{$intro}</div>

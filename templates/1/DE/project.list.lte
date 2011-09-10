@@ -19,20 +19,21 @@
     {foreach $projects.items project}
     <div class="idea_project_overview">
       <h2>{$project.title}</h2>
-      <div class="idea_project_overview_description">{$project.desc_short}</div>
-      <div class="idea_project_overview_action"><a href="{$project.detail_url}">Projekt anzeigen ...</a></div>
+      <div class="idea_overview_description">{$project.desc_long}</div>
+      <div class="idea_overview_commands">[ <a href="{$project.detail_url}">Projekt öffnen</a> ]</div>
     </div>
     {/foreach}
   {else}
   <div>
-    Es sind zur Zeit keine Projekte aktiv!
+    <p>Es sind zur Zeit keine {if $authenticated == 0}<b>öffentlichen</b> {/if}Projekte aktiv!</p>
+    {if $authenticated == 0}<p>Bitte melden Sie sich an, Sie erhalten dadurch Zugriff auf weitere Projekte.</p>{/if}
   </div>
   {/if}
-  <div class="idea_footer">
+  <div class="idea_overview_footer">
     {if $authenticated == 1}
-    <a href="{$projects.action.create_url}">Neues Projekt anlegen</a> 
+    <p style="text-align: right;">[ <a href="{$projects.action.create_url}">Projekt anlegen</a> ]</p> 
     {else}
-    <a href="{$login_url}">Melden Sie sich bitte an</a> um ein neues Projekt anzulegen.
+    <p><i><a href="{$login_url}">Melden Sie sich bitte an</a> um ein neues Projekt anzulegen zu können!.</i></p>
     {/if}
   </div>
 </div>
