@@ -98,5 +98,8 @@ if (!class_exists('kitContactInterface')) require_once(WB_PATH.'/modules/kit/cla
 // load class to compare text
 require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.compare.php';
 
+// load kitDirList
+require_once WB_PATH.'/modules/kit_dirlist/class.dirlist.php';
+
 
 ?>

@@ -96,7 +96,6 @@ class dbIdeaProjectSections extends dbConnectLE {
 	const field_project_id		= 'project_id';
 	const field_text					= 'section_text';
 	const field_identifier		= 'section_identifier';
-	const field_order					= 'section_order';
 	const field_timestamp			= 'section_timestamp';
 	
 	private $createTables 		= false;
@@ -109,7 +108,6 @@ class dbIdeaProjectSections extends dbConnectLE {
   	$this->addFieldDefinition(self::field_project_id, "INT(11) NOT NULL DEFAULT '-1'");
   	$this->addFieldDefinition(self::field_text, "VARCHAR(64) NOT NULL DEFAULT ''");
   	$this->addFieldDefinition(self::field_identifier, "VARCHAR(64) NOT NULL DEFAULT ''");
-  	$this->addFieldDefinition(self::field_order, "VARCHAR(255) NOT NULL DEFAULT ''");
   	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
   	$this->checkFieldDefinitions();
   	// Tabelle erstellen
@@ -581,6 +579,7 @@ class dbIdeaTableSort extends dbConnectLE {
 	const field_id				= 'sort_id';
 	const field_table			= 'sort_table';
 	const field_value			= 'sort_value';
+	const field_item			= 'sort_item';
 	const field_order			= 'sort_order';
 	const field_timestamp	= 'sort_timestamp';
 	
@@ -593,6 +592,7 @@ class dbIdeaTableSort extends dbConnectLE {
 		$this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
 		$this->addFieldDefinition(self::field_table, "VARCHAR(64) NOT NULL DEFAULT ''");
 		$this->addFieldDefinition(self::field_value, "VARCHAR(255) NOT NULL DEFAULT ''");
+		$this->addFieldDefinition(self::field_item, "VARCHAR(255) NOT NULL DEFAULT ''");
 		$this->addFieldDefinition(self::field_order, "TEXT NOT NULL DEFAULT ''");
 		$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
 		$this->checkFieldDefinitions();

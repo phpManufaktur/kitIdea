@@ -24,28 +24,81 @@
     <input id="sorter_active" type="hidden" name="sorter_active" value="{$sorter_active}" />
     <h2>{$head}</h2>
     <div class="{if $is_message == 1}message{else}intro{/if}">{$intro}</div>
-    {*
-     Für Rückmeldungen des jQuery Sorter den folgenden Container einfügen!
-     <div id="response"></div>
-    *}
-    <div id="response"></div>
-    <div id="sorter">
       <table width="100%">
         <colgroup>
           <col width="200" /> 
           <col width="*" />
           <col width="400" />
         </colgroup>
-        <tbody>
-          {foreach $sections section}
-          <tr id="rowID_{$section.id}">
-            <td>&nbsp;</td>
-            <td><input name="{$section.name}" value="{$section.value}" /></td>
-            <td>&nbsp;</td>
-          </tr>
-          {/foreach}
-        </tbody>
+        <tr>
+          <td colspan="3">&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            {* <div id="response"></div> remove comment to get jQuery responses for the sorter! *}
+            <div id="sorter">
+              <table width="100%">
+                <colgroup>
+                  <col width="50" />
+                  <col width="*" />
+                </colgroup>
+                <tbody>
+                  {foreach $sections.navigation.tabs section}
+                  <tr id="rowID_{$section.id}">
+                    <td class="sortable_row"></td>
+                    <td><input name="{$section.name}" value="{$section.value}" /></td>
+                  </tr>
+                  {/foreach}
+                </tbody>
+              </table>
+            </div>
+          </td>
+          <td>
+            {* hints for sorter *}
+            {$sections.navigation.hint}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <div class="intro">{$sections.add.hint}</div>
+          </td>
+        </tr>
+        <tr>
+          <td>{$sections.add.label}</td>
+          <td><input type="text" name="{$sections.add.name}" value="{$sections.add.value}" /></td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="3">&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <div class="intro">{$sections.delete.hint}</div>
+          </td>
+        </tr>
+        <tr>
+          <td>{$sections.delete.label}</td>
+          <td>
+            <select name="{$sections.delete.name}">
+              {foreach $sections.delete.values option}
+              <option value="{$option.value}">{$option.text}</option>
+              {/foreach}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">&nbsp;</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td colspan="2">
+            <input type="submit" value="{$form.btn.ok}" />&nbsp;
+            <input type="button" value="{$form.btn.abort}" onclick="javascript: window.location = '{$page_link}'; return false;" />
+          </td>
+        </tr>
       </table>
-    </div>
   </form>
 </div>

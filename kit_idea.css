@@ -76,9 +76,6 @@ input[name=kit_zip] {
 input[name=kit_city] {
   width: auto;
 }
-input[name=article_title] {
-  width: 400px;
-}
 .project_sections,
 .nav_tab
 {
@@ -165,4 +162,15 @@ input[name=article_title] {
 }
 .idea_overview_footer {
   margin: 30px 0 0 0;
+}
+.sorter {
+  width: 100%;
+}
+.sortable_row {
+  color: #000;
+  background-color: #ccc;
+  background-image: url(images/drag_drop.png);
+  background-position: bottom center;
+  background-repeat: no-repeat;
+  cursor: move;
 }

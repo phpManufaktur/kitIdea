@@ -82,20 +82,24 @@ define('idea_hint_project_revision',						'');
 define('idea_hint_project_status',							'');
 define('idea_hint_project_timestamp',						'');
 define('idea_hint_project_title',								'');
+define('idea_hint_section_add',									'<p>Fügen Sie einen neuen Abschnitt hinzu, in dem Sie den gewünschten Bezeichner eintragen.</p>');
+define('idea_hint_section_delete',							'<p>Wählen Sie den Abschnitt aus, den Sie löschen möchten.</p><p><u>Bitte beachten Sie:</u> der zu löschende Abschnitt darf keine Artikel enhalten, muss also leer sein und Sie können nicht den letzten (einzigen) Abschnitt löschen.</p>');
+define('idea_hint_section_tab_move',						'<p>Ordnen Sie die einzelnen TAB\'s für die Abschnitte per Drag & Drop in der gewünschten Reihenfolge an und ändern Sie die Bezeichnungen nach Belieben.</p>'); 
 
 define('idea_intro_project_edit',								'Mit diesem Dialog können Sie neue Projekte anlegen bzw. bestehende Projekte bearbeiten.');
 define('idea_intro_project_view',								'Fügen Sie dem Projekt neue Artikel hinzu oder bearbeiten Sie bereits vorhandene Artikel.');
 define('idea_intro_section_edit',								'<p>Fügen sie neue Abschnitte hinzu, löschen oder verschieben Sie Abschnitte.</p><p>Der Abschnitt <b>Dateien</b> kann weder umbenannt noch gelöscht oder verschoben werden und wird hier nicht angezeigt.</p>');
 
 define('idea_label_article_author',							'Autor');
-define('idea_label_article_content_html',				'Artikel Inhalt (HTML)');
-define('idea_label_article_content_text',				'Artikel Inhalt (Text)');
-define('idea_label_article_id',									'Artikel ID');
+define('idea_label_article_content_html',				'Inhalt (HTML)');
+define('idea_label_article_content_text',				'Inhalt (Text)');
+define('idea_label_article_id',									'ID');
+define('idea_label_article_move_section',				'Verschieben');
 define('idea_label_article_revision',						'Revision');
 define('idea_label_article_section',						'Abschnitt');
 define('idea_label_article_status',							'Status');
 define('idea_label_article_timestamp',					'Letzte Änderung');
-define('idea_label_article_title',							'Artikel Titel');
+define('idea_label_article_title',							'Überschrift');
 define('idea_label_cfg_compare_differ_prefix',	'Revisionsvergleich, Prefix');
 define('idea_label_cfg_compare_differ_suffix',	'Revisionsvergleich, Suffix');
 define('idea_label_cfg_compare_revisions',			'Revisionen vergleichen');
@@ -120,6 +124,8 @@ define('idea_label_project_revision',						'Revision');
 define('idea_label_project_status',							'Status');
 define('idea_label_project_timestamp',					'Letzte Änderung');
 define('idea_label_project_title',							'Titel');
+define('idea_label_section_add',								'Abschnitt hinzufügen');
+define('idea_label_section_delete',							'Abschnitt löschen');
 
 define('idea_msg_article_inserted',							'<p>Der Artikel mit der <b>ID %05d</b> wurde erfolgreich angelegt.</p>');
 define('idea_msg_article_updated',							'<p>Der Artikel mit der <b>ID %05d</b> wurde aktualisiert.</p>');
@@ -127,11 +133,17 @@ define('idea_msg_login_welcome',								'<p>Herzlich willkommen bei kitIdea!</p>
 define('idea_msg_project_inserted',							'<p>Das Projekt mit der <b>ID %05d</b> wurde erfolgreich angelegt.</p><p>Fügen Sie dem Projekt jetzt gleich den ersten Artikel hinzu!</p>');
 define('idea_msg_project_must_field_missing',		'<p>Das Feld <b>%s</b> muss einen gültigen Wert enthalten!</p>');
 define('idea_msg_project_updated',							'<p>Das Projekt mit der <b>ID %05d</b> wurde aktualisiert.</p>');
+define('idea_msg_section_deleted',							'<p>Der Abschnitt <b>%s</b> wurde erfolgreich entfernt.</p>');
+define('idea_msg_section_inserted',							'<p>Es wurde ein neuer Abschnitt mit der Bezeichnung <b>%s</b> hinzugefügt.</p>');
+define('idea_msg_section_not_empty',						'<p>Der Abschnitt <b>%s</b> enthält noch Artikel und kann nicht gelöscht werden.</p>');
+define('idea_msg_section_text_empty',						'<p>Die Bezeichnung für den Abschnitt <b>%s</b> darf nicht leer sein!</p>');
+define('idea_msg_section_text_updated',					'<p>Die Bezeichnung für den Abschnitt <b>%s</b> wurde in <b>%s</b> geändert!</p>');
 
 define('idea_str_access_closed',								'Geschlossen');
 define('idea_str_access_public',								'Öffentlich');
 define('idea_str_author_anonymous',							'Anonym');
 define('idea_str_edit',													'Bearbeiten');
+define('idea_str_please_select',								'- bitte auswählen -');
 define('idea_str_status_active',								'Aktiv');
 define('idea_str_status_deleted',								'Gelöscht');
 define('idea_str_status_locked',								'Gesperrt');

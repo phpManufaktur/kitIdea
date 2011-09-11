@@ -65,8 +65,9 @@ $(document).ready(function(){
 		$("#sorter tbody").sortable({ opacity: 0.6, cursor: 'move', update: function() {
 			var sorter_table = $("#sorter_table").val();
 			var sorter_value = $("#sorter_value").val();
+			var sorter_item = $("#sorter_item").val();
 			var sorter_active = $("#sorter_active").val();
-			var order = $(this).sortable("serialize") + '&sorter_table='+sorter_table+'&sorter_value='+sorter_value+'&sorter_active='+sorter_active; 
+			var order = $(this).sortable("serialize") + '&sorter_table='+sorter_table+'&sorter_value='+sorter_value+'&sorter_active='+sorter_active+'&sorter_item='+sorter_item; 
 			$.post(WB_URL+"/modules/kit_idea/sorter.php", order, function(theResponse){
 				// only for debugging...
 				$("#response").html(theResponse);
