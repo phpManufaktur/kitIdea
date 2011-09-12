@@ -215,7 +215,44 @@ class dbIdeaRevisionArchive extends dbConnectLE {
   	date_default_timezone_set(idea_cfg_time_zone);
   } // __construct()
 	
-} // classIdeaRevisionArchive
+} // class dbIdeaRevisionArchive
+
+class dbIdeaProjectStatusMails extends dbConnectLE {
+	
+	const field_id						= 'sm_id';
+	const field_project_id		= 'project_id';
+	const field_use_kit_cats	= 'sm_use_kit_cats';
+	const field_kit_cats			= 'sm_kit_cats';
+	const field_invite_emails	= 'sm_invite_emails';
+	const field_select_emails	= 'sm_select_emails';
+	const field_timestamp			= 'sm_timestamp';
+	
+	private $createTables 		= false;
+  
+  public function __construct($createTables = false) {
+  	$this->createTables = $createTables;
+  	parent::__construct();
+  	$this->setTableName('mod_kit_idea_project_status_mails');
+  	$this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
+  	$this->addFieldDefinition(self::field_project_id, "INT(11) NOT NULL DEFAULT '-1'");
+  	$this->addFieldDefinition(self::field_use_kit_cats, "TINYINT NOT NULL DEFAULT '1'");
+  	$this->addFieldDefinition(self::field_kit_cats, "VARCHAR(255) NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_select_emails, "TEXT NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_invite_emails, "TEXT NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->checkFieldDefinitions();
+  	// Tabelle erstellen
+  	if ($this->createTables) {
+  		if (!$this->sqlTableExists()) {
+  			if (!$this->sqlCreateTable()) {
+  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->getError()));
+  			}
+  		}
+  	}
+  	date_default_timezone_set(idea_cfg_time_zone);
+  } // __construct()
+	
+} // class dbIdeaProjectStatusMails
 
 class dbIdeaCfg extends dbConnectLE {
 	

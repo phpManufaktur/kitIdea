@@ -1,0 +1,90 @@
+{*
+ * kitIdea
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *
+ * Please consult the Dwoo Documentation & WIKI to get further informations 
+ * and hints for the usage of the Dwoo template engine.
+ *
+ * @link http://wiki.dwoo.org/
+ *
+ * Use {dump()} to get a list of all in this template available variables!
+ *}
+<div class="idea_article_edit">
+  <form name="{$form.name}" action="{$page_link}" method="post">
+    <input type="hidden" name="{$main_action.name}" value="{$main_action.value}" />
+    <input type="hidden" name="{$project_action.name}" value="{$project_action.value}" />
+    <input type="hidden" name="{$project.fields.project_id.name}" value="{$project.fields.project_id.value}" />
+    <input type="hidden" name="{$article.fields.section_identifier.name}" value="{$article.fields.section_identifier.value}" />
+    <input type="hidden" name="{$article.fields.article_id.name}" value="{$article.fields.article_id.value}" />
+    <input type="hidden" name="{$article.fields.article_revision.name}" value="{$article.fields.article_revision.value}" />
+    <input type="hidden" name="{$article.fields.article_status.name}" value="{$article.fields.article_status.value}" />
+    {* sorter fields are needed by the table sorter above *}
+    <input id="sorter_table" type="hidden" name="sorter_table" value="{$sorter_table}" />
+    <input id="sorter_value" type="hidden" name="sorter_value" value="{$sorter_value}" />
+    <input id="sorter_item" type="hidden" name="sorter_item" value="{$sorter_item}" />
+    <input id="sorter_active" type="hidden" name="sorter_active" value="{$sorter_active}" />
+    <table width="100%">
+      <colgroup>
+        <col width="100" />
+        <col width="80" />
+        <col width="150" />
+        <col width="*" />
+        <col width="80" />
+        <col width="80" />
+      </colgroup>
+      <tr>
+        <td><i>{$article.edit.title.label}</i></td>
+        <td colspan="3"><input type="text" name="{$article.edit.title.name}" value="{$article.edit.title.value}" /></td>
+        <td style="text-align: right;"><i>ID</i></td>
+        <td>{if $article.fields.article_id.value > 0}{string_format($article.fields.article_id.value, '%05d')}{else}<b>NEW</b>{/if}</td>
+      </tr>
+      <tr>
+        <td><i>{$article.edit.editor.label}</i></td>
+        <td colspan="5">
+          {$article.edit.editor.value}
+        </td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td>{$article.move.label}</td>
+        <td>
+          <select name="{$article.move.name}"{if $article.fields.article_id.value < 1} disabled="disabled"{/if}>
+            {foreach $article.move.items option}
+            <option value="{$option.value}"{if $option.value == $article.move.value} selected="selected"{/if}>{$option.text}</option>
+            {/foreach}
+          </select>
+        </td>
+        <td>&nbsp;</td>
+        <td><i>{$article.status.label}</i></td>
+        <td>
+          <select name="{$article.status.name}"{if $article.fields.article_id.value < 1} disabled="disabled"{/if}>
+            {foreach $article.status.items option}
+            <option value="{$option.value}"{if $option.value == $article.status.value} selected="selected"{/if}>{$option.text}</option>
+            {/foreach}
+          </select>
+        </td>
+      </tr>
+      {if $is_authenticated == 0}
+        {* the user is not authenticated (logged in), so use Captcha to prevent SPAM! *}
+        <tr>
+          <td>&nbsp;</td>
+          <td colspan="5">
+            {$article.edit.captcha}
+          </td>
+        </tr>
+      {/if}
+      <tr>
+        <td>&nbsp;</td>
+        <td colspan="5">
+          <input type="submit" value="{$form.btn.ok}" />&nbsp;
+          <input type="button" value="{$form.btn.abort}" onclick="javascript: window.location = '{$page_link}'; return false;" />
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>

@@ -52,6 +52,7 @@ define('idea_error_illegal_function_call',			'<p>Illegaler Funktionsaufruf, Zugr
 define('idea_error_preset_not_exists',					'<p>Das Presetverzeichnis <b>%s</b> existiert nicht, die erforderlichen Templates können nicht geladen werden!</p>');
 define('idea_error_project_access_invalid',			'<p>Dieser Zugriff auf Projektdaten ist nicht autorisiert!</p>');
 define('idea_error_section_definition_invalid',	'<p>Die Definition <b>%s</b> für einen Projektbereich ist ungültig. Die Definition muss einen <b>Text</b>, gefolgt von einer Pipe <b>|</b> und einen <b>eindeutigen Bezeichner</b> enthalten.</p><p>Bitte prüfen Sie die kitIdea Einstellungen!</p>');
+define('idea_error_status_mail_configuration',	'<p>Die Konfiguration für das Versenden von Status E-Mails ist fehlerhaft, es können keine E-Mails versendet werden!</p>');
 define('idea_error_template_error',							'<p>Fehler bei der Ausführung des Template <b>%s</b>:</p><p>%s</p>');
 define('idea_error_undefined',									'<p>Es ist ein nicht näher spezifizierter Fehler aufgetreten, bitte informieren Sie den Support.</p>');
 
@@ -128,7 +129,9 @@ define('idea_label_section_add',								'Abschnitt hinzufügen');
 define('idea_label_section_delete',							'Abschnitt löschen');
 
 define('idea_msg_article_inserted',							'<p>Der Artikel mit der <b>ID %05d</b> wurde erfolgreich angelegt.</p>');
+define('idea_msg_article_moved',								'<p>Der Artikel <b>%s</b> wurde erfolgreich auf diese Seite verschoben!</p>');
 define('idea_msg_article_updated',							'<p>Der Artikel mit der <b>ID %05d</b> wurde aktualisiert.</p>');
+define('idea_msg_captcha_invalid',							'<p>Der übermittelte CAPTCHA Code ist nicht korrekt, bitte prüfen Sie Ihre Eingabe!</p>');
 define('idea_msg_login_welcome',								'<p>Herzlich willkommen bei kitIdea!</p><p>Sie haben Zugriff auf die verschiedenen <a href="%s">Projekte</a> und auf Ihre <a href="%s">persönlichen Einstellungen</a>.</p>');
 define('idea_msg_project_inserted',							'<p>Das Projekt mit der <b>ID %05d</b> wurde erfolgreich angelegt.</p><p>Fügen Sie dem Projekt jetzt gleich den ersten Artikel hinzu!</p>');
 define('idea_msg_project_must_field_missing',		'<p>Das Feld <b>%s</b> muss einen gültigen Wert enthalten!</p>');

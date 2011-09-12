@@ -50,7 +50,7 @@ require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.idea.php';
 
 global $admin;
 
-$tables = array('dbIdeaCfg', 'dbIdeaProject', 'dbIdeaProjectSections', 'dbIdeaProjectArticles', 'dbIdeaRevisionArchive', 'dbIdeaTableSort');
+$tables = array('dbIdeaCfg', 'dbIdeaProject', 'dbIdeaProjectSections', 'dbIdeaProjectArticles', 'dbIdeaRevisionArchive', 'dbIdeaTableSort', 'dbIdeaProjectStatusMails');
 $error = '';
 
 foreach ($tables as $table) {

@@ -85,6 +85,8 @@ global $dbIdeaRevisionArchive;
 if (!is_object($dbIdeaRevisionArchive)) $dbIdeaRevisionArchive = new dbIdeaRevisionArchive();
 global $dbIdeaTableSort;
 if (!is_object($dbIdeaTableSort)) $dbIdeaTableSort = new dbIdeaTableSort();
+global $dbIdeaProjectStatusMails;
+if (!is_object($dbIdeaProjectStatusMails)) $dbIdeaProjectStatusMails = new dbIdeaProjectStatusMails();
 
 // WYSIWYG editor
 require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.editor.php';
@@ -101,5 +103,15 @@ require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.compare.php
 // load kitDirList
 require_once WB_PATH.'/modules/kit_dirlist/class.dirlist.php';
 
+// load captcha
+require_once (WB_PATH.'/include/captcha/captcha.php');
+
+// load KIT Mail
+require_once WB_PATH.'/modules/kit/class.mail.php';
+
+// load kitIdea Status Mail
+require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.status.mail.php';
+global $statusMails;
+if (!is_object($statusMails)) $statusMails = new kitIdeaStatusMails();
 
 ?>

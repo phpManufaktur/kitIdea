@@ -51,7 +51,7 @@ require_once WB_PATH.'/modules/kit_form/class.form.php';
 
 global $admin;
 
-$tables = array('dbIdeaCfg', 'dbIdeaProject', 'dbIdeaProjectSections', 'dbIdeaProjectArticles', 'dbIdeaRevisionArchive', 'dbIdeaTableSort');
+$tables = array('dbIdeaCfg', 'dbIdeaProject', 'dbIdeaProjectSections', 'dbIdeaProjectArticles', 'dbIdeaRevisionArchive', 'dbIdeaTableSort', 'dbIdeaProjectStatusMails');
 $error = '';
 
 foreach ($tables as $table) {
