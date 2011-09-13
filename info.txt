@@ -3,6 +3,10 @@ kitIdea
 Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
+Release 0.12
+2011-09-13
+fixed: missing the section identifier at creating new articles moves the articles to an non existing section
+
 Release 0.11
 2011-09-12
 fixed: moving articles between sections does not work

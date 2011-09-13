@@ -156,6 +156,7 @@ input[name=kit_city] {
   font-style: italic;
 }
 .compare_differ {
+  display: inline-block;
   padding: 2px 5px;
   color: inherit;
   background-color: #e1c800;

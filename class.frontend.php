@@ -1473,6 +1473,13 @@ class kitIdeaFrontend {
   				$message .= sprintf(idea_msg_article_moved, $article[dbIdeaProjectArticles::field_title]);
   				$changed = true;
   			}
+  			else {
+  				$value = isset($_REQUEST[$key]) ? $_REQUEST[$key] : '';
+  				if ($value != $article[$key]) {
+  					$changed = true;
+  					$article[$key] = $value;
+  				}
+  			}
   			break;
   		case dbIdeaProjectArticles::field_project_id;
   			if (isset($_REQUEST[$key])) {

@@ -148,7 +148,7 @@ class kitIdeaStatusMails {
 			
 			$kitMail = new kitMail();
 			if (!$kitMail->mail($subject, $message, $kitMail->From, $kitMail->FromName, array($kitMail->From => $kitMail->FromName), false, array(), $emails)) {
-				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->getError()));//$kitMail->getMailError()));
+				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitMail->getMailError()));
 				return false;
 			}
 			return true;
