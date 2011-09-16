@@ -49,6 +49,8 @@ define('idea_cfg_title',												'Herr,Frau');
 define('idea_error_access_not_auth',						'<p>Dieser Zugriff ist nicht autorisiert. Bitte melden Sie sich zunächst an!</p><p><b>Hinweis:</b> <i>Sie erhalten diese Meldung eventuell auf dann, wenn Sie längere Zeit inaktiv waren und Ihre Sitzung automatisch beendet wurde.</i></p>');
 define('idea_error_auth_wrong_category',				'<p>Ihr Benutzerkonto gestattet Ihnen leider keinen Zugriff auf die Verwaltung von kitIdea.</p><p>Bitte wenden Sie sich an den Service, dieser kann Sie für kitIdea freischalten!</p>');
 define('idea_error_illegal_function_call',			'<p>Illegaler Funktionsaufruf, Zugriff verweigert!</p>');
+define('idea_error_lepton_group_invalid',				'<p>Die LEPTON Gruppe <b>%s</b> wurde nicht gefunden, bitte prüfen Sie die Parameter die an kitIdea übergeben werden!</p>');
+define('idea_error_lepton_group_missing',				'<p>Es ist keine LEPTON Gruppe gesetzt, kitIdea kann die Zugriffsberechtigung nicht prüfen!</p>');
 define('idea_error_preset_not_exists',					'<p>Das Presetverzeichnis <b>%s</b> existiert nicht, die erforderlichen Templates können nicht geladen werden!</p>');
 define('idea_error_project_access_invalid',			'<p>Dieser Zugriff auf Projektdaten ist nicht autorisiert!</p>');
 define('idea_error_section_definition_invalid',	'<p>Die Definition <b>%s</b> für einen Projektbereich ist ungültig. Die Definition muss einen <b>Text</b>, gefolgt von einer Pipe <b>|</b> und einen <b>eindeutigen Bezeichner</b> enthalten.</p><p>Bitte prüfen Sie die kitIdea Einstellungen!</p>');

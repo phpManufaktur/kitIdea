@@ -75,6 +75,7 @@ class kitIdeaFrontend {
 	private $message									= '';
 	private $media_path								= '';
 	private $media_url								= '';
+	private $use_lepton_auth					= false;
 	
 	const param_css										= 'css';
 	const param_js										= 'js';
@@ -82,6 +83,7 @@ class kitIdeaFrontend {
 	const param_search								= 'search';
 	const param_section_about					= 'section_about';
 	const param_section_files					= 'section_files';
+	const param_lepton_groups					= 'lepton_groups';
 	
 	private $params = array(
 		self::param_css							=> true,
@@ -89,7 +91,8 @@ class kitIdeaFrontend {
 		self::param_preset					=> 1, 
 		self::param_search					=> true,
 		self::param_section_about		=> true,
-		self::param_section_files		=> true
+		self::param_section_files		=> true,
+		self::param_lepton_groups		=> ''
 	);
 	
 	// general TAB Navigation 
@@ -137,11 +140,27 @@ class kitIdeaFrontend {
 	 * @return BOOL
 	 */
 	public function setParams($params = array()) {
+		global $database;
 		$this->params = $params;
 		$this->template_path = WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/templates/'.$this->params[self::param_preset].'/'.KIT_IDEA_LANGUAGE.'/';
 		if (!file_exists($this->template_path)) {
 			$this->setError(sprintf(idea_error_preset_not_exists, '/modules/'.basename(dirname(__FILE__)).'/templates/'.$this->params[self::param_preset].'/'.KIT_IDEA_LANGUAGE.'/'));
 			return false;
+		}
+		// if LEPTON group is set, authenticate via LEPTON USER
+		if (!empty($this->params[self::param_lepton_groups])) {
+			$gs = explode(',', $this->params[self::param_lepton_groups]);
+			$grps = array();
+			foreach ($gs as $g) {
+				$SQL = sprintf("SELECT group_id FROM %sgroups WHERE name='%s'", TABLE_PREFIX, trim($g));
+				if (false ===($id = $database->get_one($SQL))) {
+					$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_lepton_group_invalid, $g)));
+					return false;
+				}
+				$grps[] = $id;
+			}
+			$this->params[self::param_lepton_groups] = implode(',', $grps);
+			$this->use_lepton_auth = true;
 		}
 		return true;
 	} // setParams()
@@ -344,6 +363,8 @@ class kitIdeaFrontend {
   public function show_main($action, $content) {
   	$navigation = array();
   	foreach ($this->tab_main_navigation_array as $key => $value) {
+  		// skip account tab if using LEPTON authentication
+  		if ($this->use_lepton_auth && ($key == self::action_account)) continue;
   		$navigation[] = array(
   			'active' 	=> ($key == $action) ? 1 : 0,
   			'url'			=> sprintf('%s%s%s=%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', self::request_main_action, $key),
@@ -429,16 +450,100 @@ class kitIdeaFrontend {
   } // accountShow()
   
   /**
-   * Check if the user is authenticated by the KIT interface and
-   * if he is allowed to access kitIdea
+   * Check if the user is authenticated by the KIT interface or
+   * by the LEPTON interface and if he is allowed to access kitIdea
    * 
    * @return BOOL 
    */
   private function accountIsAuthenticated() {
 		global $kitContactInterface;
 		global $dbIdeaCfg;
+		global $wb;
+		global $dbRegister;
 		
-		if ($kitContactInterface->isAuthenticated()) {
+		if ($this->use_lepton_auth && $wb->is_authenticated()) {
+			// authenticate via LEPTON
+			if (!isset($_SESSION['GROUPS_ID']) || empty($this->params[self::param_lepton_groups])) {
+				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_lepton_group_missing));
+				return false;
+			}
+			// unset KIT session vars...
+			unset($_SESSION[kitContactInterface::session_kit_aid]);
+			unset($_SESSION[kitContactInterface::session_kit_key]);
+			unset($_SESSION[kitContactInterface::session_kit_contact_id]);
+  	
+			$lepton_groups = explode(',', $_SESSION['GROUPS_ID']);
+			$idea_groups = explode(',', $this->params[self::param_lepton_groups]);
+			foreach ($lepton_groups as $lepton_group) {
+				if (in_array($lepton_group, $idea_groups)) {
+					// ok - LEPTON user is authenticated, now switch him to KIT ...
+					$contact_id = -1;
+					$status = -1;
+					if (!$kitContactInterface->isEMailRegistered($_SESSION['EMAIL'], $contact_id, $status)) {
+						// Bugfixing, work around: clean up register records!
+						$SQL = sprintf( "DELETE FROM %s WHERE %s='%s' AND %s!='%s'", 
+														$dbRegister->getTableName(),
+														dbKITregister::field_email,
+														$_SESSION['EMAIL'],
+														dbKITregister::field_status,
+														dbKITregister::status_active );
+						$result = array();
+						if (!$dbRegister->sqlExec($SQL, $result)) {
+							$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbRegister->getError()));
+							return false;
+						}
+						// user must be registered in KIT
+						$contact_array = array();
+						$contact_array[kitContactInterface::kit_email] = $_SESSION['EMAIL'];
+						$contact_array[kitContactInterface::kit_intern] = $dbIdeaCfg->getValue(dbIdeaCfg::cfgKITcategory);
+						$register = array();
+						// insert contact
+						if (!$kitContactInterface->addContact($contact_array, $contact_id, $register)) {
+							$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+							return false;
+						}
+						// update register record, set to active
+						$where = array(dbKITregister::field_contact_id => $contact_id);
+						$data = array(
+							dbKITregister::field_status => dbKITregister::status_active,
+							dbKITregister::field_register_confirmed => date('Y-m-d H:i:s'),
+							dbKITregister::field_update_when => date('Y-m-d H:i:s'),
+							dbKITregister::field_update_by => 'kitIdea'
+						);
+						if (!$dbRegister->sqlUpdateRecord($data, $where)) {
+							$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbRegister->getError()));
+							return false;
+						}
+						// ok - login user via KIT
+						$_SESSION[kitContactInterface::session_kit_aid] = $register[dbKITregister::field_id];
+						$_SESSION[self::session_kit_key] = $register[dbKITregister::field_register_key];
+						$_SESSION[self::session_kit_contact_id] = $register[dbKITregister::field_contact_id];
+						return true;
+					}
+					else {
+						// user is registered in KIT
+						$where = array(
+							dbKITregister::field_contact_id => $contact_id,
+							dbKITregister::field_status => dbKITregister::status_active);
+						$register = array();
+						if (!$dbRegister->sqlSelectRecord($where, $register)) {
+							$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbRegister->getError()));
+							return false;
+						}
+						if (count($register) < 1) {
+							$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $contact_id)));
+							return false;
+						}
+						$register = end($register);
+						$_SESSION[kitContactInterface::session_kit_aid] = $register[dbKITregister::field_id];
+						$_SESSION[kitContactInterface::session_kit_key] = $register[dbKITregister::field_register_key];
+						$_SESSION[kitContactInterface::session_kit_contact_id] = $register[dbKITregister::field_contact_id];
+						return true;
+					}
+				}
+			}
+		}
+		elseif ($kitContactInterface->isAuthenticated()) {
 			// user is authenticated so check categories
 			$cat = $dbIdeaCfg->getValue(dbIdeaCfg::cfgKITcategory);
 			if (!$kitContactInterface->existsCategory(kitContactInterface::category_type_intern, $cat)) {
@@ -461,6 +566,7 @@ class kitIdeaFrontend {
 				return false;
 			}
 		}
+		// user is not authenticated
 		return false;
 	} // accountIsAuthenticated()
 	
@@ -553,22 +659,29 @@ class kitIdeaFrontend {
 	public function accountGetAuthor() {
 		global $kitContactInterface;
 		if ($this->accountIsAuthenticated()) {
-			$contact = array();
-			if (!$kitContactInterface->getContact($_SESSION[kitContactInterface::session_kit_contact_id], $contact)) {
-				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
-				return false;
-			}
-			if (!empty($contact[kitContactInterface::kit_first_name]) && !empty($contact[kitContactInterface::kit_last_name])) {
-				return sprintf('%s %s', $contact[kitContactInterface::kit_first_name], $contact[kitContactInterface::kit_last_name]);
-			}
-			elseif (!empty($contact[kitContactInterface::kit_last_name])) {
-				return $contact[kitContactInterface::kit_last_name];
-			}
-			elseif (!empty($contact[kitContactInterface::kit_first_name])) {
-				return $contact[kitContactInterface::kit_first_name];
+			if ($this->use_lepton_auth) {
+				// user is logged in via LEPTON user interface
+				return $_SESSION['DISPLAY_NAME'];
 			}
 			else {
-				return $contact[kitContactInterface::kit_email];
+				// use KIT contact informations
+				$contact = array();
+				if (!$kitContactInterface->getContact($_SESSION[kitContactInterface::session_kit_contact_id], $contact)) {
+					$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+					return false;
+				}
+				if (!empty($contact[kitContactInterface::kit_first_name]) && !empty($contact[kitContactInterface::kit_last_name])) {
+					return sprintf('%s %s', $contact[kitContactInterface::kit_first_name], $contact[kitContactInterface::kit_last_name]);
+				}
+				elseif (!empty($contact[kitContactInterface::kit_last_name])) {
+					return $contact[kitContactInterface::kit_last_name];
+				}
+				elseif (!empty($contact[kitContactInterface::kit_first_name])) {
+					return $contact[kitContactInterface::kit_first_name];
+				}
+				else {
+					return $contact[kitContactInterface::kit_email];
+				}
 			}
 		}
 		else {
