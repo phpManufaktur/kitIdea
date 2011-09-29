@@ -460,6 +460,7 @@ class kitIdeaFrontend {
 		global $dbIdeaCfg;
 		global $wb;
 		global $dbRegister;
+		global $database;
 		
 		if ($this->use_lepton_auth && $wb->is_authenticated()) {
 			// authenticate via LEPTON
@@ -479,16 +480,11 @@ class kitIdeaFrontend {
 					// ok - LEPTON user is authenticated, now switch him to KIT ...
 					$contact_id = -1;
 					$status = -1;
-					if (!$kitContactInterface->isEMailRegistered($_SESSION['EMAIL'], $contact_id, $status)) {
+					$email = $_SESSION['EMAIL'];
+					if (!$kitContactInterface->isEMailRegistered($email, $contact_id, $status)) {
 						// Bugfixing, work around: clean up register records!
-						$SQL = sprintf( "DELETE FROM %s WHERE %s='%s' AND %s!='%s'", 
-														$dbRegister->getTableName(),
-														dbKITregister::field_email,
-														$_SESSION['EMAIL'],
-														dbKITregister::field_status,
-														dbKITregister::status_active );
-						$result = array();
-						if (!$dbRegister->sqlExec($SQL, $result)) {
+						$where = array(dbKITregister::field_email => $_SESSION['EMAIL']);
+						if (!$dbRegister->sqlDeleteRecord($where)) {
 							$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbRegister->getError()));
 							return false;
 						}
@@ -502,6 +498,7 @@ class kitIdeaFrontend {
 							$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
 							return false;
 						}
+						
 						// update register record, set to active
 						$where = array(dbKITregister::field_contact_id => $contact_id);
 						$data = array(
@@ -516,8 +513,8 @@ class kitIdeaFrontend {
 						}
 						// ok - login user via KIT
 						$_SESSION[kitContactInterface::session_kit_aid] = $register[dbKITregister::field_id];
-						$_SESSION[self::session_kit_key] = $register[dbKITregister::field_register_key];
-						$_SESSION[self::session_kit_contact_id] = $register[dbKITregister::field_contact_id];
+						$_SESSION[kitContactInterface::session_kit_key] = $register[dbKITregister::field_register_key];
+						$_SESSION[kitContactInterface::session_kit_contact_id] = $register[dbKITregister::field_contact_id];
 						return true;
 					}
 					else {
@@ -1081,6 +1078,8 @@ class kitIdeaFrontend {
   	$differ_prefix = $dbIdeaCfg->getValue(dbIdeaCfg::cfgCompareDifferPrefix);
   	$differ_suffix = $dbIdeaCfg->getValue(dbIdeaCfg::cfgCompareDifferSuffix);
   	
+  	$calcTable = new calcTable();
+  	
   	foreach ($project as $name => $value) {
   		if ($compare_revisions && ($name == dbIdeaProject::field_desc_long) && ($project[dbIdeaProject::field_revision] > 1)) {
   			$where = array(	dbIdeaRevisionArchive::field_archived_id => $project[dbIdeaProject::field_id],
@@ -1102,6 +1101,7 @@ class kitIdeaFrontend {
 					$value = $compare->getHTML(1, $differ_prefix, $differ_suffix, '');
   			}
   		}
+  		$calcTable->parseTables($value);
   		$project_array[$name] = array(
   			'name'	=> $name,
   			'value'	=> $value

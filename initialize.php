@@ -87,6 +87,8 @@ global $dbIdeaTableSort;
 if (!is_object($dbIdeaTableSort)) $dbIdeaTableSort = new dbIdeaTableSort();
 global $dbIdeaProjectStatusMails;
 if (!is_object($dbIdeaProjectStatusMails)) $dbIdeaProjectStatusMails = new dbIdeaProjectStatusMails();
+global $dbIdeaProjectAccess;
+if (!is_object($dbIdeaProjectAccess)) $dbIdeaProjectAccess = new dbIdeaProjectAccess(true);
 
 // WYSIWYG editor
 require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.editor.php';
@@ -114,4 +116,6 @@ require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.status.mail
 global $statusMails;
 if (!is_object($statusMails)) $statusMails = new kitIdeaStatusMails();
 
+// load calcTable
+require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.table.php';
 ?>
