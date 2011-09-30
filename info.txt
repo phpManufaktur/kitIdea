@@ -6,7 +6,6 @@ http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 Release 0.13
 2011-09-16
 added: parameter lepton_groups for droplet kit_idea allows to login via LEPTON user interface. The user must member of one of the specified groups.
-+++
 
 Release 0.12
 2011-09-13
