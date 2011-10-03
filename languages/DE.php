@@ -70,6 +70,7 @@ define('idea_hint_cfg_kit_form_dlg_account',		'Der kitForm Dialog, der von kitId
 define('idea_hint_cfg_kit_form_dlg_login',			'Der kitForm Dialog, der von kitIdea für die Anmeldung von Benutzern verwendet wird.');
 define('idea_hint_cfg_kit_form_dlg_register',		'Der kitForm Dialog, der von kitIdea für die Registrierung von Benutzern verwendet wird.');
 define('idea_hint_cfg_media_dir',								'Verzeichnis im /MEDIA Ordner das für die MEDIA-Daten von kitIdea verwendet wird.');
+define('idea_hint_cfg_media_project_dir',				'Verzeichnis im /MEDIA Ordner das für die MEDIA-Daten von kitIdea PROJEKTEN verwendet wird - jedes Projekt erhält ein eigenes Unterverzeichnis');
 define('idea_hint_cfg_project_default_sections','Die Standard Projektbereiche dienen zur Strukturierung der Projekte. Geben Sie mindestens einen Bereich vor, die Benutzer können weitere Bereiche hinzufügen. Der Bereich <b>Dateien</b> wird von kitIdea automatisch hinzugefügt und kann nicht entfernt oder geändert werden.<br />Die Definition eines Bereich besteht aus dem <b>Text</b>, der in der Navigation angezeigt werden soll, einem senkrechten Strich (Pipe) <b>|</b> als <b>Trenner</b> und einem eindeutigen <b>Bezeichner</b>, der keine Leerzeichen, Sonderzeichen Umlaute etc. enthalten darf. Trennen sie die einzelnen Bereiche mit einem Komma.');
 define('idea_hint_cfg_wysiwyg_editor_height',		'Die angezeigte Höhe des verwendeten WYSIWYG Editor. Die Angabe kann in Pixel (px) oder in Prozent (%) erfolgen.');
 define('idea_hint_cfg_wysiwyg_editor_width',		'Die angezeigte Breite des verwendeten WYSIWYG Editor. Die Angabe kann in Pixel (px) oder in Prozent (%) erfolgen.');
@@ -110,7 +111,8 @@ define('idea_label_cfg_kit_category',						'KeepInTouch (KIT) Kategorie');
 define('idea_label_cfg_kit_form_dlg_account',		'kitForm Dialog: Benutzerkonto');
 define('idea_label_cfg_kit_form_dlg_login',			'kitForm Dialog: Anmeldung');
 define('idea_label_cfg_kit_form_dlg_register',	'kitForm Dialog: Registrierung');
-define('idea_label_cfg_media_dir',							'Medien Verzeichnis');
+define('idea_label_cfg_media_dir',							'Medien Verzeichnis, Allgemein');
+define('idea_label_cfg_media_project_dir',			'Medien Verzeichnis, Projekte');
 define('idea_label_cfg_project_default_sections','Standard Projektbereiche');
 define('idea_label_cfg_wysiwyg_editor_height',	'WYSIWYG Editor, Höhe');
 define('idea_label_cfg_wysiwyg_editor_width',		'WYSIWYG Editor, Breite');

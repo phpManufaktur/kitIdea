@@ -297,6 +297,7 @@ class dbIdeaCfg extends dbConnectLE {
   private $message					= '';
 
   const cfgMediaDir								= 'cfgMediaDir';	
+  const cfgMediaProjectDir				= 'cfgMediaProjectDir';
   const cfgKITcategory						= 'cfgKITcategory';
   const cfgKITformDlgLogin				= 'cfgKITformDlgLogin';
   const cfgKITformDlgAccount			= 'cfgKITformDlgAccount';
@@ -309,6 +310,7 @@ class dbIdeaCfg extends dbConnectLE {
   const cfgCompareDifferSuffix		= 'cfgCompareDifferSuffix';
   
   public $config_array = array(
+  	array('idea_label_cfg_media_project_dir', self::cfgMediaProjectDir, self::type_string, '/kit_idea/project', 'idea_hint_cfg_media_project_dir'),
   	array('idea_label_cfg_media_dir', self::cfgMediaDir, self::type_string, '/kit_idea', 'idea_hint_cfg_media_dir'),
   	array('idea_label_cfg_kit_category', self::cfgKITcategory, self::type_string, 'kitIdea', 'idea_hint_cfg_kit_category'),
   	array('idea_label_cfg_kit_form_dlg_login', self::cfgKITformDlgLogin, self::type_string, 'idea_login', 'idea_hint_cfg_kit_form_dlg_login'),

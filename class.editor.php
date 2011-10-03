@@ -30,6 +30,7 @@ if (defined('WB_PATH')) {
 }
 // end include LEPTON class.secure.php
 
+/*
 if (!defined('WYSIWYG_EDITOR') || 
 		WYSIWYG_EDITOR == "none" || 
 		!file_exists(WB_PATH.'/modules/'.WYSIWYG_EDITOR.'/include.php')) {
@@ -42,6 +43,8 @@ else {
 	// include default WYSIWYG editor
 	require_once(WB_PATH.'/modules/'.WYSIWYG_EDITOR.'/include.php');
 }
+*/
 
+require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/include/ckeditor/include.php';
 
 ?>
