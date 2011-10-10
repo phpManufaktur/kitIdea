@@ -59,7 +59,7 @@ global $database;
 $error = '';
 
 // install missing tables
-$tables = array('dbIdeaCfg', 'dbIdeaProject', 'dbIdeaProjectSections', 'dbIdeaProjectArticles', 'dbIdeaRevisionArchive', 'dbIdeaTableSort', 'dbIdeaProjectStatusMails', 'dbIdeaProjectAccess');
+$tables = array('dbIdeaCfg', 'dbIdeaProject', 'dbIdeaProjectSections', 'dbIdeaProjectArticles', 'dbIdeaRevisionArchive', 'dbIdeaTableSort', 'dbIdeaProjectStatusMails', 'dbIdeaProjectAccess', 'dbIdeaProjectGroups', 'dbIdeaProjectUsers');
 
 foreach ($tables as $table) {
 	$create = null;
@@ -71,6 +71,55 @@ foreach ($tables as $table) {
 	}
 }
 
+$dbIdeaProject = new dbIdeaProject();
+if (!$dbIdeaProject->sqlFieldExists(dbIdeaProject::field_project_group)) {
+	// kitIdea 0.14 - project_group added
+	if ($dbIdeaProject->sqlAlterTableAddField(dbIdeaProject::field_project_group, "INT(11) NOT NULL DEFAULT '-1'", dbIdeaProject::field_id)) {
+		// project_group added, now create default project group and add the existing projects to this group
+		$dbIdeaCfg = new dbIdeaCfg();
+		$dbIdeaProjectGroups = new dbIdeaProjectGroups();
+		$data = array(
+			dbIdeaProjectGroups::field_access_default 		=> dbIdeaProjectGroups::field_access_group_2,
+			dbIdeaProjectGroups::field_access_group_1			=> idea_str_access_group_1,
+			dbIdeaProjectGroups::field_access_group_2			=> idea_str_access_group_2,
+			dbIdeaProjectGroups::field_access_group_3			=> idea_str_access_group_3,
+			dbIdeaProjectGroups::field_access_group_4			=> idea_str_access_group_4,
+			dbIdeaProjectGroups::field_access_group_5			=> idea_str_access_group_5,
+			dbIdeaProjectGroups::field_access_rights_1		=> $dbIdeaCfg->getValue(dbIdeaCfg::cfgAccessGrpDefault_1),
+			dbIdeaProjectGroups::field_access_rights_2		=> $dbIdeaCfg->getValue(dbIdeaCfg::cfgAccessGrpDefault_2),
+			dbIdeaProjectGroups::field_access_rights_3		=> $dbIdeaCfg->getValue(dbIdeaCfg::cfgAccessGrpDefault_3),
+			dbIdeaProjectGroups::field_access_rights_4		=> $dbIdeaCfg->getValue(dbIdeaCfg::cfgAccessGrpDefault_4),
+			dbIdeaProjectGroups::field_access_rights_5		=> $dbIdeaCfg->getValue(dbIdeaCfg::cfgAccessGrpDefault_5),
+			dbIdeaProjectGroups::field_description				=> 'Default group, automatically created by the upgrade script - please adapt this group as you like!',
+			dbIdeaProjectGroups::field_name								=> 'Default Group',
+			dbIdeaProjectGroups::field_status							=> dbIdeaProjectGroups::status_active
+		);
+		$grp_id = -1;
+		if ($dbIdeaProjectGroups->sqlInsertRecord($data, $grp_id)) {
+			// ok - group exists now update all projects
+			$where = array();
+			$projects = array();
+			if ($dbIdeaProject->sqlSelectRecord($where, $projects)) {
+				foreach ($projects as $project) {
+					$where = array(dbIdeaProject::field_id => $project[dbIdeaProject::field_id]);
+					$data = array(dbIdeaProject::field_project_group => $grp_id);
+					if (!$dbIdeaProject->sqlUpdateRecord($data, $where)) {
+						$error .= sprintf('[%s - %s] %s', __FILE__, __LINE__, $dbIdeaProject->getError());
+					}
+				}
+			}
+			else {
+				$error .= sprintf('[%s - %s] %s', __FILE__, __LINE__, $dbIdeaProject->getError());
+			}
+		}
+		else {
+			$error .= sprintf('[%s - %s] %s', __FILE__, __LINE__, $dbIdeaProjectGroups->getError());
+		}
+	}
+	else {
+		$error .= sprintf('[UPGRADE mod_idea_project] %s', $dbIdeaProject->getError());
+	} 
+}
 
 // import forms from /forms to kitForm
 $kitForm = new dbKITform();

@@ -30,6 +30,7 @@ if (defined('WB_PATH')) {
 class dbIdeaProject extends dbConnectLE {
 	
 	const field_id							= 'project_id';
+	const field_project_group		= 'project_group';
 	const field_title						= 'project_title';
 	const field_desc_short			= 'project_desc_short';
 	const field_desc_long				= 'project_desc_long';
@@ -66,6 +67,7 @@ class dbIdeaProject extends dbConnectLE {
   	parent::__construct();
   	$this->setTableName('mod_kit_idea_project');
   	$this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
+  	$this->addFieldDefinition(self::field_project_group, "INT(11) NOT NULL DEFAULT '-1'");
   	$this->addFieldDefinition(self::field_title, "VARCHAR(128) NOT NULL DEFAULT ''");
   	$this->addFieldDefinition(self::field_desc_short, "VARCHAR(255) NOT NULL DEFAULT ''", false, false, true);
   	$this->addFieldDefinition(self::field_desc_long, "TEXT NOT NULL DEFAULT ''", false, false, true);
@@ -254,6 +256,169 @@ class dbIdeaProjectStatusMails extends dbConnectLE {
 	
 } // class dbIdeaProjectStatusMails
 
+class dbIdeaProjectGroups extends dbConnectLE {
+	
+	const field_id								= 'grp_id';
+	const field_name							= 'grp_name';
+	const field_description				= 'grp_description';
+	const field_status						= 'grp_status';
+	const field_access_group_1		= 'grp_access_group_1';
+	const field_access_rights_1		= 'grp_access_rights_1';
+	const field_access_group_2		= 'grp_access_group_2';
+	const field_access_rights_2		= 'grp_access_rights_2';
+	const field_access_group_3		= 'grp_access_group_3';
+	const field_access_rights_3		= 'grp_access_rights_3';
+	const field_access_group_4		= 'grp_access_group_4';
+	const field_access_rights_4		= 'grp_access_rights_4';
+	const field_access_group_5		= 'grp_access_group_5';
+	const field_access_rights_5		= 'grp_access_rights_5';
+	const field_access_default		= 'grp_access_default';
+	const field_timestamp					= 'grp_timestamp';
+	
+	const status_active						= 1;
+	const status_locked						= 2;
+	const status_deleted					= 4;
+	
+	public $status_array = array(
+		array('value' => self::status_active, 'text' => idea_str_status_active),
+		array('value' => self::status_locked, 'text' => idea_str_status_locked),
+		array('value' => self::status_deleted, 'text' => idea_str_status_deleted)		
+	);
+	
+	// rights: general
+	const no_access						= 0;
+	
+	// rights: project
+	const project_view				= 1;
+	const project_create			= 2;
+	const project_edit				= 4;
+	const project_lock				= 8;
+	const project_delete			= 16;
+	
+	// rights: articles
+	const article_view				= 32;
+	const article_create			= 64;
+	const article_edit				= 128;
+	const article_edit_html		= 256;
+	const article_move				= 512;
+	const article_lock				= 1024;
+	const article_delete			= 2048;
+	
+	// rights: sections
+	const section_view				= 4096;
+	const section_create			= 8192;
+	const section_edit				= 16384;
+	const section_move				= 32768;
+	const section_delete			= 65536;
+	
+	// rights: files				
+	const file_download				= 131072;
+	const file_upload					= 262144;
+	const file_delete_file		= 524288;
+	const file_rename_file		= 1048576;
+	const file_create_dir			= 2097152;
+	const file_rename_dir			= 4194304;
+	const file_delete_dir			= 8388608;
+	
+	// rights: admins
+	const admin_change_rights	= 16777216;
+		
+	private $createTables 		= false;
+  
+  public function __construct($createTables = false) {
+  	$this->createTables = $createTables;
+  	parent::__construct();
+  	$this->setTableName('mod_kit_idea_project_groups');
+  	$this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
+  	$this->addFieldDefinition(self::field_name, "VARCHAR(80) NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_description, "TEXT NOT NULL DEFAULT ''");
+  	$this->addFieldDefinition(self::field_status, "TINYINT NOT NULL DEFAULT '".self::status_active."'");
+  	$this->addFieldDefinition(self::field_access_group_1, "VARCHAR(80) NOT NULL DEFAULT '".idea_str_access_group_1."'");
+  	$this->addFieldDefinition(self::field_access_rights_1, "INT(11) NOT NULL DEFAULT '-1'");
+  	$this->addFieldDefinition(self::field_access_group_2, "VARCHAR(80) NOT NULL DEFAULT '".idea_str_access_group_2."'");
+  	$this->addFieldDefinition(self::field_access_rights_2, "INT(11) NOT NULL DEFAULT '-1'");
+  	$this->addFieldDefinition(self::field_access_group_3, "VARCHAR(80) NOT NULL DEFAULT '".idea_str_access_group_3."'");
+  	$this->addFieldDefinition(self::field_access_rights_3, "INT(11) NOT NULL DEFAULT '-1'");
+  	$this->addFieldDefinition(self::field_access_group_4, "VARCHAR(80) NOT NULL DEFAULT '".idea_str_access_group_4."'");
+  	$this->addFieldDefinition(self::field_access_rights_4, "INT(11) NOT NULL DEFAULT '-1'");
+  	$this->addFieldDefinition(self::field_access_group_5, "VARCHAR(80) NOT NULL DEFAULT '".idea_str_access_group_5."'");
+  	$this->addFieldDefinition(self::field_access_rights_5, "INT(11) NOT NULL DEFAULT '-1'");
+  	$this->addFieldDefinition(self::field_access_default, "VARCHAR(30) NOT NULL DEFAULT '".self::field_access_group_1."'");
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->checkFieldDefinitions();
+  	// Tabelle erstellen
+  	if ($this->createTables) {
+  		if (!$this->sqlTableExists()) {
+  			if (!$this->sqlCreateTable()) {
+  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->getError()));
+  			}
+  		}
+  	}
+  	date_default_timezone_set(idea_cfg_time_zone);
+  } // __construct()
+	
+  /**
+   * Check if the $access integer contains the $permission and return true on
+   * success
+   * 
+   * @param INT $access
+   * @param INT $permission
+   * @return BOOL
+   */
+  public function checkPermissions($access, $permission) {
+  	if ($access & $permission) return true;
+  	return false;
+  } // checkPermissions()
+  
+} // class dbIdeaProjectGroups
+
+class dbIdeaProjectUsers extends dbConnectLE {
+	
+	const field_id						= 'user_id';
+	const field_group_id			= 'grp_id';
+	const field_access				= 'user_access';
+	const field_kit_id				= 'kit_id';
+	const field_register_id		= 'register_id';
+	const field_status				= 'status';
+	const field_timestamp			= 'timestamp';
+
+	const status_active						= 1;
+	const status_locked						= 2;
+	const status_deleted					= 4;
+	
+	public $status_array = array(
+		array('value' => self::status_active, 'text' => idea_str_status_active),
+		array('value' => self::status_locked, 'text' => idea_str_status_locked),
+		array('value' => self::status_deleted, 'text' => idea_str_status_deleted)		
+	);
+	
+	private $createTables 		= false;
+  
+  public function __construct($createTables = false) {
+  	$this->createTables = $createTables;
+  	parent::__construct();
+  	$this->setTableName('mod_kit_idea_project_users');
+  	$this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
+  	$this->addFieldDefinition(self::field_group_id, "INT(11) NOT NULL DEFAULT '-1'");
+  	$this->addFieldDefinition(self::field_access, "INT(11) NOT NULL DEFAULT '0'");
+  	$this->addFieldDefinition(self::field_kit_id, "INT(11) NOT NULL DEFAULT '-1'");
+  	$this->addFieldDefinition(self::field_register_id, "INT(11) NOT NULL DEFAULT '-1'");
+  	$this->addFieldDefinition(self::field_status, "TINYINT NOT NULL DEFAULT '".self::status_active."'");
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->checkFieldDefinitions();
+  	// Tabelle erstellen
+  	if ($this->createTables) {
+  		if (!$this->sqlTableExists()) {
+  			if (!$this->sqlCreateTable()) {
+  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->getError()));
+  			}
+  		}
+  	}
+  	date_default_timezone_set(idea_cfg_time_zone);
+  } // __construct()
+	
+} // class dbIdeaProjectUsers
+
 class dbIdeaCfg extends dbConnectLE {
 	
 	const field_id						= 'cfg_id';
@@ -308,6 +473,11 @@ class dbIdeaCfg extends dbConnectLE {
   const cfgCompareRevisions				= 'cfgCompareRevisions';					
   const cfgCompareDifferPrefix		= 'cfgCompareDifferPrefix';
   const cfgCompareDifferSuffix		= 'cfgCompareDifferSuffix';
+  const cfgAccessGrpDefault_1			= 'cfgAccessGrpDefault_1';
+  const cfgAccessGrpDefault_2			= 'cfgAccessGrpDefault_2';
+  const cfgAccessGrpDefault_3			= 'cfgAccessGrpDefault_3';
+  const cfgAccessGrpDefault_4			= 'cfgAccessGrpDefault_4';
+  const cfgAccessGrpDefault_5			= 'cfgAccessGrpDefault_5';
   
   public $config_array = array(
   	array('idea_label_cfg_media_project_dir', self::cfgMediaProjectDir, self::type_string, '/kit_idea/project', 'idea_hint_cfg_media_project_dir'),
@@ -321,7 +491,12 @@ class dbIdeaCfg extends dbConnectLE {
   	array('idea_label_cfg_project_default_sections', self::cfgProjectDefaultSections, self::type_array, 'Die Idee|secIdea', 'idea_hint_cfg_project_default_sections'),
   	array('idea_label_cfg_compare_differ_prefix', self::cfgCompareDifferPrefix, self::type_string, '<span class="compare_differ">', 'idea_hint_cfg_compare_differ_prefix'),
   	array('idea_label_cfg_compare_differ_suffix', self::cfgCompareDifferSuffix, self::type_string, '</span>', 'idea_hint_cfg_compare_differ_suffix'),
-  	array('idea_label_cfg_compare_revisions', self::cfgCompareRevisions, self::type_boolean, '1', 'idea_hint_cfg_compare_revisions')
+  	array('idea_label_cfg_compare_revisions', self::cfgCompareRevisions, self::type_boolean, '1', 'idea_hint_cfg_compare_revisions'),
+  	array('idea_label_cfg_access_grp_default_1', self::cfgAccessGrpDefault_1, self::type_integer, '135201', 'idea_hint_cfg_access_grp_default'),
+  	array('idea_label_cfg_access_grp_default_2', self::cfgAccessGrpDefault_2, self::type_integer, '398049', 'idea_hint_cfg_access_grp_default'),
+  	array('idea_label_cfg_access_grp_default_3', self::cfgAccessGrpDefault_3, self::type_integer, '7796711', 'idea_hint_cfg_access_grp_default'),
+  	array('idea_label_cfg_access_grp_default_4', self::cfgAccessGrpDefault_4, self::type_integer, '16777215', 'idea_hint_cfg_access_grp_default'),
+  	array('idea_label_cfg_access_grp_default_5', self::cfgAccessGrpDefault_5, self::type_integer, '0', 'idea_hint_cfg_access_grp_default')  	
   );  
   
   public function __construct($createTables = false) {

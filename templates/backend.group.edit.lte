@@ -1,0 +1,185 @@
+{*
+ * kitIdea
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *
+ * Please consult the Dwoo Documentation & WIKI to get further informations 
+ * and hints for the usage of the Dwoo template engine.
+ *
+ * @link http://wiki.dwoo.org/
+ *
+ * Use {dump()} to get a list of all in this template available variables!
+ *}
+<div id="idea_config">
+  <form name="{$form.name}" action="{$form.action}" method="post">
+    <input type="hidden" name="{$action.name}" value="{$action.value}" />
+    <h2>{$form.head}</h2>
+    <div class="{if $form.is_message == 1}message{else}intro{/if}">{$form.intro}</div>
+    <table width="100%">
+      <colgroup> 
+        <col width="200" />
+        <col width="150" />
+        <col width="*" />
+        <col width="250" />
+      </colgroup>
+      <tr>
+        <td>{$select_group.label}</td>
+        <td colspan="2">
+          <select id="{$select_group.id}" name="{$select_group.name}" onchange="{$select_group.onchange}">
+          {foreach $select_group.options option}
+          <option value="{$option.value}"{if $option.selected == 1} selected="selected"{/if}>{$option.text}</option>
+          {/foreach}
+          </select>
+        </td>
+        <td>{$select_group.hint}</td>
+      </tr>
+      <tr><td colspan="4">&nbsp;</td></tr>
+      {if ($group.grp_id.value > 0)}
+      <tr>
+        <td colspan="4">{$group.grp_id.label} {string_format($group.grp_id.value, '%05d')}</td>
+      </tr>
+      {/if}
+      <tr>
+        <td>{$group.grp_name.label}</td>
+        <td colspan="2"><input type="text" name="{$group.grp_name.name}" value="{$group.grp_name.value}" /></td>
+        <td>{$group.grp_name.hint}</td>
+      </tr>
+      <tr>
+        <td>{$group.grp_description.label}</td>
+        <td colspan="2"><textarea name="{$group.grp_description.name}">{$group.grp_description.value}</textarea></td>
+        <td>{$group.grp_description.hint}</td>
+      </tr>
+      <tr>
+        <td>{$group.grp_status.label}</td>
+        <td colspan="2">
+          <select name="{$group.grp_status.name}">
+            {foreach $group.grp_status.options option}
+            <option value="{$option.value}"{if $group.grp_status.value == $option.value} selected="selected"{/if}>{$option.text}</option>
+            {/foreach}
+          </select>
+        </td>
+        <td>{$group.grp_status.hint}</td>
+      </tr>
+      <tr><td colspan="4">&nbsp;</td></tr>
+      <tr>
+        <td>{$group.grp_access_default.label}</td>
+        <td colspan="2">
+          <select name="{$group.grp_access_default.name}">
+            {foreach $group.grp_access_default.options option}
+            <option value="{$option.value}"{if $group.grp_access_default.value == $option.value} selected="selected"{/if}>{$option.text}</option>
+            {/foreach}
+          </select>
+        </td>
+        <td>{$group.grp_access_default.hint}</td>
+      </tr>
+      <tr><td colspan="4">&nbsp;</td></tr>
+      <tr>
+        <td>{$group.grp_access_group_1.label}</td>
+        <td colspan="2"><input type="text" name="{$group.grp_access_group_1.name}" value="{$group.grp_access_group_1.value}" /></td>
+        <td>{$group.grp_access_group_1.hint}</td>
+      </tr>
+      {$i = 0}
+      {foreach $group.grp_access_rights_1.access access}
+      <tr>
+        <td>{if $i == 0}{$group.grp_access_rights_1.label}<br /><br />[ <i>{$group.grp_access_rights_1.value}</i> ]{/if}</td>
+        <td>{$access.label}</td>
+        <td>
+          {foreach $access.options option}
+          <input type="checkbox" name="{$group.grp_access_rights_1.name}[]" value="{$option.value}"{if $option.checked == 1} checked="checked"{/if} /> {$option.text}<br />
+          {/foreach}
+        </td>
+        <td>{if $i == 0}{$group.grp_access_rights_1.hint}{$i=1}{/if}</td>
+      </tr>
+      {/foreach}
+      <tr><td colspan="4">&nbsp;</td></tr>
+      <tr>
+        <td>{$group.grp_access_group_2.label}</td>
+        <td colspan="2"><input type="text" name="{$group.grp_access_group_2.name}" value="{$group.grp_access_group_2.value}" /></td>
+        <td>{$group.grp_access_group_2.hint}</td>
+      </tr>
+      {$i = 0}
+      {foreach $group.grp_access_rights_2.access access}
+      <tr>
+        <td>{if $i == 0}{$group.grp_access_rights_2.label}<br /><br />[ <i>{$group.grp_access_rights_2.value}</i> ]{/if}</td>
+        <td>{$access.label}</td>
+        <td>
+          {foreach $access.options option}
+          <input type="checkbox" name="{$group.grp_access_rights_2.name}[]" value="{$option.value}"{if $option.checked == 1} checked="checked"{/if} /> {$option.text}<br />
+          {/foreach}
+        </td>
+        <td>{if $i == 0}{$group.grp_access_rights_2.hint}{$i=1}{/if}</td>
+      </tr>
+      {/foreach}
+      <tr><td colspan="4">&nbsp;</td></tr>
+      <tr>
+        <td>{$group.grp_access_group_3.label}</td>
+        <td colspan="2"><input type="text" name="{$group.grp_access_group_3.name}" value="{$group.grp_access_group_3.value}" /></td>
+        <td>{$group.grp_access_group_3.hint}</td>
+      </tr>
+      {$i = 0}
+      {foreach $group.grp_access_rights_3.access access}
+      <tr>
+        <td>{if $i == 0}{$group.grp_access_rights_3.label}<br /><br />[ <i>{$group.grp_access_rights_3.value}</i> ]{/if}</td>
+        <td>{$access.label}</td>
+        <td>
+          {foreach $access.options option}
+          <input type="checkbox" name="{$group.grp_access_rights_3.name}[]" value="{$option.value}"{if $option.checked == 1} checked="checked"{/if} /> {$option.text}<br />
+          {/foreach}
+        </td>
+        <td>{if $i == 0}{$group.grp_access_rights_3.hint}{$i=1}{/if}</td>
+      </tr>
+      {/foreach}
+      <tr><td colspan="4">&nbsp;</td></tr>
+      <tr>
+        <td>{$group.grp_access_group_4.label}</td>
+        <td colspan="2"><input type="text" name="{$group.grp_access_group_4.name}" value="{$group.grp_access_group_4.value}" /></td>
+        <td>{$group.grp_access_group_4.hint}</td>
+      </tr>
+      {$i = 0}
+      {foreach $group.grp_access_rights_4.access access}
+      <tr>
+        <td>{if $i == 0}{$group.grp_access_rights_4.label}<br /><br />[ <i>{$group.grp_access_rights_4.value}</i> ]{/if}</td>
+        <td>{$access.label}</td>
+        <td>
+          {foreach $access.options option}
+          <input type="checkbox" name="{$group.grp_access_rights_4.name}[]" value="{$option.value}"{if $option.checked == 1} checked="checked"{/if} /> {$option.text}<br />
+          {/foreach}
+        </td>
+        <td>{if $i == 0}{$group.grp_access_rights_4.hint}{$i=1}{/if}</td>
+      </tr>
+      {/foreach}
+      <tr><td colspan="4">&nbsp;</td></tr>
+      <tr>
+        <td>{$group.grp_access_group_5.label}</td>
+        <td colspan="2"><input type="text" name="{$group.grp_access_group_5.name}" value="{$group.grp_access_group_5.value}" /></td>
+        <td>{$group.grp_access_group_5.hint}</td>
+      </tr>
+      {$i = 0}
+      {foreach $group.grp_access_rights_5.access access}
+      <tr>
+        <td>{if $i == 0}{$group.grp_access_rights_5.label}<br /><br />[ <i>{$group.grp_access_rights_5.value}</i> ]{/if}</td>
+        <td>{$access.label}</td>
+        <td>
+          {foreach $access.options option}
+          <input type="checkbox" name="{$group.grp_access_rights_5.name}[]" value="{$option.value}"{if $option.checked == 1} checked="checked"{/if} /> {$option.text}<br />
+          {/foreach}
+        </td>
+        <td>{if $i == 0}{$group.grp_access_rights_5.hint}{$i=1}{/if}</td>
+      </tr>
+      {/foreach}
+      
+      
+      <tr><td colspan="4">&nbsp;</td></tr>
+      <tr>
+        <td colspan="4">
+          <input type="submit" value="{$form.btn.ok}" />&nbsp;
+          <input type="button" value="{$form.btn.abort}" onclick="javascript: window.location = '{$form.action}'; return false;" />
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>

@@ -36,7 +36,6 @@ class calcTable {
 	public function parseTables(&$content) {
 		$tables = array();
 		$count = preg_match_all("/<table[^>]*>(.*?)<\/table>/", $content, $tables);
-		print_r($tables);
 		  if ($count > 0) {
 				foreach ($tables as $table) {
 					echo "table !!!";

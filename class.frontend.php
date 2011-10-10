@@ -84,6 +84,7 @@ class kitIdeaFrontend {
 	const param_section_about					= 'section_about';
 	const param_section_files					= 'section_files';
 	const param_lepton_groups					= 'lepton_groups';
+	const param_project_group					= 'group';
 	
 	private $params = array(
 		self::param_css							=> true,
@@ -92,7 +93,8 @@ class kitIdeaFrontend {
 		self::param_search					=> true,
 		self::param_section_about		=> true,
 		self::param_section_files		=> true,
-		self::param_lepton_groups		=> ''
+		self::param_lepton_groups		=> '',
+		self::param_preset					=> -1
 	);
 	
 	// general TAB Navigation 
@@ -341,6 +343,7 @@ class kitIdeaFrontend {
     elseif (is_registered_droplet_js('kit_idea', PAGE_ID)) {
     	unregister_droplet_js('kit_idea', PAGE_ID);
     }
+    
   	switch ($action):
   	case self::action_account:
   		// switch to account
@@ -698,6 +701,13 @@ class kitIdeaFrontend {
   public function projectAction() {
   	global $dbIdeaProject;
   	
+  	// check project group
+  	if ($this->params[self::param_project_group] < 1) {
+  		// invalid project group
+  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_project_group_invalid));
+  		return false;
+  	}
+  	
   	$action = isset($_REQUEST[self::request_project_action]) ? $_REQUEST[self::request_project_action] : self::action_default;
   	
   	// check first if access is allowed!
@@ -708,7 +718,7 @@ class kitIdeaFrontend {
   			$this->setError(idea_error_project_access_invalid);
   			return $this->projectShow(false);
   		}
-  		$SQL = sprintf("SELECT %s FROM %s WHERE %s='%s'", dbIdeaProject::field_access, $dbIdeaProject->getTableName(), dbIdeaProject::field_id, $_REQUEST[dbIdeaProject::field_id]);
+  		$SQL = sprintf("SELECT %s FROM %s WHERE %s='%s' AND %s='%s'", dbIdeaProject::field_access, $dbIdeaProject->getTableName(), dbIdeaProject::field_id, $_REQUEST[dbIdeaProject::field_id], dbIdeaProject::field_project_group, $this->params[self::param_project_group]);
   		$project = array();
   		if (!$dbIdeaProject->sqlExec($SQL, $project)) {
   			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
@@ -787,17 +797,19 @@ class kitIdeaFrontend {
   	if ($this->accountIsAuthenticated()) {
   		// show all active projects
   		$is_authenticated = true;
-  		$SQL = sprintf(	"SELECT * FROM %s WHERE %s='%s'", $dbIdeaProject->getTableName(), dbIdeaProject::field_status, dbIdeaProject::status_active);
+  		$SQL = sprintf(	"SELECT * FROM %s WHERE %s='%s' AND %s='%s'", $dbIdeaProject->getTableName(), dbIdeaProject::field_status, dbIdeaProject::status_active, dbIdeaProject::field_project_group, $this->params[self::param_project_group]);
   	}
   	else {
   		// show only public projects
   		$is_authenticated = false;
-  		$SQL = sprintf( "SELECT * FROM %s WHERE %s='%s' AND %s='%s'",
+  		$SQL = sprintf( "SELECT * FROM %s WHERE %s='%s' AND %s='%s' AND %s='%s'",
   										$dbIdeaProject->getTableName(),
   										dbIdeaProject::field_access,
   										dbIdeaProject::access_public,
   										dbIdeaProject::field_status,
-  										dbIdeaProject::status_active);
+  										dbIdeaProject::status_active,
+  										dbIdeaProject::field_project_group,
+  										$this->params[self::param_project_group]);
   	}
   	$projects = array();
   	if (!$dbIdeaProject->sqlExec($SQL, $projects)) {

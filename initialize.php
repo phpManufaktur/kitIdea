@@ -88,7 +88,11 @@ if (!is_object($dbIdeaTableSort)) $dbIdeaTableSort = new dbIdeaTableSort();
 global $dbIdeaProjectStatusMails;
 if (!is_object($dbIdeaProjectStatusMails)) $dbIdeaProjectStatusMails = new dbIdeaProjectStatusMails();
 global $dbIdeaProjectAccess;
-if (!is_object($dbIdeaProjectAccess)) $dbIdeaProjectAccess = new dbIdeaProjectAccess(true);
+if (!is_object($dbIdeaProjectAccess)) $dbIdeaProjectAccess = new dbIdeaProjectAccess();
+global $dbIdeaProjectGroups;
+if (!is_object($dbIdeaProjectGroups)) $dbIdeaProjectGroups = new dbIdeaProjectGroups();
+global $dbIdeaProjectUsers;
+if (!is_object($dbIdeaProjectUsers)) $dbIdeaProjectUsers = new dbIdeaProjectUsers(true);
 
 // WYSIWYG editor
 require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.editor.php';
