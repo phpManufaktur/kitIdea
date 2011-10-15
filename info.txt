@@ -3,10 +3,28 @@ kitIdea
 Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
+Release 0.14
+2011-10-15
+changed: kitIdea is now using project-groups and allows multiple usage at 
+  different pages within the same webspace
+added: comprehensive access-rights allow to define up to 5 access-groups at each
+  project-group, specify rights for the project, sections, articles, files a.s.o.
+added: default access-rights for just registered users
+changed: now uses the CKE as editor and no longer the WB/LEPTON default editor
+changed: CKEditor is restricted to the defined project space within the MEDIA
+  directory, users can no longer access to files of other projects and system
+added: features of the CKEditer are controlled via access-rights of the group
+changed: inbound kitDirList is now restricted to the defined space for each 
+  project - user can no longer access to files of other projects
+changed: features and rights within kitDirList are now controlled via the group
+  access-rights of the projects
+improved: inbound features of kitDirList within kitIdea
+added: drag & drop sorting of projects within a project group 
+
 Release 0.13
 2011-09-16
 added: parameter lepton_groups for droplet kit_idea allows to login via LEPTON 
-  user interface. The user must member of one of the specified groups.
+  user interface. The user must be member of one of the specified groups.
 
 Release 0.12
 2011-09-13

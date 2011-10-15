@@ -87,8 +87,10 @@ global $dbIdeaTableSort;
 if (!is_object($dbIdeaTableSort)) $dbIdeaTableSort = new dbIdeaTableSort();
 global $dbIdeaProjectStatusMails;
 if (!is_object($dbIdeaProjectStatusMails)) $dbIdeaProjectStatusMails = new dbIdeaProjectStatusMails();
+/*
 global $dbIdeaProjectAccess;
 if (!is_object($dbIdeaProjectAccess)) $dbIdeaProjectAccess = new dbIdeaProjectAccess();
+*/
 global $dbIdeaProjectGroups;
 if (!is_object($dbIdeaProjectGroups)) $dbIdeaProjectGroups = new dbIdeaProjectGroups();
 global $dbIdeaProjectUsers;

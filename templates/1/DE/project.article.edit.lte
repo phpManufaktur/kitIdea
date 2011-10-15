@@ -23,11 +23,6 @@
     <input type="hidden" name="{$article.fields.article_id.name}" value="{$article.fields.article_id.value}" />
     <input type="hidden" name="{$article.fields.article_revision.name}" value="{$article.fields.article_revision.value}" />
     <input type="hidden" name="{$article.fields.article_status.name}" value="{$article.fields.article_status.value}" />
-    {* sorter fields are needed by the table sorter above *}
-    <input id="sorter_table" type="hidden" name="sorter_table" value="{$sorter_table}" />
-    <input id="sorter_value" type="hidden" name="sorter_value" value="{$sorter_value}" />
-    <input id="sorter_item" type="hidden" name="sorter_item" value="{$sorter_item}" />
-    <input id="sorter_active" type="hidden" name="sorter_active" value="{$sorter_active}" />
     <table width="100%">
       <colgroup>
         <col width="100" />
@@ -51,25 +46,29 @@
       </tr>
       <tr>
         <td>&nbsp;</td>
-        <td>{$article.move.label}</td>
+        <td>{if $access.article.move_section == 1}{$article.move.label}{else}&nbsp;{/if}</td>
         <td>
+          {if $access.article.move_section == 1}
           <select name="{$article.move.name}"{if $article.fields.article_id.value < 1} disabled="disabled"{/if}>
             {foreach $article.move.items option}
             <option value="{$option.value}"{if $option.value == $article.move.value} selected="selected"{/if}>{$option.text}</option>
             {/foreach}
           </select>
+          {else}&nbsp;{/if}
         </td>
         <td>&nbsp;</td>
         <td><i>{$article.status.label}</i></td>
         <td>
           <select name="{$article.status.name}"{if $article.fields.article_id.value < 1} disabled="disabled"{/if}>
             {foreach $article.status.items option}
+            {if (($option.value == 1) || (($option.value == 2) && ($access.article.lock == 1)) || (($option.value == 3) && ($access.article.delete == 1)))}
             <option value="{$option.value}"{if $option.value == $article.status.value} selected="selected"{/if}>{$option.text}</option>
+            {/if}
             {/foreach}
           </select>
         </td>
       </tr>
-      {if $is_authenticated == 0}
+      {if $access.authenticated == 0}
         {* the user is not authenticated (logged in), so use Captcha to prevent SPAM! *}
         <tr>
           <td>&nbsp;</td>

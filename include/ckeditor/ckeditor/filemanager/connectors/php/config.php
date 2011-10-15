@@ -43,7 +43,7 @@ if ($kitContactInterface->isAuthenticated()) {
 			// allow actions to list folders and files
 			$Config['ConfigAllowedCommands'] = array('GetFolders', 'GetFoldersAndFiles');
 			// get the kitIdea project ID
-			$project_id = (isset($_SESSION['KIT_IDEA_PROJECT_ID'])) ? (int) $_SESSION['KIT_IDEA_PROJECT_IDEA'] : 0;
+			$project_id = (isset($_SESSION['KIT_IDEA_PROJECT_ID'])) ? (int) $_SESSION['KIT_IDEA_PROJECT_ID'] : 0;
 			// get the project directory
 			$project_media = $dbIdeaCfg->getValue(dbIdeaCfg::cfgMediaProjectDir);
 			$media_url = WB_URL.MEDIA_DIRECTORY.$project_media.'/'.$project_id.'/';

@@ -20,7 +20,7 @@
     <h2>{$project.fields.project_title.value}</h2>
     <div class="idea_project_content">{$project.fields.project_desc_long.value}</div>
     <div class="idea_project_author">{$project.fields.project_author.value}, {date_format($project.fields.project_timestamp.value, '%d.%m.%Y - %H:%M:%S')} - Rev. {$project.fields.project_revision.value}</div>
-    <div class="idea_project_commands"><a href="{$project.edit.url}">[ {$project.edit.text} ]</a></div>
+    {if $access.project.edit == 1}<div class="idea_project_commands"><a href="{$project.edit.url}">[ {$project.edit.text} ]</a></div>{/if}
   </div>
   {* the second area shows the navigation pane for the project sections *}
   <div class="idea_project_navigation">
@@ -33,7 +33,7 @@
       {/if}
       {/foreach}
     </ul>
-    <div class="project_navigation_commands">[ <a href="{$project.sections.edit.url}">{$project.sections.edit.text}</a> ]</div>
+    {if $access.section.edit == 1}<div class="project_navigation_commands">[ <a href="{$project.sections.edit.url}">{$project.sections.edit.text}</a> ]</div>{/if}
   </div>
   {* show introduction or message to the last action *}
   {if $project.sections.active == 'secFiles'}
@@ -45,32 +45,41 @@
     <div class="{if $is_message == 1}message{else}intro{/if}">{$intro}</div>
     <div class="idea_articles_list">
       {* show the articles for this section *}
-      <div id="sorter">
+      {* sorter fields are needed by the table sorter below *}
+      {if $access.article.move == 1}
+      <input id="sorter_table" type="hidden" name="sorter_table" value="{$sorter_table}" />
+      <input id="sorter_value" type="hidden" name="sorter_value" value="{$sorter_value}" />
+      <input id="sorter_item" type="hidden" name="sorter_item" value="{$sorter_item}" />
+      <input id="sorter_active" type="hidden" name="sorter_active" value="{$sorter_active}" />
+      {/if}
+      <div{if $access.article.move == 1} id="sorter"{/if}>
         {* <div id="response"></div> remove comment to get jQuery responses for the sorter! *}
         <table width="100%">
           <colgroup>
             <col width="*" />
-            <col width="30" />
+            {if $access.article.move == 1}<col width="30" />{/if}
           </colgroup>
           <tbody>
           {foreach $article.list item}
-          <tr id="rowID_{$item.fields.article_id.value}">
+          <tr{if $access.article.move == 1} id="rowID_{$item.fields.article_id.value}{/if}">
             <td>
               <div class="idea_article">
                 <h3>{$item.fields.article_title.value}</h3>
                 {$item.fields.article_content_html.value}
                 <div class="idea_article_author">{$item.fields.article_author.value}, {date_format($item.fields.article_timestamp.value, '%d.%m.%Y - %H:%M:%S')} - Rev. {$item.fields.article_revision.value}</div>
-                <div class="idea_article_commands">[ <a href="{$item.links.edit.url}">{$item.links.edit.text}</a> ]</div>
+                {if $access.article.edit == 1}<div class="idea_article_commands">[ <a href="{$item.links.edit.url}">{$item.links.edit.text}</a> ]</div>{/if}
               </div>
             </td>
-            <td class="sortable_row"></td>
+            {if $access.article.move == 1}<td class="sortable_row"></td>{/if}
           </tr>
           {/foreach}
           </tbody>
         </table>
       <div>
     </div>
-    {* include the WYSIWYG editor to create and edit articles *}
+    {* include the WYSIWYG editor to create and edit articles only if the access is granted *}
+    {if ($access.article.create == 1) || (($access.article.edit == 1) && ($article.fields.article_id.value > 0))}
     {include('project.article.edit.lte')}
+    {/if}
   {/if}
 </div>

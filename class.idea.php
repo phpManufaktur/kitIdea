@@ -286,42 +286,84 @@ class dbIdeaProjectGroups extends dbConnectLE {
 	);
 	
 	// rights: general
-	const no_access						= 0;
+	const no_access							= 0;
 	
 	// rights: project
-	const project_view				= 1;
-	const project_create			= 2;
-	const project_edit				= 4;
-	const project_lock				= 8;
-	const project_delete			= 16;
+	const project_view					= 1;
+	const project_create				= 2;
+	const project_edit					= 4;
+	const project_move					= 33554432;
+	const project_lock					= 8;
+	const project_delete				= 16;
 	
 	// rights: articles
-	const article_view				= 32;
-	const article_create			= 64;
-	const article_edit				= 128;
-	const article_edit_html		= 256;
-	const article_move				= 512;
-	const article_lock				= 1024;
-	const article_delete			= 2048;
+	const article_view					= 32;
+	const article_create				= 64;
+	const article_edit					= 128;
+	const article_edit_html			= 256;
+	const article_move					= 512;
+	const article_move_section	= 67108864; // last added
+	const article_lock					= 1024;
+	const article_delete				= 2048;
 	
 	// rights: sections
-	const section_view				= 4096;
-	const section_create			= 8192;
-	const section_edit				= 16384;
-	const section_move				= 32768;
-	const section_delete			= 65536;
+	const section_view					= 4096;
+	const section_create				= 8192;
+	const section_edit					= 16384;
+	const section_move					= 32768;
+	const section_delete				= 65536;
 	
 	// rights: files				
-	const file_download				= 131072;
-	const file_upload					= 262144;
-	const file_delete_file		= 524288;
-	const file_rename_file		= 1048576;
-	const file_create_dir			= 2097152;
-	const file_rename_dir			= 4194304;
-	const file_delete_dir			= 8388608;
+	const file_download					= 131072;
+	const file_upload						= 262144;
+	const file_delete_file			= 524288;
+	const file_rename_file			= 1048576;
+	const file_create_dir				= 2097152;
+	const file_rename_dir				= 4194304;
+	const file_delete_dir				= 8388608;
 	
 	// rights: admins
-	const admin_change_rights	= 16777216;
+	const admin_change_rights		= 16777216;
+	
+	// default array for the access rights
+	private $access_array = array(
+		'authenticated'	=> 0,
+		'rights'				=> 0,
+		'project'	=> array(
+			'view'			=> self::project_view,
+			'create'		=> self::project_create,
+			'edit'			=> self::project_edit,
+			'move'			=> self::project_move,
+			'lock'			=> self::project_edit,
+			'delete'		=> self::project_delete
+		),
+		'article'	=> array(
+			'view'			=> self::article_view,
+			'create'		=> self::article_create,
+			'edit'			=> self::article_edit,
+			'edit_html'	=> self::article_edit_html,
+			'move'			=> self::article_move,
+			'move_section' => self::article_move_section,
+			'lock'			=> self::article_lock,
+			'delete'		=> self::article_delete
+		),
+		'section'	=> array(
+			'view'			=> self::section_view,
+			'create'		=> self::section_create,
+			'edit'			=> self::section_edit,
+			'move'			=> self::section_move,
+			'delete'		=> self::section_delete
+		),
+		'file'		=> array(
+			'download'		=> self::file_download,
+			'upload'			=> self::file_upload,
+			'delete_file'	=> self::file_delete_file,
+			'rename_file'	=> self::file_rename_file,
+			'create_dir'	=> self::file_create_dir,
+			'rename_dir'	=> self::file_rename_dir,
+			'delete_dir'	=> self::file_delete_dir
+		)
+	);
 		
 	private $createTables 		= false;
   
@@ -370,6 +412,36 @@ class dbIdeaProjectGroups extends dbConnectLE {
   	return false;
   } // checkPermissions()
   
+  /**
+   * Walk throught self::access_array and sets all permissions for each access
+   * right and return the complete array
+   * 
+   * @param BOOL $is_authenticated - is the user authenticated?
+   * @param INT $access_rights - numeric access rights for the user
+   * @return ARRAY $access_array
+   */
+  public function getAccessArray($is_authenticated, $access_rights) {
+  	$access_array = array();
+  	foreach ($this->access_array as $group_name => $group_array) {
+  		switch ($group_name):
+  		case 'authenticated':
+  			// set authentication flag
+  			$access_array[$group_name] = (int) $is_authenticated;
+  			break;
+  		case 'rights':
+  			$access_array[$group_name] = $access_rights;
+  			break;
+  		default:
+  			// walk through the groups
+  			foreach ($group_array as $access => $permission) {
+  				$access_array[$group_name][$access] = (int) $this->checkPermissions($access_rights, $permission);
+  			}
+  			break;
+  		endswitch;
+  	}
+  	return $access_array;
+  } // getAccessArray
+  
 } // class dbIdeaProjectGroups
 
 class dbIdeaProjectUsers extends dbConnectLE {
@@ -377,6 +449,7 @@ class dbIdeaProjectUsers extends dbConnectLE {
 	const field_id						= 'user_id';
 	const field_group_id			= 'grp_id';
 	const field_access				= 'user_access';
+	const field_email_info		= 'email_info';
 	const field_kit_id				= 'kit_id';
 	const field_register_id		= 'register_id';
 	const field_status				= 'status';
@@ -392,15 +465,22 @@ class dbIdeaProjectUsers extends dbConnectLE {
 		array('value' => self::status_deleted, 'text' => idea_str_status_deleted)		
 	);
 	
+	public $status_array_short = array(
+		self::status_active 	=> idea_str_status_active,
+		self::status_locked		=> idea_str_status_locked,
+		self::status_deleted	=> idea_str_status_deleted
+	);
+	
 	private $createTables 		= false;
   
   public function __construct($createTables = false) {
   	$this->createTables = $createTables;
-  	parent::__construct();
+  	parent::__construct(); 
   	$this->setTableName('mod_kit_idea_project_users');
   	$this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
   	$this->addFieldDefinition(self::field_group_id, "INT(11) NOT NULL DEFAULT '-1'");
-  	$this->addFieldDefinition(self::field_access, "INT(11) NOT NULL DEFAULT '0'");
+  	$this->addFieldDefinition(self::field_access, "VARCHAR(30) NOT NULL DEFAULT '".dbIdeaProjectGroups::field_access_rights_1."'");
+  	$this->addFieldDefinition(self::field_email_info, "INT(11) NOT NULL DEFAULT '0'");
   	$this->addFieldDefinition(self::field_kit_id, "INT(11) NOT NULL DEFAULT '-1'");
   	$this->addFieldDefinition(self::field_register_id, "INT(11) NOT NULL DEFAULT '-1'");
   	$this->addFieldDefinition(self::field_status, "TINYINT NOT NULL DEFAULT '".self::status_active."'");
@@ -823,6 +903,7 @@ class dbIdeaTableSort extends dbConnectLE {
 	
 } // class dbIdeaTableSort
 
+/*
 class dbIdeaProjectAccess extends dbConnectLE {
 	
 	const field_id						= 'access_id';
@@ -896,5 +977,6 @@ class dbIdeaProjectAccess extends dbConnectLE {
 	} // __construct()
 	
 } // class dbIdeaProjectAccess
+*/
 
 ?>

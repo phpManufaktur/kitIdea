@@ -1,0 +1,104 @@
+{*
+ * kitIdea
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *
+ * Please consult the Dwoo Documentation & WIKI to get further informations 
+ * and hints for the usage of the Dwoo template engine.
+ *
+ * @link http://wiki.dwoo.org/
+ *
+ * Use {dump()} to get a list of all in this template available variables!
+ *}
+<div id="idea_config">
+  <form name="{$form.name}" action="{$form.action}" method="post">
+    <input type="hidden" name="{$action.name}" value="{$action.value}" />
+    <input type="hidden" name="{$user_id.name}" value="{$user_id.value}" />
+    <input type="hidden" name="{$group_id.name}" value="{$group_id.value}" />
+    <h2>{$form.head}</h2>
+    <div class="{if $form.is_message == 1}message{else}intro{/if}">{$form.intro}</div>
+    <table width="100%">
+      <colgroup>
+        <col width="200" />
+        <col width="150" />
+        <col width="*" />
+        <col width="250" />
+      </colgroup>
+      <tr>
+        <td>{$user.label}</td>
+        <td colspan="2">
+          <a href="{$user.kit_link}">{string_format($user.kit_id, '%06d')}</a><br /><br />
+          {if ($user.contact.kit_title == 'titleMister')}Herr{else}Frau{/if}<br />
+          {$user.contact.kit_first_name}{if count_characters($user.contact.kit_last_name) > 0} {/if}{$user.contact.kit_last_name}<br /><br />
+          <a href="{$user.kit_link}">{$user.contact.kit_email}</a>
+        </td>
+        <td>
+          {$user.hint}
+        </td>
+      </tr>
+      <tr><td colspan="4">&nbsp;</td></tr>
+      <tr>
+        <td>{$select_group.label}</td>
+        <td colspan="2">
+          <select id="{$select_group.id}" name="{$select_group.name}" onchange="{$select_group.onchange}">
+          {foreach $select_group.options option}
+          <option value="{$option.value}"{if $option.selected == 1} selected="selected"{/if}>{$option.text}</option>
+          {/foreach}
+          </select>
+        </td>
+        <td>{$select_group.hint}</td>
+      </tr>
+      <tr>
+        <td>{$permissions.group.label}</td>
+        <td colspan="2">
+          <select id="{$permissions.group.id}" name="{$permissions.group.name}" onchange="{$permissions.group.onchange}">
+            {foreach $permissions.group.options option}
+            <option value="{$option.value}"{if $option.selected == 1} selected="selected"{/if}>{$option.text}</option>
+            {/foreach}
+          </select>
+        </td>
+        <td>{$permissions.group.hint}</td>
+      </tr>
+      <tr><td colspan="4">&nbsp;</td></tr>
+      {$i=0}
+      {foreach $permissions.rights.options group}      
+      <tr>
+        <td>{if $i == 0}{$permissions.rights.label}{/if}</td>
+        <td>{$group.label}</td>
+        <td>
+        {foreach $group.options option}
+          <input type="checkbox" name="*" value="{$option.value}"{if $option.checked == 1} checked="checked"{/if} disabled="disabled" /> {$option.text}<br />
+        {/foreach}
+        </td>
+        <td>{if $i == 0}{$permissions.rights.hint}{$i=1}{/if}</td>
+      </tr>
+      {/foreach}
+      
+      {*
+      <tr>
+        <td>{$permissions.rights.label}</td>
+        <td>{$group.label}</td>
+        {foreach $group.options option}
+        <td>
+          <input type="checkbox" name="" value="{$option.value}"{if $option.checked == 1} checked="checked"{/if} /> {$option.text}<br />
+        </td>
+        {/foreach}
+        {/foreach}
+        <td>{$permissions.rights.hint}</td>
+      </tr>
+      *}
+      <tr><td colspan="4">&nbsp;</td></tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td colspan="3">
+          <input type="submit" value="{$form.btn.ok}" />&nbsp;
+          <input type="button" value="{$form.btn.abort}" onclick="javascript: window.location = '{$form.action}'; return false;" />
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>

@@ -1,0 +1,76 @@
+{*
+ * kitIdea
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *
+ * Please consult the Dwoo Documentation & WIKI to get further informations 
+ * and hints for the usage of the Dwoo template engine.
+ *
+ * @link http://wiki.dwoo.org/
+ *
+ * Use {dump()} to get a list of all in this template available variables!
+ *}
+<div id="idea_config">
+  <form name="{$form.name}" action="{$form.action}" method="post">
+    <input type="hidden" name="{$action.name}" value="{$action.value}" />
+    <h2>{$form.head}</h2>
+    <div class="{if $form.is_message == 1}message{else}intro{/if}">{$form.intro}</div>
+    <table width="100%">
+      <colgroup> 
+        <col width="200" />
+        <col width="*" />
+        <col width="250" />
+      </colgroup>
+      <tr>
+        <td>{$select_group.label}</td>
+        <td>
+          <select id="{$select_group.id}" name="{$select_group.name}" onchange="{$select_group.onchange}">
+          {foreach $select_group.options option}
+          <option value="{$option.value}"{if $option.selected == 1} selected="selected"{/if}>{$option.text}</option>
+          {/foreach}
+          </select>
+        </td>
+        <td>{$select_group.hint}</td>
+      </tr>
+      <tr><td colspan="3">&nbsp;</td></tr>
+      {if $user_list.count > 0}
+      <tr>
+        <td colspan="3">
+          <table width="100%">
+            <colgroup>
+              <col width="200" />
+              <col width="200" />
+              <col width="*" />
+              <col width="70" />
+              <col width="70" />
+              <col width="120" />
+            </colgroup>
+            <tr>
+              <th>{$user_list.header.email}</th>
+              <th>{$user_list.header.name}</th>
+              <th>{$user_list.header.access_group}</th>
+              <th>{$user_list.header.kit_id}</th>
+              <th>{$user_list.header.status}</th>
+              <th>{$user_list.header.timestamp}</th>
+            </tr>
+            {foreach $user_list.items item}
+            <tr class="{cycle values=array('flip', 'flop')}">
+              <td><a href="{$item.user_link}">{$item.contact.kit_email}</a></td>
+              <td>{$item.contact.kit_last_name}{if count_characters($item.contact.kit_last_name) > 0}, {/if}{$item.contact.kit_first_name}</td>
+              <td>{$item.access_group}</td>
+              <td><a href="{$item.kit_link}">{string_format($item.kit_id, '%06d')}</a></td>
+              <td>{$item.status}</td>
+              <td>{$item.timestamp}</td>
+            </tr>
+            {/foreach}
+          </table>
+        </td>
+      </tr>
+      {/if}
+    </table>
+  </form>
+</div>

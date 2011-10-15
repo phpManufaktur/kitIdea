@@ -15,25 +15,46 @@
  * Use {dump()} to get a list of all in this template available variables!
  *}
 <div class="idea_frontend">
+  {if $access.project.move == 1}
+  {* sorter fields are needed by the table sorter *}
+  <input id="sorter_table" type="hidden" name="sorter_table" value="{$sorter_table}" />
+  <input id="sorter_value" type="hidden" name="sorter_value" value="{$sorter_value}" />
+  <input id="sorter_item" type="hidden" name="sorter_item" value="{$sorter_item}" />
+  <input id="sorter_active" type="hidden" name="sorter_active" value="{$sorter_active}" />
+  {/if}  
   {if $projects.count > 0}
-    {foreach $projects.items project}
-    <div class="idea_project_overview">
-      <h2>{$project.title}</h2>
-      <div class="idea_overview_description">{$project.desc_long}</div>
-      <div class="idea_overview_commands">[ <a href="{$project.detail_url}">Projekt öffnen</a> ]</div>
-    </div>
-    {/foreach}
+  <div{if $access.project.move == 1} id="sorter"{/if}>
+    {* <div id="response"></div> remove comment to get jQuery responses for the sorter! *}
+    <table width="100%">
+      <colgroup>
+        <col width="*" />
+        {if $access.project.move == 1}<col width="30" />{/if}
+      </colgroup>
+      <tbody>
+      {foreach $projects.items project}
+        <tr id="rowID_{$project.id}">
+          <td>          
+            <div class="idea_project_overview">
+              <h2>{$project.title}</h2>
+              <div class="idea_overview_description">{$project.desc_long}</div>
+              <div class="idea_overview_commands">[ <a href="{$project.detail_url}">Projekt öffnen</a> ]</div>
+            </div>
+          </td>
+          {if $access.project.move == 1}<td class="sortable_row"></td>{/if}
+        </tr>
+      {/foreach}
+      </tbody>
+    </table>
+  </div>
   {else}
   <div>
-    <p>Es sind zur Zeit keine {if $authenticated == 0}<b>öffentlichen</b> {/if}Projekte aktiv!</p>
-    {if $authenticated == 0}<p>Bitte melden Sie sich an, Sie erhalten dadurch Zugriff auf weitere Projekte.</p>{/if}
+    <p>Es sind zur Zeit keine {if $access.authenticated == 0}<b>öffentlichen</b> {/if}Projekte aktiv!</p>
+    {if $access.authenticated == 0}<p>Bitte melden Sie sich an, Sie erhalten dadurch Zugriff auf weitere Projekte.</p>{/if}
   </div>
   {/if}
   <div class="idea_overview_footer">
-    {if $authenticated == 1}
+    {if $access.project.create == 1}
     <p style="text-align: right;">[ <a href="{$projects.action.create_url}">Projekt anlegen</a> ]</p> 
-    {else}
-    <p><i><a href="{$login_url}">Melden Sie sich bitte an</a> um ein neues Projekt anzulegen zu können!.</i></p>
     {/if}
   </div>
 </div>

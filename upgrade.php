@@ -79,7 +79,7 @@ if (!$dbIdeaProject->sqlFieldExists(dbIdeaProject::field_project_group)) {
 		$dbIdeaCfg = new dbIdeaCfg();
 		$dbIdeaProjectGroups = new dbIdeaProjectGroups();
 		$data = array(
-			dbIdeaProjectGroups::field_access_default 		=> dbIdeaProjectGroups::field_access_group_2,
+			dbIdeaProjectGroups::field_access_default 		=> dbIdeaProjectGroups::field_access_rights_2,
 			dbIdeaProjectGroups::field_access_group_1			=> idea_str_access_group_1,
 			dbIdeaProjectGroups::field_access_group_2			=> idea_str_access_group_2,
 			dbIdeaProjectGroups::field_access_group_3			=> idea_str_access_group_3,
