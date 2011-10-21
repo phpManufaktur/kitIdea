@@ -1,7 +1,7 @@
 <?php
 /**
  * kitIdea
- * 
+ *
  * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
  * @link http://phpmanufaktur.de
  * @copyright 2011
@@ -10,25 +10,25 @@
  */
 
 // try to include LEPTON class.secure.php to protect this file and the whole CMS!
-if (defined('WB_PATH')) {	
+if (defined('WB_PATH')) {
 	if (defined('LEPTON_VERSION')) include(WB_PATH.'/framework/class.secure.php');
 } elseif (file_exists($_SERVER['DOCUMENT_ROOT'].'/framework/class.secure.php')) {
-	include($_SERVER['DOCUMENT_ROOT'].'/framework/class.secure.php'); 
+	include($_SERVER['DOCUMENT_ROOT'].'/framework/class.secure.php');
 } else {
 	$subs = explode('/', dirname($_SERVER['SCRIPT_NAME']));	$dir = $_SERVER['DOCUMENT_ROOT'];
 	$inc = false;
 	foreach ($subs as $sub) {
 		if (empty($sub)) continue; $dir .= '/'.$sub;
-		if (file_exists($dir.'/framework/class.secure.php')) { 
-			include($dir.'/framework/class.secure.php'); $inc = true;	break; 
-		} 
+		if (file_exists($dir.'/framework/class.secure.php')) {
+			include($dir.'/framework/class.secure.php'); $inc = true;	break;
+		}
 	}
 	if (!$inc) trigger_error(sprintf("[ <b>%s</b> ] Can't include LEPTON class.secure.php!", $_SERVER['SCRIPT_NAME']), E_USER_ERROR);
 }
 // end include LEPTON class.secure.php
 
 class dbIdeaProject extends dbConnectLE {
-	
+
 	const field_id							= 'project_id';
 	const field_project_group		= 'project_group';
 	const field_title						= 'project_title';
@@ -41,27 +41,27 @@ class dbIdeaProject extends dbConnectLE {
 	const field_revision				= 'project_revision';
 	const field_status					= 'project_status';
 	const field_timestamp				= 'project_timestamp';
-	
+
 	const status_active				= 1;
-	const status_locked				= 2; 
+	const status_locked				= 2;
 	const status_deleted			= 4;
-	
+
 	public $status_array = array(
 		array('value' => self::status_active, 'text' => idea_str_status_active),
 		array('value' => self::status_locked, 'text' => idea_str_status_locked),
-		array('value' => self::status_deleted, 'text' => idea_str_status_deleted)		
+		array('value' => self::status_deleted, 'text' => idea_str_status_deleted)
 	);
-	
+
 	const access_public				= 1;
 	const access_closed				= 2;
-	
+
 	public $access_array = array(
 		array('value' => self::access_public, 'text' => idea_str_access_public),
-		array('value' => self::access_closed, 'text' => idea_str_access_closed)		
+		array('value' => self::access_closed, 'text' => idea_str_access_closed)
 	);
-	
+
 	private $createTables 		= false;
-  
+
   public function __construct($createTables = false) {
   	$this->createTables = $createTables;
   	parent::__construct();
@@ -77,7 +77,7 @@ class dbIdeaProject extends dbConnectLE {
   	$this->addFieldDefinition(self::field_author, "VARCHAR(64) NOT NULL DEFAULT ''");
   	$this->addFieldDefinition(self::field_revision, "INT(11) NOT NULL DEFAULT '1'");
 		$this->addFieldDefinition(self::field_status, "TINYINT NOT NULL DEFAULT '".self::status_active."'");
-  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
   	$this->checkFieldDefinitions();
   	// Tabelle erstellen
   	if ($this->createTables) {
@@ -89,19 +89,19 @@ class dbIdeaProject extends dbConnectLE {
   	}
   	date_default_timezone_set(idea_cfg_time_zone);
   } // __construct()
-	
+
 } // class dbIdeaProject
 
 class dbIdeaProjectSections extends dbConnectLE {
-	
+
 	const field_id						= 'section_id';
 	const field_project_id		= 'project_id';
 	const field_text					= 'section_text';
 	const field_identifier		= 'section_identifier';
 	const field_timestamp			= 'section_timestamp';
-	
+
 	private $createTables 		= false;
-  
+
   public function __construct($createTables = false) {
   	$this->createTables = $createTables;
   	parent::__construct();
@@ -110,7 +110,7 @@ class dbIdeaProjectSections extends dbConnectLE {
   	$this->addFieldDefinition(self::field_project_id, "INT(11) NOT NULL DEFAULT '-1'");
   	$this->addFieldDefinition(self::field_text, "VARCHAR(64) NOT NULL DEFAULT ''");
   	$this->addFieldDefinition(self::field_identifier, "VARCHAR(64) NOT NULL DEFAULT ''");
-  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
   	$this->checkFieldDefinitions();
   	// Tabelle erstellen
   	if ($this->createTables) {
@@ -122,11 +122,11 @@ class dbIdeaProjectSections extends dbConnectLE {
   	}
   	date_default_timezone_set(idea_cfg_time_zone);
   } // __construct()
-	
+
 } // class dbIdeaProjectSections
 
 class dbIdeaProjectArticles extends dbConnectLE {
-	
+
 	const field_id									= 'article_id';
 	const field_project_id					= 'project_id';
 	const field_section_identifier	= 'section_identifier';
@@ -138,19 +138,19 @@ class dbIdeaProjectArticles extends dbConnectLE {
 	const field_author							= 'article_author';
 	const field_kit_contact_id			= 'kit_contact_id';
 	const field_timestamp						= 'article_timestamp';
-	
+
 	const status_active				= 1;
-	const status_locked				= 2; 
+	const status_locked				= 2;
 	const status_deleted			= 4;
-	
+
 	public $status_array = array(
 		array('value' => self::status_active, 'text' => idea_str_status_active),
 		array('value' => self::status_locked, 'text' => idea_str_status_locked),
-		array('value' => self::status_deleted, 'text' => idea_str_status_deleted)		
+		array('value' => self::status_deleted, 'text' => idea_str_status_deleted)
 	);
-	
+
 	private $createTables 		= false;
-  
+
   public function __construct($createTables = false) {
   	$this->createTables = $createTables;
   	parent::__construct();
@@ -165,7 +165,7 @@ class dbIdeaProjectArticles extends dbConnectLE {
   	$this->addFieldDefinition(self::field_status, "TINYINT NOT NULL DEFAULT '".self::status_active."'");
   	$this->addFieldDefinition(self::field_author, "VARCHAR(64) NOT NULL DEFAULT ''");
   	$this->addFieldDefinition(self::field_kit_contact_id, "INT(11) NOT NULl DEFAULT '-1'");
-  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
   	$this->checkFieldDefinitions();
   	// Tabelle erstellen
   	if ($this->createTables) {
@@ -177,11 +177,11 @@ class dbIdeaProjectArticles extends dbConnectLE {
   	}
   	date_default_timezone_set(idea_cfg_time_zone);
   } // __construct()
-	
+
 } // class dbIdeaProjectArticles
 
 class dbIdeaRevisionArchive extends dbConnectLE {
-	
+
 	const field_id								= 'revision_id';
 	const field_archived_id				= 'revision_archived_id';
 	const field_archived_type			= 'revision_archived_type';
@@ -192,9 +192,9 @@ class dbIdeaRevisionArchive extends dbConnectLE {
 	const archive_type_undefined	= 1;
 	const archive_type_project		= 2;
 	const archive_type_article		= 4;
-	
+
 	private $createTables 		= false;
-  
+
   public function __construct($createTables = false) {
   	$this->createTables = $createTables;
   	parent::__construct();
@@ -204,7 +204,7 @@ class dbIdeaRevisionArchive extends dbConnectLE {
   	$this->addFieldDefinition(self::field_archived_type, "TINYINT NOT NULL DEFAULT '".self::archive_type_undefined."'");
   	$this->addFieldDefinition(self::field_archived_revision, "INT(11) NOT NULL DEFAULT '0'");
   	$this->addFieldDefinition(self::field_archived_record, "LONGTEXT NOT NULL DEFAULT ''", false, false, true);
-  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
   	$this->checkFieldDefinitions();
   	// Tabelle erstellen
   	if ($this->createTables) {
@@ -216,11 +216,11 @@ class dbIdeaRevisionArchive extends dbConnectLE {
   	}
   	date_default_timezone_set(idea_cfg_time_zone);
   } // __construct()
-	
+
 } // class dbIdeaRevisionArchive
 
 class dbIdeaProjectStatusMails extends dbConnectLE {
-	
+
 	const field_id						= 'sm_id';
 	const field_project_id		= 'project_id';
 	const field_use_kit_cats	= 'sm_use_kit_cats';
@@ -228,9 +228,9 @@ class dbIdeaProjectStatusMails extends dbConnectLE {
 	const field_invite_emails	= 'sm_invite_emails';
 	const field_select_emails	= 'sm_select_emails';
 	const field_timestamp			= 'sm_timestamp';
-	
+
 	private $createTables 		= false;
-  
+
   public function __construct($createTables = false) {
   	$this->createTables = $createTables;
   	parent::__construct();
@@ -241,7 +241,7 @@ class dbIdeaProjectStatusMails extends dbConnectLE {
   	$this->addFieldDefinition(self::field_kit_cats, "VARCHAR(255) NOT NULL DEFAULT ''");
   	$this->addFieldDefinition(self::field_select_emails, "TEXT NOT NULL DEFAULT ''");
   	$this->addFieldDefinition(self::field_invite_emails, "TEXT NOT NULL DEFAULT ''");
-  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
   	$this->checkFieldDefinitions();
   	// Tabelle erstellen
   	if ($this->createTables) {
@@ -253,11 +253,11 @@ class dbIdeaProjectStatusMails extends dbConnectLE {
   	}
   	date_default_timezone_set(idea_cfg_time_zone);
   } // __construct()
-	
+
 } // class dbIdeaProjectStatusMails
 
 class dbIdeaProjectGroups extends dbConnectLE {
-	
+
 	const field_id								= 'grp_id';
 	const field_name							= 'grp_name';
 	const field_description				= 'grp_description';
@@ -274,20 +274,20 @@ class dbIdeaProjectGroups extends dbConnectLE {
 	const field_access_rights_5		= 'grp_access_rights_5';
 	const field_access_default		= 'grp_access_default';
 	const field_timestamp					= 'grp_timestamp';
-	
+
 	const status_active						= 1;
 	const status_locked						= 2;
 	const status_deleted					= 4;
-	
+
 	public $status_array = array(
 		array('value' => self::status_active, 'text' => idea_str_status_active),
 		array('value' => self::status_locked, 'text' => idea_str_status_locked),
-		array('value' => self::status_deleted, 'text' => idea_str_status_deleted)		
+		array('value' => self::status_deleted, 'text' => idea_str_status_deleted)
 	);
-	
+
 	// rights: general
 	const no_access							= 0;
-	
+
 	// rights: project
 	const project_view					= 1;
 	const project_create				= 2;
@@ -295,7 +295,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
 	const project_move					= 33554432;
 	const project_lock					= 8;
 	const project_delete				= 16;
-	
+
 	// rights: articles
 	const article_view					= 32;
 	const article_create				= 64;
@@ -305,15 +305,15 @@ class dbIdeaProjectGroups extends dbConnectLE {
 	const article_move_section	= 67108864; // last added
 	const article_lock					= 1024;
 	const article_delete				= 2048;
-	
+
 	// rights: sections
 	const section_view					= 4096;
 	const section_create				= 8192;
 	const section_edit					= 16384;
 	const section_move					= 32768;
 	const section_delete				= 65536;
-	
-	// rights: files				
+
+	// rights: files
 	const file_download					= 131072;
 	const file_upload						= 262144;
 	const file_delete_file			= 524288;
@@ -321,10 +321,10 @@ class dbIdeaProjectGroups extends dbConnectLE {
 	const file_create_dir				= 2097152;
 	const file_rename_dir				= 4194304;
 	const file_delete_dir				= 8388608;
-	
+
 	// rights: admins
 	const admin_change_rights		= 16777216;
-	
+
 	// default array for the access rights
 	private $access_array = array(
 		'authenticated'	=> 0,
@@ -364,9 +364,9 @@ class dbIdeaProjectGroups extends dbConnectLE {
 			'delete_dir'	=> self::file_delete_dir
 		)
 	);
-		
+
 	private $createTables 		= false;
-  
+
   public function __construct($createTables = false) {
   	$this->createTables = $createTables;
   	parent::__construct();
@@ -386,7 +386,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
   	$this->addFieldDefinition(self::field_access_group_5, "VARCHAR(80) NOT NULL DEFAULT '".idea_str_access_group_5."'");
   	$this->addFieldDefinition(self::field_access_rights_5, "INT(11) NOT NULL DEFAULT '-1'");
   	$this->addFieldDefinition(self::field_access_default, "VARCHAR(30) NOT NULL DEFAULT '".self::field_access_group_1."'");
-  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
   	$this->checkFieldDefinitions();
   	// Tabelle erstellen
   	if ($this->createTables) {
@@ -398,11 +398,11 @@ class dbIdeaProjectGroups extends dbConnectLE {
   	}
   	date_default_timezone_set(idea_cfg_time_zone);
   } // __construct()
-	
+
   /**
    * Check if the $access integer contains the $permission and return true on
    * success
-   * 
+   *
    * @param INT $access
    * @param INT $permission
    * @return BOOL
@@ -411,11 +411,11 @@ class dbIdeaProjectGroups extends dbConnectLE {
   	if ($access & $permission) return true;
   	return false;
   } // checkPermissions()
-  
+
   /**
    * Walk throught self::access_array and sets all permissions for each access
    * right and return the complete array
-   * 
+   *
    * @param BOOL $is_authenticated - is the user authenticated?
    * @param INT $access_rights - numeric access rights for the user
    * @return ARRAY $access_array
@@ -441,41 +441,41 @@ class dbIdeaProjectGroups extends dbConnectLE {
   	}
   	return $access_array;
   } // getAccessArray
-  
+
 } // class dbIdeaProjectGroups
 
 class dbIdeaProjectUsers extends dbConnectLE {
-	
-	const field_id						= 'user_id';
-	const field_group_id			= 'grp_id';
-	const field_access				= 'user_access';
-	const field_email_info		= 'email_info';
-	const field_kit_id				= 'kit_id';
-	const field_register_id		= 'register_id';
-	const field_status				= 'status';
-	const field_timestamp			= 'timestamp';
 
-	const status_active						= 1;
-	const status_locked						= 2;
-	const status_deleted					= 4;
-	
+	const field_id				= 'user_id';
+	const field_group_id		= 'grp_id';
+	const field_access			= 'user_access';
+	const field_email_info		= 'email_info';
+	const field_kit_id			= 'kit_id';
+	const field_register_id		= 'register_id';
+	const field_status			= 'status';
+	const field_timestamp		= 'timestamp';
+
+	const status_active			= 1;
+	const status_locked			= 2;
+	const status_deleted		= 4;
+
 	public $status_array = array(
 		array('value' => self::status_active, 'text' => idea_str_status_active),
 		array('value' => self::status_locked, 'text' => idea_str_status_locked),
-		array('value' => self::status_deleted, 'text' => idea_str_status_deleted)		
+		array('value' => self::status_deleted, 'text' => idea_str_status_deleted)
 	);
-	
+
 	public $status_array_short = array(
 		self::status_active 	=> idea_str_status_active,
 		self::status_locked		=> idea_str_status_locked,
 		self::status_deleted	=> idea_str_status_deleted
 	);
-	
+
 	private $createTables 		= false;
-  
+
   public function __construct($createTables = false) {
   	$this->createTables = $createTables;
-  	parent::__construct(); 
+  	parent::__construct();
   	$this->setTableName('mod_kit_idea_project_users');
   	$this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
   	$this->addFieldDefinition(self::field_group_id, "INT(11) NOT NULL DEFAULT '-1'");
@@ -484,7 +484,7 @@ class dbIdeaProjectUsers extends dbConnectLE {
   	$this->addFieldDefinition(self::field_kit_id, "INT(11) NOT NULL DEFAULT '-1'");
   	$this->addFieldDefinition(self::field_register_id, "INT(11) NOT NULL DEFAULT '-1'");
   	$this->addFieldDefinition(self::field_status, "TINYINT NOT NULL DEFAULT '".self::status_active."'");
-  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
   	$this->checkFieldDefinitions();
   	// Tabelle erstellen
   	if ($this->createTables) {
@@ -496,11 +496,11 @@ class dbIdeaProjectUsers extends dbConnectLE {
   	}
   	date_default_timezone_set(idea_cfg_time_zone);
   } // __construct()
-	
+
 } // class dbIdeaProjectUsers
 
 class dbIdeaCfg extends dbConnectLE {
-	
+
 	const field_id						= 'cfg_id';
 	const field_name					= 'cfg_name';
 	const field_type					= 'cfg_type';
@@ -510,10 +510,10 @@ class dbIdeaCfg extends dbConnectLE {
 	const field_status				= 'cfg_status';
 	const field_update_by			= 'cfg_update_by';
 	const field_update_when		= 'cfg_update_when';
-	
+
 	const status_active				= 1;
 	const status_deleted			= 0;
-	
+
 	const type_undefined			= 0;
 	const type_array					= 7;
   const type_boolean				= 1;
@@ -524,7 +524,7 @@ class dbIdeaCfg extends dbConnectLE {
   const type_path						= 5;
   const type_string					= 6;
   const type_url						= 8;
-  
+
   public $type_array = array(
   	self::type_undefined		=> '-UNDEFINED-',
   	self::type_array				=> 'ARRAY',
@@ -537,11 +537,11 @@ class dbIdeaCfg extends dbConnectLE {
   	self::type_string				=> 'STRING',
   	self::type_url					=> 'URL'
   );
-  
+
   private $createTables 		= false;
   private $message					= '';
 
-  const cfgMediaDir								= 'cfgMediaDir';	
+  const cfgMediaDir								= 'cfgMediaDir';
   const cfgMediaProjectDir				= 'cfgMediaProjectDir';
   const cfgKITcategory						= 'cfgKITcategory';
   const cfgKITformDlgLogin				= 'cfgKITformDlgLogin';
@@ -550,7 +550,7 @@ class dbIdeaCfg extends dbConnectLE {
   const cfgWYSIWYGeditorWidth			= 'cfgWYSIWYGeditorWidth';
   const cfgWYSIWYGeditorHeight		= 'cfgWYSIWYGeditorHeight';
   const cfgProjectDefaultSections	= 'cfgProjectDefaultSections';
-  const cfgCompareRevisions				= 'cfgCompareRevisions';					
+  const cfgCompareRevisions				= 'cfgCompareRevisions';
   const cfgCompareDifferPrefix		= 'cfgCompareDifferPrefix';
   const cfgCompareDifferSuffix		= 'cfgCompareDifferSuffix';
   const cfgAccessGrpDefault_1			= 'cfgAccessGrpDefault_1';
@@ -558,7 +558,7 @@ class dbIdeaCfg extends dbConnectLE {
   const cfgAccessGrpDefault_3			= 'cfgAccessGrpDefault_3';
   const cfgAccessGrpDefault_4			= 'cfgAccessGrpDefault_4';
   const cfgAccessGrpDefault_5			= 'cfgAccessGrpDefault_5';
-  
+
   public $config_array = array(
   	array('idea_label_cfg_media_project_dir', self::cfgMediaProjectDir, self::type_string, '/kit_idea/project', 'idea_hint_cfg_media_project_dir'),
   	array('idea_label_cfg_media_dir', self::cfgMediaDir, self::type_string, '/kit_idea', 'idea_hint_cfg_media_dir'),
@@ -576,9 +576,9 @@ class dbIdeaCfg extends dbConnectLE {
   	array('idea_label_cfg_access_grp_default_2', self::cfgAccessGrpDefault_2, self::type_integer, '398049', 'idea_hint_cfg_access_grp_default'),
   	array('idea_label_cfg_access_grp_default_3', self::cfgAccessGrpDefault_3, self::type_integer, '7796711', 'idea_hint_cfg_access_grp_default'),
   	array('idea_label_cfg_access_grp_default_4', self::cfgAccessGrpDefault_4, self::type_integer, '16777215', 'idea_hint_cfg_access_grp_default'),
-  	array('idea_label_cfg_access_grp_default_5', self::cfgAccessGrpDefault_5, self::type_integer, '0', 'idea_hint_cfg_access_grp_default')  	
-  );  
-  
+  	array('idea_label_cfg_access_grp_default_5', self::cfgAccessGrpDefault_5, self::type_integer, '0', 'idea_hint_cfg_access_grp_default')
+  );
+
   public function __construct($createTables = false) {
   	$this->createTables = $createTables;
   	parent::__construct();
@@ -609,14 +609,14 @@ class dbIdeaCfg extends dbConnectLE {
   	}
   	date_default_timezone_set(idea_cfg_time_zone);
   } // __construct()
-  
+
   public function setMessage($message) {
     $this->message = $message;
   } // setMessage()
 
   /**
     * Get Message from $this->message;
-    * 
+    *
     * @return STR $this->message
     */
   public function getMessage() {
@@ -625,21 +625,21 @@ class dbIdeaCfg extends dbConnectLE {
 
   /**
     * Check if $this->message is empty
-    * 
+    *
     * @return BOOL
     */
   public function isMessage() {
     return (bool) !empty($this->message);
   } // isMessage
-  
+
   /**
    * Aktualisiert den Wert $new_value des Datensatz $name
-   * 
+   *
    * @param $new_value STR - Wert, der uebernommen werden soll
    * @param $id INT - ID des Datensatz, dessen Wert aktualisiert werden soll
-   * 
+   *
    * @return BOOL Ergebnis
-   * 
+   *
    */
   public function setValueByName($new_value, $name) {
   	$where = array();
@@ -655,7 +655,7 @@ class dbIdeaCfg extends dbConnectLE {
   	}
   	return $this->setValue($new_value, $config[0][self::field_id]);
   } // setValueByName()
-  
+
   /**
    * Haengt einen Slash an das Ende des uebergebenen Strings
    * wenn das letzte Zeichen noch kein Slash ist
@@ -665,9 +665,9 @@ class dbIdeaCfg extends dbConnectLE {
    */
   public function addSlash($path) {
   	$path = substr($path, strlen($path)-1, 1) == "/" ? $path : $path."/";
-  	return $path;  
+  	return $path;
   }
-  
+
   /**
    * Wandelt einen String in einen Float Wert um.
    * Geht davon aus, dass Dezimalzahlen mit ',' und nicht mit '.'
@@ -689,7 +689,7 @@ class dbIdeaCfg extends dbConnectLE {
 		$int = intval($string);
 		return $int;
   }
-  
+
 	/**
 	 * Ueberprueft die uebergebene E-Mail Adresse auf logische Gueltigkeit
 	 *
@@ -704,13 +704,13 @@ class dbIdeaCfg extends dbConnectLE {
 		else {
 			return false; }
 	}
-  
+
   /**
    * Aktualisiert den Wert $new_value des Datensatz $id
-   * 
+   *
    * @param $new_value STR - Wert, der uebernommen werden soll
    * @param $id INT - ID des Datensatz, dessen Wert aktualisiert werden soll
-   * 
+   *
    * @return BOOL Ergebnis
    */
   public function setValue($new_value, $id) {
@@ -735,7 +735,7 @@ class dbIdeaCfg extends dbConnectLE {
   		foreach ($worker as $item) {
   			$data[] = trim($item);
   		};
-  		$value = implode(",", $data);  			
+  		$value = implode(",", $data);
   		break;
   	case self::type_boolean:
   		$value = (bool) $new_value;
@@ -747,7 +747,7 @@ class dbIdeaCfg extends dbConnectLE {
   		}
   		else {
   			$this->setMessage(sprintf(tool_msg_invalid_email, $new_value));
-  			return false;			
+  			return false;
   		}
   		break;
   	case self::type_float:
@@ -766,7 +766,7 @@ class dbIdeaCfg extends dbConnectLE {
   		$value = str_replace('&quot;', '"', $value);
   		break;
   	case self::type_list:
-  		$lines = nl2br($new_value); 
+  		$lines = nl2br($new_value);
   		$lines = explode('<br />', $lines);
   		$val = array();
   		foreach ($lines as $line) {
@@ -786,12 +786,12 @@ class dbIdeaCfg extends dbConnectLE {
   	}
   	return true;
   } // setValue()
-  
+
   /**
    * Gibt den angeforderten Wert zurueck
-   * 
-   * @param $name - Bezeichner 
-   * 
+   *
+   * @param $name - Bezeichner
+   *
    * @return WERT entsprechend des TYP
    */
   public function getValue($name) {
@@ -837,7 +837,7 @@ class dbIdeaCfg extends dbConnectLE {
   	endswitch;
   	return $result;
   } // getValue()
-  
+
   public function checkConfig() {
   	foreach ($this->config_array as $item) {
   		$where = array();
@@ -865,20 +865,20 @@ class dbIdeaCfg extends dbConnectLE {
   	}
   	return true;
   }
-	  
+
 } // class dbIdeaCfg
 
 class dbIdeaTableSort extends dbConnectLE {
-	
+
 	const field_id				= 'sort_id';
 	const field_table			= 'sort_table';
 	const field_value			= 'sort_value';
 	const field_item			= 'sort_item';
 	const field_order			= 'sort_order';
 	const field_timestamp	= 'sort_timestamp';
-	
+
 	private $create_tables = false;
-	
+
 	public function __construct($create_tables=false) {
 		$this->create_tables = $create_tables;
 		parent::__construct();
@@ -899,28 +899,28 @@ class dbIdeaTableSort extends dbConnectLE {
 			}
 		}
 	 	date_default_timezone_set(idea_cfg_time_zone);
-	} // __construct()	
-	
+	} // __construct()
+
 } // class dbIdeaTableSort
 
 /*
 class dbIdeaProjectAccess extends dbConnectLE {
-	
+
 	const field_id						= 'access_id';
 	const field_kit_category	= 'access_kit_category';
 	const field_rights				=	'access_rights';
-	const field_timestamp			= 'access_timestamp'; 
-	
+	const field_timestamp			= 'access_timestamp';
+
 	// rights: general
 	const no_access						= 0;
-	
+
 	// rights: project
 	const project_view				= 1;
 	const project_create			= 2;
 	const project_edit				= 4;
 	const project_lock				= 8;
 	const project_delete			= 16;
-	
+
 	// rights: articles
 	const article_view				= 32;
 	const article_create			= 64;
@@ -928,15 +928,15 @@ class dbIdeaProjectAccess extends dbConnectLE {
 	const article_move				= 256;
 	const article_lock				= 512;
 	const article_delete			= 1024;
-	
+
 	// rights: sections
 	const section_view				= 2048;
 	const section_create			= 4096;
 	const section_edit				= 8192;
 	const section_move				= 16384;
 	const section_delete			= 32768;
-	
-	// rights: files				
+
+	// rights: files
 	const file_download				= 65536;
 	const file_upload					= 131072;
 	const file_delete_file		= 262144;
@@ -944,16 +944,16 @@ class dbIdeaProjectAccess extends dbConnectLE {
 	const file_create_dir			= 1048576;
 	const file_rename_dir			= 2097152;
 	const file_delete_dir			= 4194304;
-	
+
 	// rights: admins
 	const admin_change_rights	= 8388608;
-	
+
 	// default rights
 	var $default_visitor			= -1;
 	var $default_editor				= -1;
-	
+
 	private $create_tables = false;
-	
+
 	public function __construct($create_tables=false) {
 		$this->create_tables = $create_tables;
 		$this->default_visitor = self::project_view | self::article_view | self::section_view | self::file_download;
@@ -975,7 +975,7 @@ class dbIdeaProjectAccess extends dbConnectLE {
 		}
 		date_default_timezone_set(idea_cfg_time_zone);
 	} // __construct()
-	
+
 } // class dbIdeaProjectAccess
 */
 

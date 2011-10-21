@@ -3,6 +3,10 @@ kitIdea
 Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
+Release 0.15
+2011-10-21
+added: kitIdea can calculate within HTML tables sums and multiplications
+
 Release 0.14
 2011-10-15
 changed: kitIdea is now using project-groups and allows multiple usage at 
