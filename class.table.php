@@ -537,7 +537,7 @@ class calcTable {
 	                if (!$this->execCalculation($cell, $cmd, $vals, $content, $cell_array, $this->process_commands[$cell], $res)) {
 	                    return false;
 	                }
-	                $result += $res;
+	                $result *= $res;
 	            }
 	            else {
 	                // add value of a cell to the $result

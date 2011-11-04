@@ -1418,7 +1418,7 @@ class kitIdeaFrontend {
   		$params[kitDirList::param_recursive] = true;
   		$params[kitDirList::param_copyright] = false;
   		$params[kitDirList::param_hide_account] = true;
-  		$params[kitDirList::PARAM_CSS] = true;
+  		$params[kitDirList::param_css] = true;
   		$params[kitDirList::param_upload] = $dbIdeaProjectGroups->checkPermissions($_SESSION[self::SESSION_USER_ACCESS], dbIdeaProjectGroups::file_upload) ? true : false;
   		$params[kitDirList::param_unlink] = $dbIdeaProjectGroups->checkPermissions($_SESSION[self::SESSION_USER_ACCESS], dbIdeaProjectGroups::file_delete_file) ? true : false;
   		$params[kitDirList::param_mkdir] = $dbIdeaProjectGroups->checkPermissions($_SESSION[self::SESSION_USER_ACCESS], dbIdeaProjectGroups::file_create_dir) ? true : false;

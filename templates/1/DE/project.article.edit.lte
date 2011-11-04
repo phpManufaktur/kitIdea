@@ -61,7 +61,7 @@
         <td>
           <select name="{$article.status.name}"{if $article.fields.article_id.value < 1} disabled="disabled"{/if}>
             {foreach $article.status.items option}
-            {if (($option.value == 1) || (($option.value == 2) && ($access.article.lock == 1)) || (($option.value == 3) && ($access.article.delete == 1)))}
+            {if (($option.value == 1) || (($option.value == 2) && ($access.article.lock == 1)) || (($option.value == 4) && ($access.article.delete == 1)))}
             <option value="{$option.value}"{if $option.value == $article.status.value} selected="selected"{/if}>{$option.text}</option>
             {/if}
             {/foreach}
