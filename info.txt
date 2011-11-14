@@ -3,6 +3,10 @@ kitIdea
 Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
+Release 0.16
+2011-11-14
+changed: kitIdea process status mails now with the KIT cronjob.
+
 Release 0.15
 2011-10-21
 added: kitIdea can calculate within HTML tables sums and multiplications

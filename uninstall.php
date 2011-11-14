@@ -50,7 +50,16 @@ require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.idea.php';
 
 global $admin;
 
-$tables = array('dbIdeaCfg', 'dbIdeaProject', 'dbIdeaProjectSections', 'dbIdeaProjectArticles', 'dbIdeaRevisionArchive', 'dbIdeaTableSort', 'dbIdeaProjectStatusMails', 'dbIdeaProjectGroups', 'dbIdeaProjectUsers');
+$tables = array(
+        'dbIdeaCfg',
+        'dbIdeaProject',
+        'dbIdeaProjectSections',
+        'dbIdeaProjectArticles',
+        'dbIdeaRevisionArchive',
+        'dbIdeaTableSort',
+        'dbIdeaProjectGroups',
+        'dbIdeaProjectUsers',
+        'dbIdeaStatusChange');
 $error = '';
 
 foreach ($tables as $table) {
@@ -72,6 +81,7 @@ foreach ($droplets as $droplet) {
 		$message = sprintf('[UPGRADE] Error uninstalling Droplet: %s', $dbDroplets->getError());
 	}
 }
+
 
 // Prompt Errors
 if (!empty($error)) {

@@ -85,9 +85,11 @@ global $dbIdeaRevisionArchive;
 if (!is_object($dbIdeaRevisionArchive)) $dbIdeaRevisionArchive = new dbIdeaRevisionArchive();
 global $dbIdeaTableSort;
 if (!is_object($dbIdeaTableSort)) $dbIdeaTableSort = new dbIdeaTableSort();
+
+/*
 global $dbIdeaProjectStatusMails;
 if (!is_object($dbIdeaProjectStatusMails)) $dbIdeaProjectStatusMails = new dbIdeaProjectStatusMails();
-/*
+
 global $dbIdeaProjectAccess;
 if (!is_object($dbIdeaProjectAccess)) $dbIdeaProjectAccess = new dbIdeaProjectAccess();
 */
@@ -95,9 +97,8 @@ global $dbIdeaProjectGroups;
 if (!is_object($dbIdeaProjectGroups)) $dbIdeaProjectGroups = new dbIdeaProjectGroups();
 global $dbIdeaProjectUsers;
 if (!is_object($dbIdeaProjectUsers)) $dbIdeaProjectUsers = new dbIdeaProjectUsers();
-
-// WYSIWYG editor
-require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.editor.php';
+global $dbIdeaStatusChange;
+if (!is_object($dbIdeaStatusChange)) $dbIdeaStatusChange = new dbIdeaStatusChange();
 
 // general needed LEPTON functions
 require_once WB_PATH.'/framework/functions.php';
@@ -115,12 +116,14 @@ require_once WB_PATH.'/modules/kit_dirlist/class.dirlist.php';
 require_once (WB_PATH.'/include/captcha/captcha.php');
 
 // load KIT Mail
-require_once WB_PATH.'/modules/kit/class.mail.php';
+//require_once WB_PATH.'/modules/kit/class.mail.php';
 
+/*
 // load kitIdea Status Mail
 require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.status.mail.php';
 global $statusMails;
 if (!is_object($statusMails)) $statusMails = new kitIdeaStatusMails();
+*/
 
 // load calcTable
 require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.table.php';

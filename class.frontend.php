@@ -30,6 +30,9 @@ if (defined('WB_PATH')) {
 // load the required libraries
 require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/initialize.php';
 
+// WYSIWYG editor
+require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.editor.php';
+
 require_once(WB_PATH.'/include/captcha/captcha.php');
 require_once(WB_PATH.'/modules/kit_form/class.frontend.php');
 
@@ -127,14 +130,10 @@ class kitIdeaFrontend {
         $_SESSION['FRONTEND'] = true;
         $kitTools->getPageLinkByPageID(PAGE_ID, $url);
         $this->page_link = $url;
-        $this->template_path = WB_PATH . '/modules/' .
-         basename(dirname(__FILE__)) . '/templates/' .
-         $this->params[self::PARAM_PRESET] . '/' . KIT_IDEA_LANGUAGE . '/';
-        $this->img_url = WB_URL . '/modules/' . basename(dirname(__FILE__)) .
-         '/images/';
+        $this->template_path = WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/templates/' . $this->params[self::PARAM_PRESET] . '/' . KIT_IDEA_LANGUAGE . '/';
+        $this->img_url = WB_URL . '/modules/' . basename(dirname(__FILE__)) . '/images/';
         date_default_timezone_set(idea_cfg_time_zone);
-        $this->media_path = WB_PATH . MEDIA_DIRECTORY . '/' .
-         $dbIdeaCfg->getValue(dbIdeaCfg::cfgMediaDir) . '/';
+        $this->media_path = WB_PATH . MEDIA_DIRECTORY . '/' . $dbIdeaCfg->getValue(dbIdeaCfg::cfgMediaDir) . '/';
         $this->media_url = str_replace(WB_PATH, WB_URL, $this->media_path);
     } // __construct()
     /**
@@ -759,7 +758,6 @@ class kitIdeaFrontend {
 
   	// get the access rights for the user
   	$this->projectGetAccessRights();
-
   	switch ($action):
   	case self::ACTION_SECTION_EDIT:
   		return $this->projectShow($this->projectSectionEdit());
@@ -1073,7 +1071,8 @@ class kitIdeaFrontend {
   public function projectProjectCheck() {
   	global $dbIdeaProject;
   	global $dbIdeaRevisionArchive;
-  	global $statusMails;
+  	//global $statusMails;
+  	global $dbIdeaStatusChange;
 
   	$project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : -1;
 
@@ -1146,6 +1145,8 @@ class kitIdeaFrontend {
   				return false;
   			}
   			$message .= sprintf(idea_msg_project_inserted, $project_id);
+  			/*
+  			 * Dont send mail on creating projects, there are no members now !!!
   			$data = array(
   				'project'				=> $project,
   				'project_url'		=> $this->page_link
@@ -1155,6 +1156,7 @@ class kitIdeaFrontend {
   				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $statusMails->getError()));
   				return false;
   			}
+  			*/
   		}
   		else {
   			// save the previous record to the revision archive
@@ -1179,6 +1181,7 @@ class kitIdeaFrontend {
   				return false;
   			}
   			$message .= sprintf(idea_msg_project_updated, $project_id);
+  			/*
   			$data = array(
   				'project'				=> $project,
   				'project_url'		=> $this->page_link
@@ -1188,6 +1191,20 @@ class kitIdeaFrontend {
   				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $statusMails->getError()));
   				return false;
   			}
+  			*/
+  			$data = array(
+  			        dbIdeaStatusChange::FIELD_ARTICLE_ID => -1,
+  			        dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : -1,
+  			        dbIdeaStatusChange::FIELD_INFO => sprintf(idea_msg_project_updated, $project_id),
+  			        dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
+  			        dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
+  			        dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
+  			        dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_UNDELIVERED
+  			        );
+  		    if (!$dbIdeaStatusChange->sqlInsertRecord($data)) {
+  		        $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
+  		        return false;
+  		    }
   		}
   		foreach ($fields as $key => $value) unset($_REQUEST[$key]);
   		$_REQUEST[dbIdeaProject::field_id] = $project_id;
@@ -1708,7 +1725,8 @@ class kitIdeaFrontend {
   	global $dbIdeaProjectArticles;
   	global $dbIdeaRevisionArchive;
   	global $dbIdeaProject;
-  	global $statusMails;
+  	//global $statusMails;
+  	global $dbIdeaStatusChange;
 
   	// first check CAPTCHA
   	if (isset($_REQUEST['captcha']) && ($_REQUEST['captcha'] != $_SESSION['captcha'])) {
@@ -1874,6 +1892,7 @@ class kitIdeaFrontend {
   				return false;
   			}
   			$message .= sprintf(idea_msg_article_inserted, $article_id);
+  			/*
   			$data = array(
   				'article'				=> $article,
   				'project'				=> $project,
@@ -1883,6 +1902,20 @@ class kitIdeaFrontend {
   			if (!$statusMails->sendStatusMails($project_id, $project[dbIdeaProject::field_title], $body)) {
   				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $statusMails->getError()));
   				return false;
+  			}
+  			*/
+  			$data = array(
+  			        dbIdeaStatusChange::FIELD_ARTICLE_ID => $article_id,
+  			        dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : -1,
+  			        dbIdeaStatusChange::FIELD_INFO => sprintf(idea_msg_article_inserted, $article_id),
+  			        dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
+  			        dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
+  			        dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
+  			        dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_UNDELIVERED
+  			);
+  			if (!$dbIdeaStatusChange->sqlInsertRecord($data)) {
+  			    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
+  			    return false;
   			}
   		}
   		else {
@@ -1909,6 +1942,7 @@ class kitIdeaFrontend {
   				return false;
   			}
   			$message .= sprintf(idea_msg_article_updated, $article_id);
+  			/*
   			$data = array(
   				'article'				=> $article,
   				'project'				=> $project,
@@ -1918,6 +1952,20 @@ class kitIdeaFrontend {
   			if (!$statusMails->sendStatusMails($project_id, $project[dbIdeaProject::field_title], $body)) {
   				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $statusMails->getError()));
   				return false;
+  			}
+  			*/
+  			$data = array(
+  			        dbIdeaStatusChange::FIELD_ARTICLE_ID => $article_id,
+  			        dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : -1,
+  			        dbIdeaStatusChange::FIELD_INFO => sprintf(idea_msg_article_updated, $article_id),
+  			        dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
+  			        dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
+  			        dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
+  			        dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_UNDELIVERED
+  			);
+  			if (!$dbIdeaStatusChange->sqlInsertRecord($data)) {
+  			    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
+  			    return false;
   			}
   		}
   		// unset $_REQUESTs
@@ -2064,7 +2112,6 @@ class kitIdeaFrontend {
   	global $dbIdeaProjectArticles;
   	global $dbIdeaProject;
   	global $kitTools;
-  	global $statusMails;
 
   	$project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : -1;
   	if ($project_id < 1) {

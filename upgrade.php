@@ -59,7 +59,16 @@ global $database;
 $error = '';
 
 // install missing tables
-$tables = array('dbIdeaCfg', 'dbIdeaProject', 'dbIdeaProjectSections', 'dbIdeaProjectArticles', 'dbIdeaRevisionArchive', 'dbIdeaTableSort', 'dbIdeaProjectStatusMails', 'dbIdeaProjectGroups', 'dbIdeaProjectUsers');
+$tables = array(
+        'dbIdeaCfg',
+        'dbIdeaProject',
+        'dbIdeaProjectSections',
+        'dbIdeaProjectArticles',
+        'dbIdeaRevisionArchive',
+        'dbIdeaTableSort',
+        'dbIdeaProjectGroups',
+        'dbIdeaProjectUsers',
+        'dbIdeaStatusChange');
 
 foreach ($tables as $table) {
 	$create = null;
