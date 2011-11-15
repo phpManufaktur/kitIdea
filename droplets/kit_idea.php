@@ -9,6 +9,13 @@
  * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
  * @version $Id$
  */
+// load the kit_idea.jquery preset with LibraryAdmin
+include_once WB_PATH.'/modules/libraryadmin/include.php';
+$new_page = includePreset( $wb_page_data, 'lib_jquery', 'kit_idea', 'kit_idea', NULL, false, NULL, NULL );
+if ( !empty($new_page) ) {
+    $wb_page_data = $new_page;
+}
+// access to kitIdea
 if (file_exists(WB_PATH.'/modules/kit_idea/class.frontend.php')) {
 	require_once(WB_PATH.'/modules/kit_idea/class.frontend.php');
 	$idea = new kitIdeaFrontend();

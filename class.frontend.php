@@ -53,6 +53,7 @@ class kitIdeaFrontend {
     const REQUEST_ARTICLE_MOVE 		= 'artm';
     const REQUEST_SECTION_ADD 		= 'seca';
     const REQUEST_SECTION_DELETE 	= 'secd';
+    const REQUEST_COMMAND           = 'kic';
 
 	const ACTION_ACCOUNT			= 'acc';
 	const ACTION_DEFAULT			= 'def';
@@ -68,6 +69,9 @@ class kitIdeaFrontend {
 	const ACTION_SECTION_EDIT_CHECK = 'secec';
 	const ACTION_PROJECT_VIEW		= 'prjv';
 	const ACTION_ARTICLE_CHECK		= 'artc';
+	const ACTION_COMMAND            = 'cmd';
+
+	const ANCHOR = 'ki';
 
 	const IDENTIFIER_ABOUT			= 'secAbout';
 	const IDENTIFIER_FILES			= 'secFiles';
@@ -380,17 +384,18 @@ class kitIdeaFrontend {
   		// skip account tab if using LEPTON authentication
   		if ($this->use_lepton_auth && ($key == self::ACTION_ACCOUNT)) continue;
   		$navigation[] = array(
-  			'active' 	=> ($key == $action) ? 1 : 0,
-  			'url'			=> sprintf('%s%s%s=%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', self::REQUEST_MAIN_ACTION, $key),
-  			'text'		=> $value
-  		);
+  		        'active' => ($key == $action) ? 1 : 0,
+  		        'url' => sprintf('%s%s%s=%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', self::REQUEST_MAIN_ACTION, $key),
+  		        'text' => $value
+  		        );
   	}
   	$data = array(
-  		'WB_URL'			=> WB_URL,
-  		'navigation'	=> $navigation,
-  		'error'				=> ($this->isError()) ? 1 : 0,
-  		'content'			=> ($this->isError()) ? $this->getError() : $content
-  	);
+  	        'WB_URL' => WB_URL,
+  	        'anchor' => self::ANCHOR,
+  	        'navigation' => $navigation,
+  	        'error'	=> ($this->isError()) ? 1 : 0,
+  	        'content' => ($this->isError()) ? $this->getError() : $content
+  	        );
   	return $this->getTemplate('body.lte', $data);
   } // show_main()
 
@@ -722,6 +727,11 @@ class kitIdeaFrontend {
 
   	$action = isset($_REQUEST[self::REQUEST_PROJECT_ACTION]) ? $_REQUEST[self::REQUEST_PROJECT_ACTION] : self::ACTION_DEFAULT;
 
+  	// special: need no further checks for commands!
+  	if ($action == self::ACTION_COMMAND) {
+  	    return $this->projectShow($this->projectCommand());
+  	}
+
   	// check first if access is allowed!
   	if (($action != self::ACTION_DEFAULT) && ($action != self::ACTION_PROJECT_OVERVIEW) && ($action != self::ACTION_PROJECT_EDIT) && ($action != self::ACTION_PROJECT_EDIT_CHECK)) {
   		// At direct access to a project the authentication must be checked first!
@@ -888,8 +898,9 @@ class kitIdeaFrontend {
   	global $dbIdeaProjectGroups;
   	global $dbIdeaTableSort;
 
-  	$where = array( dbIdeaTableSort::field_table	=> 'mod_kit_idea_project_group',
-  									dbIdeaTableSort::field_value	=> $this->params[self::PARAM_PROJECT_GROUP]);
+  	$where = array(
+  	        dbIdeaTableSort::field_table => 'mod_kit_idea_project_group',
+  	        dbIdeaTableSort::field_value => $this->params[self::PARAM_PROJECT_GROUP]);
   	$order = array();
   	if (!$dbIdeaTableSort->sqlSelectRecord($where, $order)) {
   		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
@@ -972,7 +983,7 @@ class kitIdeaFrontend {
   			return false;
   		}
   	}
-  	$sorter_active = 0;
+  	$sorter_active = 1;
 
 
 
@@ -2236,5 +2247,62 @@ class kitIdeaFrontend {
   	$this->setMessage($message);
   	return $checked ? $this->projectProjectView() : $this->projectSectionEdit();
   } // projectSectionCheck()
+
+  protected function projectCommand() {
+      global $dbKITformCommands;
+      global $dbIdeaProjectUsers;
+
+      if (!isset($_REQUEST[self::REQUEST_COMMAND]) || empty($_REQUEST[self::REQUEST_COMMAND])) {
+          $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_invalid));
+          return false;
+      }
+
+      $where = array(dbKITformCommands::FIELD_COMMAND => $_REQUEST[self::REQUEST_COMMAND]);
+      $command = array();
+      if (!$dbKITformCommands->sqlSelectRecord($where, $command)) {
+          $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbKITformCommands->getError()));
+          return false;
+      }
+      if (count($command) < 1) {
+          $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_invalid));
+          return false;
+      }
+      $command = $command[0];
+      if ($command[dbKITformCommands::FIELD_TYPE] != dbKITformCommands::TYPE_IDEA_EMAIL_INFO) {
+          $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_unknown));
+          return false;
+      }
+      $params = array();
+      parse_str($command[dbKITformCommands::FIELD_PARAMS], $params);
+      if (!isset($params['project_group']) || !isset($params['contact']) || !isset($params['email_info']) || !isset($params['kit_id'])) {
+          $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_params_invalid));
+          return false;
+      }
+      $where = array(
+              dbIdeaProjectUsers::field_group_id => $params['project_group'],
+              dbIdeaProjectUSers::field_kit_id => $params['kit_id']
+              );
+      $data = array(
+              dbIdeaProjectUsers::field_email_info => $params['email_info']
+              );
+      if (!$dbIdeaProjectUsers->sqlUpdateRecord($data, $where)) {
+          $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
+          return false;
+      }
+      // delete command
+      $where = array(dbKITformCommands::FIELD_ID => $command[dbKITformCommands::FIELD_ID]);
+      if (!$dbKITformCommands->sqlDeleteRecord($where)) {
+          $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbKITformCommands->getError()));
+          return false;
+      }
+
+      $einfo = $dbIdeaProjectUsers->email_info_array[$params['email_info']];
+      $message = sprintf(
+              idea_msg_email_info_changed,
+              $params['contact'][kitContactInterface::kit_email],
+              $einfo['text']
+              );
+      return $message;
+  } // projectCommand()
 
 } // class kitIdeaFrontend

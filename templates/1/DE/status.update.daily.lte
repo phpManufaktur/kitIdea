@@ -1,0 +1,37 @@
+{*
+ * kitIdea
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *
+ * Please consult the Dwoo Documentation & WIKI to get further informations 
+ * and hints for the usage of the Dwoo template engine.
+ *
+ * @link http://wiki.dwoo.org/
+ *
+ * Use {dump()} to get a list of all in this template available variables!
+ *}
+Tägliche Zusammenfassung: 
+ 
+{$report}
+
+##### AUTOMATISCHE BENACHRICHTIGUNG durch kitIdea #####
+ 
+Sie haben eine tägliche Zusammenfassung der Änderung in dieser Projektgruppe abonniert. Verwenden Sie die folgenden Links um ihr Abonnement zu ändern.
+
+Sofortige Benachrichtigung bei jeder Änderung: 
+{$commands.immediate.link}
+
+Wöchentliche Zusammenfassung der Änderungen:
+{$commands.weekly.link}
+ 
+Monatliche Zusammenfassung der Änderungen:
+{$commands.monthly.link}
+
+Abonnement abbestellen: 
+{$commands.no_email.link}
+
+Die Links zum Ändern des Abonnement können nur ein einziges Mal verwendet werden und sind maximal 14 Tage gültig.

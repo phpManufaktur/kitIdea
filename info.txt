@@ -3,6 +3,14 @@ kitIdea
 Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
+Release 0.17
+2011-11-15
+changed: kitIdea uses now LibraryAdmin for including jQuery
+fixed: drag & drop problem at the project overview
+added: immediated, daily, weekly and monthly reports. User can switch between
+  the report modes by links
+changed: mail.xxx.lte templates replaced by status.xxx.lte templates
+
 Release 0.16
 2011-11-14
 changed: kitIdea process status mails now with the KIT cronjob.

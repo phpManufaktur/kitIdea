@@ -53,9 +53,19 @@ class dbIdeaProject extends dbConnectLE {
     const status_deleted = 4;
 
     public $status_array = array(
-    array('value' => self::status_active, 'text' => idea_str_status_active),
-    array('value' => self::status_locked, 'text' => idea_str_status_locked),
-    array('value' => self::status_deleted, 'text' => idea_str_status_deleted));
+            array(
+                    'value' => self::status_active,
+                    'text' => idea_str_status_active
+                    ),
+            array(
+                    'value' => self::status_locked,
+                    'text' => idea_str_status_locked
+                    ),
+            array(
+                    'value' => self::status_deleted,
+                    'text' => idea_str_status_deleted
+                    )
+            );
 
     const access_public = 1;
     const access_closed = 2;
@@ -477,14 +487,25 @@ class dbIdeaProjectUsers extends dbConnectLE {
     const status_deleted = 4;
 
     public $status_array = array(
-    array('value' => self::status_active, 'text' => idea_str_status_active),
-    array('value' => self::status_locked, 'text' => idea_str_status_locked),
-    array('value' => self::status_deleted, 'text' => idea_str_status_deleted));
+            array(
+                    'value' => self::status_active,
+                    'text' => idea_str_status_active
+                    ),
+            array(
+                    'value' => self::status_locked,
+                    'text' => idea_str_status_locked
+                    ),
+            array(
+                    'value' => self::status_deleted,
+                    'text' => idea_str_status_deleted
+                    )
+            );
 
     public $status_array_short = array(
-    self::status_active => idea_str_status_active,
-    self::status_locked => idea_str_status_locked,
-    self::status_deleted => idea_str_status_deleted);
+            self::status_active => idea_str_status_active,
+            self::status_locked => idea_str_status_locked,
+            self::status_deleted => idea_str_status_deleted
+            );
 
     const EMAIL_UNDEFINED = 0;
     const EMAIL_NO_EMAIL = 1;
@@ -492,6 +513,42 @@ class dbIdeaProjectUsers extends dbConnectLE {
     const EMAIL_DAILY = 4;
     const EMAIL_WEEKLY = 8;
     const EMAIL_MONTHLY = 16;
+
+    public $email_info_array = array(
+            self::EMAIL_UNDEFINED => array(
+                    'value' => self::EMAIL_UNDEFINED,
+                    'text' => idea_str_email_undefined
+                    ),
+            self::EMAIL_NO_EMAIL => array(
+                    'value' => self::EMAIL_NO_EMAIL,
+                    'text' => idea_str_email_no_email
+                    ),
+            self::EMAIL_IMMEDIATE => array(
+                    'value' => self::EMAIL_IMMEDIATE,
+                    'text' => idea_str_email_immediate
+                    ),
+            self::EMAIL_DAILY => array(
+                    'value' => self::EMAIL_DAILY,
+                    'text' => idea_str_email_daily
+                    ),
+            self::EMAIL_WEEKLY => array(
+                    'value' => self::EMAIL_WEEKLY,
+                    'text' => idea_str_email_weekly
+                    ),
+            self::EMAIL_MONTHLY => array(
+                    'value' => self::EMAIL_MONTHLY,
+                    'text' => idea_str_email_monthly
+                    )
+            );
+
+    public $email_command_array = array(
+            self::EMAIL_UNDEFINED => 'undefined',
+            self::EMAIL_NO_EMAIL => 'no_email',
+            self::EMAIL_IMMEDIATE => 'immediate',
+            self::EMAIL_DAILY => 'daily',
+            self::EMAIL_WEEKLY => 'weekly',
+            self::EMAIL_MONTHLY => 'monthly'
+            );
 
     private $createTables = false;
 

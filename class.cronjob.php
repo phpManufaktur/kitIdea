@@ -35,7 +35,9 @@ if (defined('WB_PATH')) {
 require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/initialize.php';
 
 require_once WB_PATH.'/modules/kit/class.cronjob.php';
-
+require_once WB_PATH.'/modules/droplets_extension/class.pages.php';
+require_once WB_PATH.'/modules/kit_form/class.form.php';
+require_once WB_PATH.'/modules/kit_idea/class.frontend.php';
 
 class ideaCronjob {
 
@@ -134,7 +136,12 @@ class ideaCronjob {
         return $result;
     } // getTemplate()
 
-
+    /**
+     * Set the date for the call of the next DAILY cronjob in the
+     * idea_next_mail_daily record
+     *
+     * @param boolean $create_record - if true ohterwise update existing record
+     */
     private function setNextMailDaily($create_record=false) {
         global $dbIdeaCfg;
         global $dbCronjobData;
@@ -172,6 +179,12 @@ class ideaCronjob {
         return true;
     } // setNextMailDaily()
 
+    /**
+     * Set the date for the call of the next WEEKLY cronjob in the
+     * idea_next_mail_weekly record
+     *
+     * @param boolean $create_record - if true ohterwise update existing record
+     */
     private function setNextMailWeekly($create_record=false) {
         global $dbIdeaCfg;
         global $dbCronjobData;
@@ -184,7 +197,7 @@ class ideaCronjob {
         list($dow, $time) = explode('|', $weekly);
         $dow = intval($dow);
         if (($dow < 0) || ($dow > 6)) {
-            $this->setError($dow); //sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_weekday_invalid, $weekly)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_weekday_invalid, $weekly)));
             return false;
         }
         if (false === strpos($time, ':')) {
@@ -220,6 +233,12 @@ class ideaCronjob {
         return true;
     } // setNextMailWeekly()
 
+    /**
+     * Set the date for the call of the next MONTHLY cronjob in the
+     * idea_next_mail_monthly record
+     *
+     * @param boolean $create_record - if true ohterwise update existing record
+     */
     private function setNextMailMonthly($create_record) {
         global $dbIdeaCfg;
         global $dbCronjobData;
@@ -365,25 +384,25 @@ class ideaCronjob {
         foreach ($cronjob as $cron) {
             switch ($cron[dbCronjobData::field_item]):
             case self::IDEA_ACTUAL_JOB:
-                $this->actualJob = $cron[dbCronjobData::field_item]; break;
+                $this->actualJob = $cron[dbCronjobData::field_value]; break;
             case self::IDEA_LAST_CALL:
-                $this->lastCall = $cron[dbCronjobData::field_item]; break;
+                $this->lastCall = $cron[dbCronjobData::field_value]; break;
             case self::IDEA_LAST_MAIL_DAILY:
-                $this->lastMailDaily = $cron[dbCronjobData::field_item]; break;
+                $this->lastMailDaily = $cron[dbCronjobData::field_value]; break;
             case self::IDEA_LAST_MAIL_MONTHLY:
-                $this->lastMailMonthly = $cron[dbCronjobData::field_item]; break;
+                $this->lastMailMonthly = $cron[dbCronjobData::field_value]; break;
             case self::IDEA_LAST_MAIL_WEEKLY:
-                $this->lastMailWeekly = $cron[dbCronjobData::field_item]; break;
+                $this->lastMailWeekly = $cron[dbCronjobData::field_value]; break;
             case self::IDEA_NEXT_MAIL_DAILY:
-                $this->nextMailDaily = $cron[dbCronjobData::field_item]; break;
+                $this->nextMailDaily = $cron[dbCronjobData::field_value]; break;
             case self::IDEA_NEXT_MAIL_MONTHLY:
-                $this->nextMailMonthly = $cron[dbCronjobData::field_item]; break;
+                $this->nextMailMonthly = $cron[dbCronjobData::field_value]; break;
             case self::IDEA_NEXT_MAIL_WEEKLY:
-                $this->nextMailWeekly = $cron[dbCronjobData::field_item]; break;
+                $this->nextMailWeekly = $cron[dbCronjobData::field_value]; break;
             case self::IDEA_PROCESS_KIT:
-                $this->processKIT = explode(',', $cron[dbCronjobData::field_item]); break;
+                $this->processKIT = explode(',', $cron[dbCronjobData::field_value]); break;
             case self::IDEA_PROCESS_STATUS:
-                $this->processStatus = explode(',', $cron[dbCronjobData::field_item]); break;
+                $this->processStatus = explode(',', $cron[dbCronjobData::field_value]); break;
             endswitch;
         }
 
@@ -407,29 +426,41 @@ class ideaCronjob {
         }
 
         // check which job should be operated
-        /*
         $now = time();
         $nextDaily = strtotime($this->nextMailDaily);
+        $nextWeekly = strtotime($this->nextMailWeekly);
+        $nextMonthly = strtotime($this->nextMailMonthly);
 
         if ($now > $nextDaily) {
             // process DAILY Status Mails
             if (!$this->processDailyMails()) return $this->getError();
         }
+        elseif ($now > $nextWeekly) {
+            // process WEEKLY Status Mails
+            if (!$this->processWeeklyMails()) return $this->getError();
+        }
+        elseif ($now > $nextMonthly) {
+            // process MONTHLY Status Mails
+            if (!$this->processMonthlyMails()) return $this->getError();
+        }
         else {
-            // process IMMEDIATE Status Mails
             if (!$this->processImmediateMails()) return $this->getError();
         }
-        */
-        if (!$this->processImmediateMails()) return $this->getError();
-
     } // action()
 
+    /**
+     * Process the IMMEDIATE mail jobs
+     *
+     * @return boolean - result of operation
+     */
     protected function processImmediateMails() {
         global $dbIdeaStatusChange;
         global $dbIdeaCfg;
         global $dbIdeaProjectUsers;
         global $kitContactInterface;
         global $dbIdeaProject;
+        global $kitLibrary;
+        global $dbKITformCommands;
 
         $max_package = $dbIdeaCfg->getValue(dbIdeaCfg::cfgMailPackageSize);
         $where = array(dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_UNDELIVERED);
@@ -464,17 +495,6 @@ class ideaCronjob {
             }
             $project = $project[0];
 
-            // create message body
-            $body_data = array(
-                    'status' => array(
-                            'info' => $stat[dbIdeaStatusChange::FIELD_INFO],
-                            'date' => $stat[dbIdeaStatusChange::FIELD_INFO_DATE]
-                            ),
-                    'project' => array(
-                            'id' => $project_id
-                            ),
-                    );
-            $body = $this->getTemplate('status.update.immediate.lte', $body_data);
 
             // loop through the users and send the messages
             foreach ($users as $user) {
@@ -484,6 +504,57 @@ class ideaCronjob {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
                     return false;
                 }
+
+                // create commands for changing the mail delivery
+                $commands = array(
+                        dbIdeaProjectUsers::EMAIL_NO_EMAIL,
+                        dbIdeaProjectUsers::EMAIL_IMMEDIATE,
+                        dbIdeaProjectUsers::EMAIL_DAILY,
+                        dbIdeaProjectUsers::EMAIL_WEEKLY,
+                        dbIdeaProjectUsers::EMAIL_MONTHLY);
+                $commands_array = array();
+                foreach ($commands as $command) {
+                    $cmd = $kitLibrary->createGUID();
+                    $data = array(
+                            dbKITformCommands::FIELD_COMMAND => $cmd,
+                            dbKITformCommands::FIELD_PARAMS => http_build_query(array(
+                                    'project_group' => $project[dbIdeaProject::field_project_group],
+                                    'contact' => $contact,
+                                    'kit_id' => $user[dbIdeaProjectUsers::field_kit_id],
+                                    'email_info' => $command
+                            )),
+                            dbKITformCommands::FIELD_TYPE => dbKITformCommands::TYPE_IDEA_EMAIL_INFO,
+                            dbKITformCommands::FIELD_STATUS => dbKITformCommands::STATUS_WAITING
+                    );
+                    if (!$dbKITformCommands->sqlInsertRecord($data)) {
+                        $this->setError($dbKITformCommands->getError());
+                        return false;
+                    }
+                    $commands_array[$dbIdeaProjectUsers->email_command_array[$command]] = array(
+                            'link' => sprintf('%s?%s#%s',
+                                    $this->getURLofProjectGroup($project[dbIdeaProject::field_project_group]),
+                                    http_build_query(array(
+                                            kitIdeaFrontend::REQUEST_PROJECT_ACTION => kitIdeaFrontend::ACTION_COMMAND,
+                                            kitIdeaFrontend::REQUEST_COMMAND => $cmd
+                                    )),
+                                    kitIdeaFrontend::ANCHOR
+                            )
+                    );
+                }
+
+                // create message body
+                $body_data = array(
+                        'status' => array(
+                                'info' => $stat[dbIdeaStatusChange::FIELD_INFO],
+                                'date' => $stat[dbIdeaStatusChange::FIELD_INFO_DATE]
+                        ),
+                        'project' => array(
+                                'id' => $project_id
+                        ),
+                        'commands' => $commands_array
+                );
+                $body = $this->getTemplate('status.update.immediate.lte', $body_data);
+
                 $kitMail = new kitMail();
                 if (!$kitMail->mail($project[dbIdeaProject::field_title], $body, $kitMail->From, $kitMail->FromName, array($contact[kitContactInterface::kit_email] => $contact[kitContactInterface::kit_email]))) {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitMail->getMailError()));
@@ -502,6 +573,11 @@ class ideaCronjob {
         return true;
     } // processImmediateMails()
 
+    /**
+     * Processing the daily reports for the desired users
+     *
+     * @return boolean
+     */
     protected function processDailyMails() {
         global $dbIdeaStatusChange;
         global $dbIdeaCfg;
@@ -509,6 +585,9 @@ class ideaCronjob {
         global $kitContactInterface;
         global $dbIdeaProject;
         global $dbIdeaProjectGroups;
+        global $kitLibrary;
+        global $dbKITformCommands;
+        global $dbCronjobData;
 
         $where = array(dbIdeaProjectGroups::field_status => dbIdeaProjectGroups::status_active);
         $project_groups = array();
@@ -519,21 +598,33 @@ class ideaCronjob {
 
         // step through the project groups and gather the daily status infos
         foreach ($project_groups as $project_group) {
-
-        }
-
-        $where = array(dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_IMMEDIATE);
-        $status = array();
-        if (!$dbIdeaStatusChange->sqlSelectRecord($where, $status)) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
-            return false;
-        }
-        // walk through the status messages
-        foreach ($status as $stat) {
-            // get the users of this project
-            $project_id = $stat[dbIdeaStatusChange::FIELD_PROJECT_ID];
+            // get the status changes for this group
             $where = array(
-                    dbIdeaProjectUsers::field_group_id => $stat[dbIdeaStatusChange::FIELD_PROJECT_GROUP],
+                    dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_IMMEDIATE,
+                    dbIdeaStatusChange::FIELD_PROJECT_GROUP => $project_group[dbIdeaProjectGroups::field_id]
+                    );
+            $status = array();
+            if (!$dbIdeaStatusChange->sqlSelectRecord($where, $status)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
+                return false;
+            }
+            $report = '';
+            foreach ($status as $stat) {
+                $report .= date(idea_cfg_datetime_str, strtotime($stat[dbIdeaStatusChange::FIELD_INFO_DATE]));
+                $report .= "\r\n";
+                $report .= $stat[dbIdeaStatusChange::FIELD_INFO];
+                $report .= "\r\n\r\n";
+                // change the status
+                $where = array(dbIdeaStatusChange::FIELD_ID => $stat[dbIdeaStatusChange::FIELD_ID]);
+                $data = array(dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_DAILY);
+                if (!$dbIdeaStatusChange->sqlUpdateRecord($data, $where)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
+                    return false;
+                }
+            }
+            // get the users for this project with daily reporting
+            $where = array(
+                    dbIdeaProjectUsers::field_group_id => $project_group[dbIdeaProjectGroups::field_id],
                     dbIdeaProjectUsers::field_email_info => dbIdeaProjectUsers::EMAIL_DAILY
             );
             $users = array();
@@ -541,30 +632,9 @@ class ideaCronjob {
                 $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
                 return false;
             }
-            // get project informations
-            $where = array(dbIdeaProject::field_id => $project_id);
-            $project = array();
-            if (!$dbIdeaProject->sqlSelectRecord($where, $project)) {
-                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
-                return false;
-            }
-            if (count($project) < 1) {
-                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
-                return false;
-            }
-            $project = $project[0];
 
-            // create message body
-            $body_data = array(
-                    'status' => array(
-                            'info' => $stat[dbIdeaStatusChange::FIELD_INFO],
-                            'date' => $stat[dbIdeaStatusChange::FIELD_INFO_DATE]
-                    ),
-                    'project' => array(
-                            'id' => $project_id
-                    ),
-            );
-            $body = $this->getTemplate('status.update.immediate.lte', $body_data);
+            // leave if nothing is do...
+            if (empty($report)) continue;
 
             // loop through the users and send the messages
             foreach ($users as $user) {
@@ -574,22 +644,397 @@ class ideaCronjob {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
                     return false;
                 }
+
+                // create commands for changing the mail delivery
+                $commands = array(
+                        dbIdeaProjectUsers::EMAIL_NO_EMAIL,
+                        dbIdeaProjectUsers::EMAIL_IMMEDIATE,
+                        dbIdeaProjectUsers::EMAIL_DAILY,
+                        dbIdeaProjectUsers::EMAIL_WEEKLY,
+                        dbIdeaProjectUsers::EMAIL_MONTHLY);
+                $commands_array = array();
+                foreach ($commands as $command) {
+                    $cmd = $kitLibrary->createGUID();
+                    $data = array(
+                            dbKITformCommands::FIELD_COMMAND => $cmd,
+                            dbKITformCommands::FIELD_PARAMS => http_build_query(array(
+                                    'project_group' => $project_group[dbIdeaProjectGroups::field_id],
+                                    'contact' => $contact,
+                                    'kit_id' => $user[dbIdeaProjectUsers::field_kit_id],
+                                    'email_info' => $command
+                            )),
+                            dbKITformCommands::FIELD_TYPE => dbKITformCommands::TYPE_IDEA_EMAIL_INFO,
+                            dbKITformCommands::FIELD_STATUS => dbKITformCommands::STATUS_WAITING
+                    );
+                    if (!$dbKITformCommands->sqlInsertRecord($data)) {
+                        $this->setError($dbKITformCommands->getError());
+                        return false;
+                    }
+                    $commands_array[$dbIdeaProjectUsers->email_command_array[$command]] = array(
+                            'link' => sprintf('%s?%s#%s',
+                                    $this->getURLofProjectGroup($project_group[dbIdeaProjectGroups::field_id]),
+                                    http_build_query(array(
+                                            kitIdeaFrontend::REQUEST_PROJECT_ACTION => kitIdeaFrontend::ACTION_COMMAND,
+                                            kitIdeaFrontend::REQUEST_COMMAND => $cmd
+                                    )),
+                                    kitIdeaFrontend::ANCHOR
+                            )
+                    );
+                }
+
+                // create message body
+                $body_data = array(
+                        'report' => $report,
+                        'commands' => $commands_array
+                );
+                $body = $this->getTemplate('status.update.daily.lte', $body_data);
+
                 $kitMail = new kitMail();
-                if (!$kitMail->mail($project[dbIdeaProject::field_title], $body, $kitMail->From, $kitMail->FromName, array($contact[kitContactInterface::kit_email] => $contact[kitContactInterface::kit_email]))) {
+                if (!$kitMail->mail($project_group[dbIdeaProjectGroups::field_name], $body, $kitMail->From, $kitMail->FromName, array($contact[kitContactInterface::kit_email] => $contact[kitContactInterface::kit_email]))) {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitMail->getMailError()));
+                    return false;
+                }
+            } // foreach user
+        } // foreach project groups
+
+        // now set cronjob to the next day ...
+        $this->setNextMailDaily();
+
+        // set last call
+        $where = array(dbCronjobData::field_item => self::IDEA_LAST_MAIL_DAILY);
+        $data = array(dbCronjobData::field_value => date('Y-m-d H:i:s'));
+        if (!$dbCronjobData->sqlUpdateRecord($data, $where)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbCronjobData->getError()));
+            return false;
+        }
+        return true;
+    } // processDailyMails()
+
+
+    /**
+     * Processing the weekly reports for the desired users
+     *
+     * @return boolean
+     */
+    protected function processWeeklyMails() {
+        global $dbIdeaStatusChange;
+        global $dbIdeaCfg;
+        global $dbIdeaProjectUsers;
+        global $kitContactInterface;
+        global $dbIdeaProject;
+        global $dbIdeaProjectGroups;
+        global $kitLibrary;
+        global $dbKITformCommands;
+        global $dbCronjobData;
+
+        $where = array(dbIdeaProjectGroups::field_status => dbIdeaProjectGroups::status_active);
+        $project_groups = array();
+        if (!$dbIdeaProjectGroups->sqlSelectRecord($where, $project_groups)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectGroups->getError()));
+            return false;
+        }
+
+        // step through the project groups and gather the daily status infos
+        foreach ($project_groups as $project_group) {
+            // get the status changes for this group
+            $where = array(
+                    dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_DAILY,
+                    dbIdeaStatusChange::FIELD_PROJECT_GROUP => $project_group[dbIdeaProjectGroups::field_id]
+            );
+            $status = array();
+            if (!$dbIdeaStatusChange->sqlSelectRecord($where, $status)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
+                return false;
+            }
+            $report = '';
+            foreach ($status as $stat) {
+                $report .= date(idea_cfg_datetime_str, strtotime($stat[dbIdeaStatusChange::FIELD_INFO_DATE]));
+                $report .= "\r\n";
+                $report .= $stat[dbIdeaStatusChange::FIELD_INFO];
+                $report .= "\r\n\r\n";
+                // change the status
+                $where = array(dbIdeaStatusChange::FIELD_ID => $stat[dbIdeaStatusChange::FIELD_ID]);
+                $data = array(dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_WEEKLY);
+                if (!$dbIdeaStatusChange->sqlUpdateRecord($data, $where)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
                     return false;
                 }
             }
 
-            // change the status
-            $where = array(dbIdeaStatusChange::FIELD_ID => $stat[dbIdeaStatusChange::FIELD_ID]);
-            $data = array(dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_IMMEDIATE);
-            if (!$dbIdeaStatusChange->sqlUpdateRecord($data, $where)) {
+            // leave if nothing is do...
+            if (empty($report)) continue;
+
+            // get the users for this project with weekly reporting
+            $where = array(
+                    dbIdeaProjectUsers::field_group_id => $project_group[dbIdeaProjectGroups::field_id],
+                    dbIdeaProjectUsers::field_email_info => dbIdeaProjectUsers::EMAIL_WEEKLY
+            );
+            $users = array();
+            if (!$dbIdeaProjectUsers->sqlSelectRecord($where, $users)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
+                return false;
+            }
+
+            // loop through the users and send the messages
+            foreach ($users as $user) {
+                if ($user[dbIdeaProjectUsers::field_kit_id] < 1) continue;
+                $contact = array();
+                if (!$kitContactInterface->getContact($user[dbIdeaProjectUsers::field_kit_id], $contact)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+                    return false;
+                }
+
+                // create commands for changing the mail delivery
+                $commands = array(
+                        dbIdeaProjectUsers::EMAIL_NO_EMAIL,
+                        dbIdeaProjectUsers::EMAIL_IMMEDIATE,
+                        dbIdeaProjectUsers::EMAIL_DAILY,
+                        dbIdeaProjectUsers::EMAIL_WEEKLY,
+                        dbIdeaProjectUsers::EMAIL_MONTHLY);
+                $commands_array = array();
+                foreach ($commands as $command) {
+                    $cmd = $kitLibrary->createGUID();
+                    $data = array(
+                            dbKITformCommands::FIELD_COMMAND => $cmd,
+                            dbKITformCommands::FIELD_PARAMS => http_build_query(array(
+                                    'project_group' => $project_group[dbIdeaProjectGroups::field_id],
+                                    'contact' => $contact,
+                                    'kit_id' => $user[dbIdeaProjectUsers::field_kit_id],
+                                    'email_info' => $command
+                            )),
+                            dbKITformCommands::FIELD_TYPE => dbKITformCommands::TYPE_IDEA_EMAIL_INFO,
+                            dbKITformCommands::FIELD_STATUS => dbKITformCommands::STATUS_WAITING
+                    );
+                    if (!$dbKITformCommands->sqlInsertRecord($data)) {
+                        $this->setError($dbKITformCommands->getError());
+                        return false;
+                    }
+                    $commands_array[$dbIdeaProjectUsers->email_command_array[$command]] = array(
+                            'link' => sprintf('%s?%s#%s',
+                                    $this->getURLofProjectGroup($project_group[dbIdeaProjectGroups::field_id]),
+                                    http_build_query(array(
+                                            kitIdeaFrontend::REQUEST_PROJECT_ACTION => kitIdeaFrontend::ACTION_COMMAND,
+                                            kitIdeaFrontend::REQUEST_COMMAND => $cmd
+                                    )),
+                                    kitIdeaFrontend::ANCHOR
+                            )
+                    );
+                }
+
+                // create message body
+                $body_data = array(
+                        'report' => $report,
+                        'commands' => $commands_array
+                );
+                $body = $this->getTemplate('status.update.weekly.lte', $body_data);
+
+                $kitMail = new kitMail();
+                if (!$kitMail->mail($project_group[dbIdeaProjectGroups::field_name], $body, $kitMail->From, $kitMail->FromName, array($contact[kitContactInterface::kit_email] => $contact[kitContactInterface::kit_email]))) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitMail->getMailError()));
+                    return false;
+                }
+            } // foreach user
+        } // foreach project groups
+
+        // now set cronjob to next week...
+        $this->setNextMailWeekly();
+
+        // set last call
+        $where = array(dbCronjobData::field_item => self::IDEA_LAST_MAIL_WEEKLY);
+        $data = array(dbCronjobData::field_value => date('Y-m-d H:i:s'));
+        if (!$dbCronjobData->sqlUpdateRecord($data, $where)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbCronjobData->getError()));
+            return false;
+        }
+
+        return true;
+    } // processWeeklyMails()
+
+    /**
+     * Processing the monthly reports for the desired users
+     *
+     * @return boolean
+     */
+    protected function processMonthlyMails() {
+        global $dbIdeaStatusChange;
+        global $dbIdeaCfg;
+        global $dbIdeaProjectUsers;
+        global $kitContactInterface;
+        global $dbIdeaProject;
+        global $dbIdeaProjectGroups;
+        global $kitLibrary;
+        global $dbKITformCommands;
+        global $dbCronjobData;
+
+        $where = array(dbIdeaProjectGroups::field_status => dbIdeaProjectGroups::status_active);
+        $project_groups = array();
+        if (!$dbIdeaProjectGroups->sqlSelectRecord($where, $project_groups)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectGroups->getError()));
+            return false;
+        }
+
+        // step through the project groups and gather the daily status infos
+        foreach ($project_groups as $project_group) {
+            // get the status changes for this group
+            $where = array(
+                    dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_WEEKLY,
+                    dbIdeaStatusChange::FIELD_PROJECT_GROUP => $project_group[dbIdeaProjectGroups::field_id]
+            );
+            $status = array();
+            if (!$dbIdeaStatusChange->sqlSelectRecord($where, $status)) {
                 $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
                 return false;
             }
+            $report = '';
+            foreach ($status as $stat) {
+                $report .= date(idea_cfg_datetime_str, strtotime($stat[dbIdeaStatusChange::FIELD_INFO_DATE]));
+                $report .= "\r\n";
+                $report .= $stat[dbIdeaStatusChange::FIELD_INFO];
+                $report .= "\r\n\r\n";
+                // change the status
+                $where = array(dbIdeaStatusChange::FIELD_ID => $stat[dbIdeaStatusChange::FIELD_ID]);
+                $data = array(dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_MONTHLY);
+                if (!$dbIdeaStatusChange->sqlUpdateRecord($data, $where)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
+                    return false;
+                }
+            }
+            // leave if nothing is do...
+            if (empty($report)) continue;
+
+            // get the users for this project with monthly reporting
+            $where = array(
+                    dbIdeaProjectUsers::field_group_id => $project_group[dbIdeaProjectGroups::field_id],
+                    dbIdeaProjectUsers::field_email_info => dbIdeaProjectUsers::EMAIL_MONTHLY
+            );
+            $users = array();
+            if (!$dbIdeaProjectUsers->sqlSelectRecord($where, $users)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
+                return false;
+            }
+
+            // loop through the users and send the messages
+            foreach ($users as $user) {
+                if ($user[dbIdeaProjectUsers::field_kit_id] < 1) continue;
+                $contact = array();
+                if (!$kitContactInterface->getContact($user[dbIdeaProjectUsers::field_kit_id], $contact)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+                    return false;
+                }
+
+                // create commands for changing the mail delivery
+                $commands = array(
+                        dbIdeaProjectUsers::EMAIL_NO_EMAIL,
+                        dbIdeaProjectUsers::EMAIL_IMMEDIATE,
+                        dbIdeaProjectUsers::EMAIL_DAILY,
+                        dbIdeaProjectUsers::EMAIL_WEEKLY,
+                        dbIdeaProjectUsers::EMAIL_MONTHLY);
+                $commands_array = array();
+                foreach ($commands as $command) {
+                    $cmd = $kitLibrary->createGUID();
+                    $data = array(
+                            dbKITformCommands::FIELD_COMMAND => $cmd,
+                            dbKITformCommands::FIELD_PARAMS => http_build_query(array(
+                                    'project_group' => $project_group[dbIdeaProjectGroups::field_id],
+                                    'contact' => $contact,
+                                    'kit_id' => $user[dbIdeaProjectUsers::field_kit_id],
+                                    'email_info' => $command
+                            )),
+                            dbKITformCommands::FIELD_TYPE => dbKITformCommands::TYPE_IDEA_EMAIL_INFO,
+                            dbKITformCommands::FIELD_STATUS => dbKITformCommands::STATUS_WAITING
+                    );
+                    if (!$dbKITformCommands->sqlInsertRecord($data)) {
+                        $this->setError($dbKITformCommands->getError());
+                        return false;
+                    }
+                    $commands_array[$dbIdeaProjectUsers->email_command_array[$command]] = array(
+                            'link' => sprintf('%s?%s#%s',
+                                    $this->getURLofProjectGroup($project_group[dbIdeaProjectGroups::field_id]),
+                                    http_build_query(array(
+                                            kitIdeaFrontend::REQUEST_PROJECT_ACTION => kitIdeaFrontend::ACTION_COMMAND,
+                                            kitIdeaFrontend::REQUEST_COMMAND => $cmd
+                                    )),
+                                    kitIdeaFrontend::ANCHOR
+                            )
+                    );
+                }
+
+                // create message body
+                $body_data = array(
+                        'report' => $report,
+                        'commands' => $commands_array
+                );
+                $body = $this->getTemplate('status.update.monthly.lte', $body_data);
+
+                $kitMail = new kitMail();
+                if (!$kitMail->mail($project_group[dbIdeaProjectGroups::field_name], $body, $kitMail->From, $kitMail->FromName, array($contact[kitContactInterface::kit_email] => $contact[kitContactInterface::kit_email]))) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitMail->getMailError()));
+                    return false;
+                }
+            } // foreach user
+        } // foreach project groups
+
+        // now set cronjob to next month ...
+        $this->setNextMailMonthly();
+
+        // set last call
+        $where = array(dbCronjobData::field_item => self::IDEA_LAST_MAIL_MONTHLY);
+        $data = array(dbCronjobData::field_value => date('Y-m-d H:i:s'));
+        if (!$dbCronjobData->sqlUpdateRecord($data, $where)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbCronjobData->getError()));
+            return false;
         }
+
         return true;
-    } // processDailyMails()
+    } // processMonthlyMails()
+
+
+    /**
+     * search for the droplet kit_idea by the desired project group
+     * and returns the url to this page
+     *
+     * @param integer $project_group
+     * @return boolean|string - URL on succes, false on error or fail
+     */
+    protected function getURLofProjectGroup($project_group) {
+        global $database;
+        global $kitTools;
+
+        $dbWYSIWYG = new db_wb_mod_wysiwyg();
+        $SQL = sprintf(	"SELECT %s FROM %s WHERE ((%s LIKE '%%[[%s?%%') OR (%s LIKE '%%[[%s]]%%')) AND (%s LIKE '%%group=%d%%')",
+                db_wb_mod_wysiwyg::field_page_id,
+                $dbWYSIWYG->getTableName(),
+                db_wb_mod_wysiwyg::field_text,
+                'kit_idea',
+                db_wb_mod_wysiwyg::field_text,
+                'kit_idea',
+                db_wb_mod_wysiwyg::field_text,
+                $project_group);
+        $result = array();
+        if (!$dbWYSIWYG->sqlExec($SQL, $result)) {
+            $this->setError(sprintf('[%s - %s] %s', __FUNCTION__, __LINE__, $dbWYSIWYG->getError()));
+            return false;
+        }
+        if (count($result) > 0) {
+            $url = '';
+            $kitTools->getUrlByPageID($result[0][db_wb_mod_wysiwyg::field_page_id], $url, true);
+            return $url;
+        }
+        // moeglicher Weise TOPICs?
+        $SQL = sprintf("SHOW TABLE STATUS LIKE '%smod_topics'", TABLE_PREFIX);
+        $query = $database->query($SQL);
+        if ($query->numRows() > 0) {
+            // TOPICS ist installiert
+            $SQL = sprintf(	"SELECT link FROM %smod_topics WHERE ((content_long LIKE '%%[[%s?%%') OR (content_long LIKE '%%[[%s]]%%')) AND (content_long LIKE '%%group=%d%%')",
+                    TABLE_PREFIX,
+                    'kit_idea',
+                    'kit_idea',
+                    $project_group);
+            if (null != ($link = $database->get_one($SQL, MYSQL_ASSOC))) {
+                return WB_URL.PAGES_DIRECTORY.'/topics/'.$link.PAGE_EXTENSION;
+            }
+        }
+        return false;
+    } // getURLofProjectGroup()
 
 } // class ideaCronjob

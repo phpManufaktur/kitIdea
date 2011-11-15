@@ -180,6 +180,22 @@ if ($message != "") {
   echo '<script language="javascript">alert ("'.$message.'");</script>';
 }
 
+// delete no longer needed files
+$delete_files = array(
+        'kit_idea.js',
+        'kit_idea.preset',
+        'class.status.mail.php',
+        'templates/1/DE/mail.article.inserted.lte',
+        'templates/1/DE/mail.article.update.lte',
+        'templates/1/DE/mail.project.inserted.lte',
+        'templates/1/DE/mail.project.updated.lte'
+        );
+foreach ($delete_files as $file) {
+    if (file_exists(WB_PATH.'/modules/kit_idea/'.$file)) {
+        @unlink(WB_PATH.'/modules/kit_idea/'.$file);
+    }
+}
+
 // Prompt Errors
 if (!empty($error)) {
 	$admin->print_error($error);

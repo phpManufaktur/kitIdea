@@ -1185,34 +1185,54 @@ class kitIdeaBackend {
 			),
 		);
 
+		$email_info_options = array();
+		foreach ($dbIdeaProjectUsers->email_info_array as $info) {
+		    $email_info_options[] = array(
+		            'value' => $info['value'],
+		            'text' => $info['text'],
+		            'selected' => ($user[dbIdeaProjectUsers::field_email_info] == $info['value']) ? 1 : 0
+		    );
+		}
+
 		$data = array(
-			'form'					=> array(
-				'name'				=> 'user_edit',
-				'action'			=> $this->page_link,
-				'head'				=> idea_head_user_edit,
-				'is_message'	=> $this->isMessage() ? 1 : 0,
-				'intro'				=> $this->isMessage() ? $this->getMessage() : idea_intro_user_edit,
-				'btn'					=> array('ok' => kit_btn_ok, 'abort' => kit_btn_abort)
+			'form' => array(
+				'name' => 'user_edit',
+				'action' => $this->page_link,
+				'head' => idea_head_user_edit,
+				'is_message' => $this->isMessage() ? 1 : 0,
+				'intro' => $this->isMessage() ? $this->getMessage() : idea_intro_user_edit,
+				'btn' => array('ok' => kit_btn_ok, 'abort' => kit_btn_abort)
 				),
-			'action'				=> array(
-				'name'				=> self::request_action,
-				'value'				=> self::action_user_edit_check
+			'action' => array(
+				'name' => self::request_action,
+				'value'	=> self::action_user_edit_check
 				),
-			'user_id'				=> array(
-				'name'				=> dbIdeaProjectUsers::field_id,
-				'value'				=> $user_id
+			'user_id' => array(
+				'name' => dbIdeaProjectUsers::field_id,
+				'value'	=> $user_id
 				),
-			'group_id'			=> array(
-				'name'				=> dbIdeaProjectUsers::field_group_id,
-				'value'				=> $group_id
+			'group_id' => array(
+				'name' => dbIdeaProjectUsers::field_group_id,
+				'value'	=> $group_id
 				),
-			'select_group'	=> $select_group,
-			'user'					=> $contact,
-			'permissions'		=> $permissions
+			'select_group' => $select_group,
+			'user' => $contact,
+			'permissions' => $permissions,
+		    'email_info' => array(
+		            'label' => idea_label_email_info,
+		            'name' => dbIdeaProjectUsers::field_email_info,
+		            'options' => $email_info_options,
+		            'hint' => idea_hint_email_info
+		            )
 		);
 		return $this->getTemplate('backend.user.edit.lte', $data);
 	} // dlgUserEdit()
 
+	/**
+	 * Check data changes in the user record and update the record
+	 *
+	 * @return string dlgUserEdit()
+	 */
 	public function checkUserEdit() {
 		global $dbIdeaProjectUsers;
 
@@ -1224,6 +1244,7 @@ class kitIdeaBackend {
 		$user_id = $_REQUEST[dbIdeaProjectUsers::field_id];
 		$group_id = $_REQUEST[dbIdeaProjectUsers::field_group_id];
 		$access = $_REQUEST[dbIdeaProjectUsers::field_access];
+		$email_info = isset($_REQUEST[dbIdeaProjectUsers::field_email_info]) ? $_REQUEST[dbIdeaProjectUsers::field_email_info] : dbIdeaProjectUsers::EMAIL_UNDEFINED;
 		unset($_REQUEST[dbIdeaProjectUsers::field_access]);
 
 		$where = array(dbIdeaProjectUsers::field_group_id => $group_id, dbIdeaProjectUsers::field_id => $user_id);
@@ -1239,9 +1260,12 @@ class kitIdeaBackend {
 		}
 		$user = $user[0];
 
-		if ($user[dbIdeaProjectUsers::field_access] != $access) {
+		if (($user[dbIdeaProjectUsers::field_access] != $access) || ($user[dbIdeaProjectUsers::field_email_info] != $email_info)) {
 			// record has changed
-			$data = array(dbIdeaProjectUsers::field_access => $access);
+			$data = array(
+			        dbIdeaProjectUsers::field_access => $access,
+			        dbIdeaProjectUsers::field_email_info => $email_info
+			        );
 			if (!$dbIdeaProjectUsers->sqlUpdateRecord($data, $where)) {
 				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
 				return false;

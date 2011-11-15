@@ -14,20 +14,24 @@
  *
  * Use {dump()} to get a list of all in this template available variables!
  *}
-{$status.date}
-{$status.info}
+Monatliche Zusammenfassung: 
+ 
+{$report}
 
 ##### AUTOMATISCHE BENACHRICHTIGUNG durch kitIdea #####
  
-Sie erhalten momentan bei jeder Änderung in dieser Projektgruppe eine Benachrichtigung.
+Sie haben eine monatliche Zusammenfassung der Änderung in dieser Projektgruppe abonniert. Verwenden Sie die folgenden Links um ihr Abonnement zu ändern.
 
-Benachrichtigung komplett ausschalten: 
-{$commands.no_email.link}
+Sofortige Benachrichtigung bei jeder Änderung: 
+{$commands.immediate.link}
 
-auf eine tägliche Zusammenfassung umschalten: 
+Tägliche Zusammenfassung der Änderungen:
 {$commands.daily.link}
 
-auf eine wöchentliche Zusammenfassung umschalten:
+Wöchentliche Zusammenfassung der Änderungen:
 {$commands.weekly.link}
+ 
+Abonnement abbestellen: 
+{$commands.no_email.link}
  
 Die Links zum Ändern der Benachrichtigung können nur ein einziges Mal verwendet werden und sind maximal 14 Tage gültig.

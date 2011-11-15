@@ -17,7 +17,7 @@
 <script type="text/javascript">
   var WB_URL = '{$WB_URL}';
 </script>
-<div class="idea_frontend">
+<div class="idea_frontend"><a name="{$anchor}"></a>
   <ul class="nav_tab">
   {foreach $navigation nav}
     {if $nav.active == 1}

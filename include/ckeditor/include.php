@@ -43,7 +43,7 @@ $files = array(
 		'/editor.templates.js',
 		'/js/editor.templates.js',
 		'editor/editor.templates.js'
-	), 
+	),
 	'customConfig' => Array(
 		'/wb_ckconfig.js',
 		'/js/wb_ckconfig.js',
@@ -105,7 +105,7 @@ class CKEditor_Plus extends CKEditor {
 	 *
 	 */
 	public $pretty = true;
-	
+
 	/**
 	 *	@var	array
 	 *
@@ -128,15 +128,15 @@ class CKEditor_Plus extends CKEditor {
 	 *
 	 */
 	public function reverse_htmlentities(&$html_source) {
-	
+
 		$html_source = str_replace(
-			array_keys( $this->lookup_html ), 
-			array_values( $this->lookup_html ), 
+			array_keys( $this->lookup_html ),
+			array_values( $this->lookup_html ),
 			$html_source
 		);
     }
-    
-    
+
+
   /**
    *	Looks for an (local) url
    *
@@ -147,9 +147,9 @@ class CKEditor_Plus extends CKEditor {
    *
    */
   public function resolve_path($key= "", $aPath, $aPath_default, $path_addition="") {
-  	global $paths;    	
+  	global $paths;
   	$temp = WB_PATH.$aPath;
-    	
+
   	if (true === file_exists($temp)) {
    		$aPath = $path_addition.WB_URL.$aPath;
    	} else {
@@ -162,7 +162,7 @@ class CKEditor_Plus extends CKEditor {
    		$this->config[$key] = $aPath;
    	}
    }
-    
+
   /**
    *	More or less for debugging
    *
@@ -172,14 +172,14 @@ class CKEditor_Plus extends CKEditor {
    *
    */
   public function to_HTML($name, &$content) {
-  	$old_return = $this->returnOutput;  	
-   	$this->returnOutput = true;    	
+  	$old_return = $this->returnOutput;
+   	$this->returnOutput = true;
    	$temp_HTML= $this->editor($name, $content);
-   	$this->returnOutput = $old_return;    	
+   	$this->returnOutput = $old_return;
    	if (true === $this->pretty) {
    		$temp_HTML = str_replace (",", ",\n ", $temp_HTML);
    		$temp_HTML = "\n\n\n".$temp_HTML."\n\n\n";
-   	}    	
+   	}
    	return $temp_HTML;
   }
 }
@@ -190,7 +190,7 @@ $ckeditor = new CKEditor_Plus( WB_URL.'/modules/kit_idea/include/ckeditor/ckedit
  *	Looking for the styles
  *
  */
-$ckeditor->resolve_path( 
+$ckeditor->resolve_path(
 	'contentsCss',
 	'/modules/kit_idea/include/ckeditor/wb_config/custom/editor.css',
 	'/modules/kit_idea/include/ckeditor/wb_config/default/editor.css'
@@ -246,13 +246,13 @@ $uploadPath = $ckeditor->basePath.'filemanager/connectors/php/upload.php?Type=';
 $ckeditor->config['filebrowserUploadUrl'] = $uploadPath.'File';
 $ckeditor->config['filebrowserImageUploadUrl'] = $uploadPath.'Image';
 $ckeditor->config['filebrowserFlashUploadUrl'] = $uploadPath.'Flash';
-    
+
 /**
  *	Setup the CKE language
  *
  */
 $ckeditor->config['language'] = strtolower(LANGUAGE);
-    
+
 /**
  *	Get the config file
  *
@@ -267,22 +267,22 @@ $ckeditor->resolve_path(
  *	Getting the values from the editor_admin db-field
  *
  */
- 
+
 /**
- *	To avoid a double "else" inside the following condition, we set the 
+ *	To avoid a double "else" inside the following condition, we set the
  *	default toolbar here to "WB_Full". Keep in mind, that the config will overwrite all
  *	settings inside the config.js or wb_config.js BUT you will have to defined the toolbar inside
  *	them at all!
  *
  */
 
-$ckeditor->config['toolbar'] = 'Simple'; 
-$ckeditor->config['height'] = '250px'; 
-$ckeditor->config['width'] = '100%'; 
-$ckeditor->config['skin'] = 'kama'; 
+$ckeditor->config['toolbar'] = 'Simple';
+$ckeditor->config['height'] = '250px';
+$ckeditor->config['width'] = '100%';
+$ckeditor->config['skin'] = 'kama';
 
 /**
- *	Force the object to print/echo direct instead of returning the 
+ *	Force the object to print/echo direct instead of returning the
  *	HTML source string.
  *
  */
@@ -298,7 +298,7 @@ $ckeditor->config['scayt_autoStartup'] = false;
 
 /**
  *	Function called by parent, default by the wysiwyg-module
- *	
+ *
  *	@param	string	The name of the textarea to watch
  *	@param	mixed	  The "id" - some other modules handel this param differ
  *	@param	string	Optional the width, default "100%" of given space.
@@ -306,14 +306,16 @@ $ckeditor->config['scayt_autoStartup'] = false;
  *
  *
  */
-function show_wysiwyg_editor($name, $id, $content, $width = '100%', $height = '250px') {
-	global $ckeditor;
-	
-	if ($ckeditor->force)  {
-		$ckeditor->config['height'] = $height;
-		$ckeditor->config['width'] = $width;
-	}
-	$ckeditor->reverse_htmlentities($content);
-	echo $ckeditor->to_HTML($name, $content);
+if (!function_exists('show_wysiwyg_editor')) {
+    function show_wysiwyg_editor($name, $id, $content, $width = '100%', $height = '250px') {
+    	global $ckeditor;
+
+    	if ($ckeditor->force)  {
+    		$ckeditor->config['height'] = $height;
+    		$ckeditor->config['width'] = $width;
+    	}
+    	$ckeditor->reverse_htmlentities($content);
+    	echo $ckeditor->to_HTML($name, $content);
+    }
 }
 ?>

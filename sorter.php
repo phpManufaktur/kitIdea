@@ -2,14 +2,13 @@
 
 /**
  * kitIdea
- * 
+ *
  * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
  * @link http://phpmanufaktur.de
  * @copyright 2011
  * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
  * @version $Id$
  */
-
 // Mindestparameter gesetzt?
 if (!isset($_POST['rowID']) || !isset($_POST['sorter_table'])) exit();
 // Sorter ausgeschaltet?
@@ -19,6 +18,7 @@ require_once('../../config.php');
 require_once(WB_PATH.'/framework/initialize.php');
 
 global $database;
+echo "hix!";
 
 $sorter_table = $_POST['sorter_table'];
 switch ($sorter_table):
@@ -68,5 +68,5 @@ case 'mod_kit_idea_project_group':
 	break;
 default:
 	echo "no handling defined for: ".$_POST['sorter_table'];
-endswitch;  
+endswitch;
 ?>
