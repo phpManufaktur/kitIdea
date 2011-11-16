@@ -33,7 +33,7 @@ if (defined('WB_PATH')) {
 $module_directory     = 'kit_idea';
 $module_name          = 'kitIdea';
 $module_function      = 'tool';
-$module_version       = '0.17';
+$module_version       = '0.18';
 $module_status        = 'Beta';
 $module_platform      = '2.8';
 $module_author        = 'Ralf Hertsch, Berlin (Germany)';

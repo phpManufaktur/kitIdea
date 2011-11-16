@@ -32,8 +32,9 @@ require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/initialize.php';
 
 class kitIdeaBackend {
 
-	const request_action							= 'act';
-	const request_items								= 'its';
+	const request_action = 'act';
+	const request_items = 'its';
+	const request_all_groups = 'ag';
 
 	const action_about								= 'abt';
 	const action_config								= 'cfg';
@@ -1222,7 +1223,12 @@ class kitIdeaBackend {
 		            'label' => idea_label_email_info,
 		            'name' => dbIdeaProjectUsers::field_email_info,
 		            'options' => $email_info_options,
-		            'hint' => idea_hint_email_info
+		            'hint' => idea_hint_email_info,
+		            'all_groups' => array(
+		                    'name' => self::request_all_groups,
+		                    'value' => 1,
+		                    'text' => idea_str_change_all_groups
+		                    )
 		            )
 		);
 		return $this->getTemplate('backend.user.edit.lte', $data);
@@ -1269,6 +1275,17 @@ class kitIdeaBackend {
 			if (!$dbIdeaProjectUsers->sqlUpdateRecord($data, $where)) {
 				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
 				return false;
+			}
+			// check if change of email_info should applied to all other groups
+			if (($user[dbIdeaProjectUsers::field_email_info] != $email_info) &&
+			        (isset($_REQUEST[self::request_all_groups]) && ($_REQUEST[self::request_all_groups] == 1))) {
+			    // change email_info in all groups
+			    $where = array(dbIdeaProjectUsers::field_kit_id => $user[dbIdeaProjectUsers::field_kit_id]);
+			    $data = array(dbIdeaProjectUsers::field_email_info =>$email_info);
+			    if (!$dbIdeaProjectUsers->sqlUpdateRecord($data, $where)) {
+			        $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
+			        return false;
+			    }
 			}
 			$this->setMessage(idea_msg_user_updated);
 		}

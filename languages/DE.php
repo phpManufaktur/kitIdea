@@ -285,6 +285,7 @@ define('idea_str_access_group_4',				'Projekt Admins');
 define('idea_str_access_group_5',				'- Reserve -');
 define('idea_str_access_public',				'Öffentlich');
 define('idea_str_author_anonymous',				'Anonym');
+define('idea_str_change_all_groups',            'Einstellung in allen Projektgruppen ändern');
 define('idea_str_command_executed',             'Der Befehl wurde erfolgreich ausgeführt.');
 define('idea_str_edit',							'Bearbeiten');
 define('idea_str_email_undefined',              '- nicht festgelegt -');

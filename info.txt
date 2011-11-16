@@ -3,6 +3,12 @@ kitIdea
 Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
+Release 0.18
+2011-11-16
+fixed: visitors can't see public projects
+added: can change email reporting in user settings now for all project groups
+  at once
+
 Release 0.17
 2011-11-15
 changed: kitIdea uses now LibraryAdmin for including jQuery

@@ -924,7 +924,7 @@ class kitIdeaFrontend {
   		$SQL = sprintf( "SELECT * FROM %s WHERE %s='%s' AND %s='%s' AND %s='%s'%s",
   										$dbIdeaProject->getTableName(),
   										dbIdeaProject::field_access,
-  										dbIdeaProject::access_closed,
+  										dbIdeaProject::access_public,
   										dbIdeaProject::field_status,
   										dbIdeaProject::status_active,
   										dbIdeaProject::field_project_group,
@@ -1260,6 +1260,18 @@ class kitIdeaFrontend {
   	}
   	$project = $project[0];
 
+  	// get the access rights for visitors
+  	$visitor_permissions = 0;
+  	if ($project[dbIdeaProject::field_access] == dbIdeaProject::access_public) {
+  	    // public project - the first access group defines the rights for the visitors
+  	    $where = array(dbIdeaProjectGroups::field_id => $project[dbIdeaProject::field_project_group]);
+  	    $pg = array();
+  	    if (!$dbIdeaProjectGroups->sqlSelectRecord($where, $pg)) {
+  	        $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectGroups->getError()));
+  	        return false;
+  	    }
+  	    $visitor_permissions = $pg[0][dbIdeaProjectGroups::field_access_rights_1];
+  	}
 
   	// create project array for parser
   	$project_array = array();
@@ -1374,19 +1386,27 @@ class kitIdeaFrontend {
   		);
   	}
 
-  	if ($this->params[self::PARAM_SECTION_FILES] && $is_authenticated) {
+  	if ($this->params[self::PARAM_SECTION_FILES] &&
+  	        ($is_authenticated ||
+  	                $dbIdeaProjectGroups->checkPermissions($visitor_permissions, dbIdeaProjectGroups::file_download)
+  	                )
+  	        ) {
 	  	// add the section for the files
 	  	$sections[self::IDENTIFIER_FILES] = array(
-	  		'text'				=> idea_tab_files,
-	  		'identifier'	=> self::IDENTIFIER_FILES,
-	  		'link'				=> sprintf(	'%s%s%s',
-	  															$this->page_link,
-	  															(strpos($this->page_link, '?') === false) ? '?' : '&',
-	  															http_build_query(array( self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
-	  																											self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
-	  																											dbIdeaProjectSections::field_identifier => self::IDENTIFIER_FILES,
-	  																											dbIdeaProject::field_id => $project_id))),
-	  		'active'			=> ($section_identifier == self::IDENTIFIER_FILES) ? 1 : 0
+	  	        'text' => idea_tab_files,
+	  	        'identifier' => self::IDENTIFIER_FILES,
+	  	        'link' => sprintf(
+	  	                '%s%s%s',
+	  	                $this->page_link,
+	  	                (strpos($this->page_link, '?') === false) ? '?' : '&',
+	  	                http_build_query(array(
+	  	                        self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+	  	                        self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
+	  	                        dbIdeaProjectSections::field_identifier => self::IDENTIFIER_FILES,
+	  	                        dbIdeaProject::field_id => $project_id
+	  	                        ))
+	  	                ),
+	  	        'active' => ($section_identifier == self::IDENTIFIER_FILES) ? 1 : 0
 	  	);
   	} // section files
 

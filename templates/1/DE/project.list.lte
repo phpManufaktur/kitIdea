@@ -36,7 +36,7 @@
           <td>          
             <div class="idea_project_overview">
               <h2>{$project.title}</h2>
-              <div class="idea_overview_description">{$project.desc_long}</div>
+              <div class="idea_overview_description">{$project.desc_short}</div>
               <div class="idea_overview_commands">[ <a href="{$project.detail_url}">Projekt öffnen</a> ]</div>
             </div>
           </td>

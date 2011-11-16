@@ -52,6 +52,13 @@
         </td>
         <td>{$email_info.hint}</td>
       </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td colspan="2">
+          <input type="checkbox" name="{$email_info.all_groups.name}" value="{$email_info.all_groups.value}" /> {$email_info.all_groups.text}
+        </td>
+        <td>&nbsp;</td>
+      </tr>
       <tr><td colspan="4">&nbsp;</td></tr>
       <tr>
         <td>{$select_group.label}</td>

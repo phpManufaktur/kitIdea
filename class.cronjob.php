@@ -415,10 +415,11 @@ class ideaCronjob {
             $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
             return $this->getError();
         }
+        $ei = $dbIdeaCfg->getValue(dbIdeaCfg::cfgMailDefault);
         foreach ($users as $user) {
-            // set E-Mail delivery to IMMEDIATE by default...
+            // set E-Mail delivery to config settings by default...
             $where = array(dbIdeaProjectUsers::field_id => $user[dbIdeaProjectUsers::field_id]);
-            $data = array(dbIdeaProjectUsers::field_email_info => dbIdeaProjectUsers::EMAIL_IMMEDIATE);
+            $data = array(dbIdeaProjectUsers::field_email_info => $ei);
             if (!$dbIdeaProjectUsers->sqlUpdateRecord($data, $where)) {
                 $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
                 return $this->getError();

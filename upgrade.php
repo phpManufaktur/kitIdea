@@ -58,6 +58,25 @@ global $database;
 
 $error = '';
 
+function getRelease() {
+    // read info.php into array
+    $info_text = file(WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/info.php');
+    if ($info_text == false) {
+        return -1;
+    }
+    // walk through array
+    foreach ($info_text as $item) {
+        if (strpos($item, '$module_version') !== false) {
+            // split string $module_version
+            $value = explode('=', $item);
+            // return floatval
+            return floatval(preg_replace('([\'";,\(\)[:space:][:alpha:]])', '', $value[1]));
+        }
+    }
+    return -1;
+} // getVersion()
+$release = sprintf('%01.2f', getRelease());
+
 // install missing tables
 $tables = array(
         'dbIdeaCfg',
@@ -193,6 +212,16 @@ $delete_files = array(
 foreach ($delete_files as $file) {
     if (file_exists(WB_PATH.'/modules/kit_idea/'.$file)) {
         @unlink(WB_PATH.'/modules/kit_idea/'.$file);
+    }
+}
+
+// special for Release 0.18
+if ($release == '0.18') {
+    $dbIdeaProjectUsers = new dbIdeaProjectUsers();
+    $where = array(dbIdeaProjectUsers::field_status => dbIdeaProjectUsers::status_active);
+    $data = array(dbIdeaProjectUsers::field_email_info => dbIdeaProjectUsers::EMAIL_DAILY);
+    if (!$dbIdeaProjectUsers->sqlUpdateRecord($data, $where)) {
+        $error .= sprintf('[UPGRADE] Operation fail: %s', $dbIdeaProjectUsers->getError());
     }
 }
 
