@@ -11,30 +11,35 @@
 
 // try to include LEPTON class.secure.php to protect this file and the whole CMS!
 if (defined('WB_PATH')) {
-	if (defined('LEPTON_VERSION')) include(WB_PATH.'/framework/class.secure.php');
-} elseif (file_exists($_SERVER['DOCUMENT_ROOT'].'/framework/class.secure.php')) {
-	include($_SERVER['DOCUMENT_ROOT'].'/framework/class.secure.php');
+    if (defined('LEPTON_VERSION')) include (WB_PATH . '/framework/class.secure.php');
+} elseif (file_exists($_SERVER['DOCUMENT_ROOT'] . '/framework/class.secure.php')) {
+    include ($_SERVER['DOCUMENT_ROOT'] . '/framework/class.secure.php');
 } else {
-	$subs = explode('/', dirname($_SERVER['SCRIPT_NAME']));	$dir = $_SERVER['DOCUMENT_ROOT'];
-	$inc = false;
-	foreach ($subs as $sub) {
-		if (empty($sub)) continue; $dir .= '/'.$sub;
-		if (file_exists($dir.'/framework/class.secure.php')) {
-			include($dir.'/framework/class.secure.php'); $inc = true;	break;
-		}
-	}
-	if (!$inc) trigger_error(sprintf("[ <b>%s</b> ] Can't include LEPTON class.secure.php!", $_SERVER['SCRIPT_NAME']), E_USER_ERROR);
+    $subs = explode('/', dirname($_SERVER['SCRIPT_NAME']));
+    $dir = $_SERVER['DOCUMENT_ROOT'];
+    $inc = false;
+    foreach ($subs as $sub) {
+        if (empty($sub)) continue;
+        $dir .= '/' . $sub;
+        if (file_exists($dir . '/framework/class.secure.php')) {
+            include ($dir . '/framework/class.secure.php');
+            $inc = true;
+            break;
+        }
+    }
+    if (! $inc) trigger_error(sprintf("[ <b>%s</b> ] Can't include LEPTON class.secure.php!", $_SERVER['SCRIPT_NAME']), E_USER_ERROR);
 }
 // end include LEPTON class.secure.php
 
+
 // load the required libraries
-require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/initialize.php';
+require_once WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/initialize.php';
 
 // WYSIWYG editor
-require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/class.editor.php';
+require_once WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/class.editor.php';
 
-require_once(WB_PATH.'/include/captcha/captcha.php');
-require_once(WB_PATH.'/modules/kit_form/class.frontend.php');
+require_once (WB_PATH . '/include/captcha/captcha.php');
+require_once (WB_PATH . '/modules/kit_form/class.frontend.php');
 
 /**
  * Frontend class for kitIdea.
@@ -45,89 +50,94 @@ require_once(WB_PATH.'/modules/kit_form/class.frontend.php');
  */
 class kitIdeaFrontend {
 
-	const REQUEST_MAIN_ACTION 		= 'mac'; // general actions
-    const REQUEST_ACCOUNT_ACTION 	= 'acc'; // account actions
-    const REQUEST_PROJECT_ACTION 	= 'pac'; // project actions (default)
-    const REQUEST_WYSIWYG 			= 'wysiwyg';
-    const REQUEST_ARTICLE 			= 'art';
-    const REQUEST_ARTICLE_MOVE 		= 'artm';
-    const REQUEST_SECTION_ADD 		= 'seca';
-    const REQUEST_SECTION_DELETE 	= 'secd';
-    const REQUEST_COMMAND           = 'kic';
+    const REQUEST_MAIN_ACTION = 'mac'; // general actions
+    const REQUEST_ACCOUNT_ACTION = 'acc'; // account actions
+    const REQUEST_PROJECT_ACTION = 'pac'; // project actions (default)
+    const REQUEST_WYSIWYG = 'wysiwyg';
+    const REQUEST_ARTICLE = 'art';
+    const REQUEST_ARTICLE_MOVE = 'artm';
+    const REQUEST_SECTION_ADD = 'seca';
+    const REQUEST_SECTION_DELETE = 'secd';
+    const REQUEST_COMMAND = 'kic';
 
-	const ACTION_ACCOUNT			= 'acc';
-	const ACTION_DEFAULT			= 'def';
-	const ACTION_LOGIN				= 'in';
-	const ACTION_LOGOUT				= 'out';
-	const ACTION_OVERVIEW			= 'ov';
-	const ACTION_PROJECTS			= 'pro';
-	const ACTION_PROJECT_EDIT		= 'proe';
-	const ACTION_PROJECT_EDIT_CHECK	= 'proec';
-	const ACTION_PROJECT_OVERVIEW	= 'proov';
-	const ACTION_PROJECT_SECTION	= 'sec';
-	const ACTION_SECTION_EDIT 		= 'sece';
-	const ACTION_SECTION_EDIT_CHECK = 'secec';
-	const ACTION_PROJECT_VIEW		= 'prjv';
-	const ACTION_ARTICLE_CHECK		= 'artc';
-	const ACTION_COMMAND            = 'cmd';
+    const ACTION_ACCOUNT = 'acc';
+    const ACTION_DEFAULT = 'def';
+    const ACTION_LOGIN = 'in';
+    const ACTION_LOGOUT = 'out';
+    const ACTION_OVERVIEW = 'ov';
+    const ACTION_PROJECTS = 'pro';
+    const ACTION_PROJECT_EDIT = 'proe';
+    const ACTION_PROJECT_EDIT_CHECK = 'proec';
+    const ACTION_PROJECT_OVERVIEW = 'proov';
+    const ACTION_PROJECT_SECTION = 'sec';
+    const ACTION_SECTION_EDIT = 'sece';
+    const ACTION_SECTION_EDIT_CHECK = 'secec';
+    const ACTION_PROJECT_VIEW = 'prjv';
+    const ACTION_ARTICLE_CHECK = 'artc';
+    const ACTION_COMMAND = 'cmd';
 
-	const ANCHOR = 'ki';
+    const ANCHOR = 'ki';
 
-	const IDENTIFIER_ABOUT			= 'secAbout';
-	const IDENTIFIER_FILES			= 'secFiles';
+    const IDENTIFIER_ABOUT = 'secAbout';
+    const IDENTIFIER_FILES = 'secFiles';
 
-	const SESSION_TEMP_VARS			= 'kit_idea_temp_vars';
-	const SESSION_PROJECT_ACCESS	= 'idea_project_access';
-	const SESSION_USER_ACCESS		= 'idea_user_access';
+    const SESSION_TEMP_VARS = 'kit_idea_temp_vars';
+    const SESSION_PROJECT_ACCESS = 'idea_project_access';
+    const SESSION_USER_ACCESS = 'idea_user_access';
+    const SESSION_LOG_LOGIN = 'idea_log_login';
 
-	const ACCESS_PUBLIC				= 'public';
-	const ACCESS_CLOSED				= 'closed';
+    const ACCESS_PUBLIC = 'public';
+    const ACCESS_CLOSED = 'closed';
 
-	private $page_link 				= '';
-	private $img_url				= '';
-	private $template_path			= '';
-	private $error					= '';
-	private $message				= '';
-	private $media_path				= '';
-	private $media_url				= '';
-	private $use_lepton_auth		= false;
+    private $page_link = '';
+    private $img_url = '';
+    private $template_path = '';
+    private $error = '';
+    private $message = '';
+    private $media_path = '';
+    private $media_url = '';
+    private $use_lepton_auth = false;
 
-	const PARAM_CSS					= 'css';
-	const PARAM_JS					= 'js';
-	const PARAM_PRESET				= 'preset';
-	const PARAM_SEARCH				= 'search';
-	const PARAM_SECTION_ABOUT		= 'section_about';
-	const PARAM_SECTION_FILES		= 'section_files';
-	const PARAM_LEPTON_GROUPS		= 'lepton_groups';
-	const PARAM_PROJECT_GROUP		= 'group';
+    const PARAM_CSS = 'css';
+    const PARAM_JS = 'js';
+    const PARAM_PRESET = 'preset';
+    const PARAM_SEARCH = 'search';
+    const PARAM_SECTION_ABOUT = 'section_about';
+    const PARAM_SECTION_FILES = 'section_files';
+    const PARAM_LEPTON_GROUPS = 'lepton_groups';
+    const PARAM_PROJECT_GROUP = 'group';
+    const PARAM_LOG = 'log';
 
-	private $params = array(
-		self::PARAM_CSS				=> true,
-		self::PARAM_JS				=> true,
-		self::PARAM_PRESET			=> 1,
-		self::PARAM_SEARCH			=> true,
-		self::PARAM_SECTION_ABOUT	=> true,
-		self::PARAM_SECTION_FILES	=> true,
-		self::PARAM_LEPTON_GROUPS	=> '',
-		self::PARAM_PRESET			=> -1
-	);
+    private $params = array(
+            self::PARAM_CSS => true,
+            self::PARAM_JS => true,
+            self::PARAM_PRESET => 1,
+            self::PARAM_SEARCH => true,
+            self::PARAM_SECTION_ABOUT => true,
+            self::PARAM_SECTION_FILES => true,
+            self::PARAM_LEPTON_GROUPS => '',
+            self::PARAM_PRESET => - 1,
+            self::PARAM_LOG => ''
+            );
 
-	// general TAB Navigation
-	private $tab_main_navigation_array = array(
-		self::ACTION_PROJECTS		=> idea_tab_projects,
-		self::ACTION_ACCOUNT		=> idea_tab_account
-	);
+    protected $logLogin = false;
 
-	// TAB navigation for the account
-	private $tab_account_navigation_array = array(
-		self::ACTION_ACCOUNT		=> idea_tab_account_account,
-		self::ACTION_LOGOUT			=> idea_tab_logout
-	);
+    // general TAB Navigation
+    private $tab_main_navigation_array = array(
+            self::ACTION_PROJECTS => idea_tab_projects,
+            self::ACTION_ACCOUNT => idea_tab_account
+            );
+
+    // TAB navigation for the account
+    private $tab_account_navigation_array = array(
+            self::ACTION_ACCOUNT => idea_tab_account_account,
+            self::ACTION_LOGOUT => idea_tab_logout
+            );
+
     /**
      * Constructor of the class kitIdeaFrontend
      */
-    public function __construct ()
-    {
+    public function __construct() {
         global $kitTools;
         global $dbIdeaCfg;
         $url = '';
@@ -140,1023 +150,1045 @@ class kitIdeaFrontend {
         $this->media_path = WB_PATH . MEDIA_DIRECTORY . '/' . $dbIdeaCfg->getValue(dbIdeaCfg::cfgMediaDir) . '/';
         $this->media_url = str_replace(WB_PATH, WB_URL, $this->media_path);
     } // __construct()
+
     /**
      * Return the params available for the droplet [[kit_idea]] as array
      *
      * @return ARRAY $params
      */
-    public function getParams ()
-    {
+    public function getParams() {
         return $this->params;
     } // getParams()
 
-	/**
-	 * Set the params for the droplet {{kit_idea]]
-	 *
-	 * @param ARRAY $params
-	 * @return BOOL
-	 */
-	public function setParams($params = array()) {
-		global $database;
-		$this->params = $params;
-		$this->template_path = WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/templates/'.$this->params[self::PARAM_PRESET].'/'.KIT_IDEA_LANGUAGE.'/';
-		if (!file_exists($this->template_path)) {
-			$this->setError(sprintf(idea_error_preset_not_exists, '/modules/'.basename(dirname(__FILE__)).'/templates/'.$this->params[self::PARAM_PRESET].'/'.KIT_IDEA_LANGUAGE.'/'));
-			return false;
-		}
-		// if LEPTON group is set, authenticate via LEPTON USER
-		if (!empty($this->params[self::PARAM_LEPTON_GROUPS])) {
-			$gs = explode(',', $this->params[self::PARAM_LEPTON_GROUPS]);
-			$grps = array();
-			foreach ($gs as $g) {
-				$SQL = sprintf("SELECT group_id FROM %sgroups WHERE name='%s'", TABLE_PREFIX, trim($g));
-				if (false ===($id = $database->get_one($SQL))) {
-					$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_lepton_group_invalid, $g)));
-					return false;
-				}
-				$grps[] = $id;
-			}
-			$this->params[self::PARAM_LEPTON_GROUPS] = implode(',', $grps);
-			$this->use_lepton_auth = true;
-		}
-		return true;
-	} // setParams()
 
-  /**
-    * Set $this->error to $error
-    *
-    * @param STR $error
-    */
-  public function setError($error) {
-  	$this->error = $error;
-  } // setError()
+    /**
+     * Set the params for the droplet {{kit_idea]]
+     *
+     * @param ARRAY $params
+     * @return BOOL
+     */
+    public function setParams($params = array()) {
+        global $database;
+        $this->params = $params;
+        $this->template_path = WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/templates/' . $this->params[self::PARAM_PRESET] . '/' . KIT_IDEA_LANGUAGE . '/';
+        if (! file_exists($this->template_path)) {
+            $this->setError(sprintf(idea_error_preset_not_exists, '/modules/' . basename(dirname(__FILE__)) . '/templates/' . $this->params[self::PARAM_PRESET] . '/' . KIT_IDEA_LANGUAGE . '/'));
+            return false;
+        }
+        // if LEPTON group is set, authenticate via LEPTON USER
+        if (! empty($this->params[self::PARAM_LEPTON_GROUPS])) {
+            $gs = explode(',', $this->params[self::PARAM_LEPTON_GROUPS]);
+            $grps = array();
+            foreach ($gs as $g) {
+                $SQL = sprintf("SELECT group_id FROM %sgroups WHERE name='%s'", TABLE_PREFIX, trim($g));
+                if (false === ($id = $database->get_one($SQL))) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_lepton_group_invalid, $g)));
+                    return false;
+                }
+                $grps[] = $id;
+            }
+            $this->params[self::PARAM_LEPTON_GROUPS] = implode(',', $grps);
+            $this->use_lepton_auth = true;
+        }
+        // check for LOG parameters
+        if (!empty($this->params[self::PARAM_LOG])) {
+            $logs = explode(',', $this->params[self::PARAM_LOG]);
+            if (in_array('login', $logs)) {
+                $this->setLogLogin(true);
+            }
+        }
+        return true;
+    } // setParams()
 
-  /**
-    * Get Error from $this->error;
-    *
-    * @return STR $this->error
-    */
-  public function getError() {
-    return $this->error;
-  } // getError()
 
-  /**
-    * Check if $this->error is empty
-    *
-    * @return BOOL
-    */
-  public function isError() {
-    return (bool) !empty($this->error);
-  } // isError
-
-  /**
-   * Reset Error to empty String
-   */
-  public function clearError() {
-  	$this->error = '';
-  }
-
-  /** Set $this->message to $message
-    *
-    * @param STR $message
-    */
-  public function setMessage($message) {
-    $this->message = $message;
-  } // setMessage()
-
-  /**
-    * Get Message from $this->message;
-    *
-    * @return STR $this->message
-    */
-  public function getMessage() {
-    return $this->message;
-  } // getMessage()
-
-  /**
-   * Return Version of Module
-   *
-   * @return FLOAT
-   */
-  public function getVersion() {
-    // read info.php into array
-    $info_text = file(WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/info.php');
-    if ($info_text == false) {
-      return -1;
-    }
-    // walk through array
-    foreach ($info_text as $item) {
-      if (strpos($item, '$module_version') !== false) {
-        // split string $module_version
-        $value = explode('=', $item);
-        // return floatval
-        return floatval(preg_replace('([\'";,\(\)[:space:][:alpha:]])', '', $value[1]));
-      }
-    }
-    return -1;
-  } // getVersion()
-
-  /**
-    * Check if $this->message is empty
-    *
-    * @return BOOL
-    */
-  public function isMessage() {
-    return (bool) !empty($this->message);
-  } // isMessage
-
-  /**
-   * Process the desired template and returns the result as string
-   *
-   * @param STR $template
-   * @param ARRAY $template_data
-   * @return STR $result
-   */
-  public function getTemplate($template, $template_data) {
-  	global $parser;
-  	try {
-  		$result = $parser->get($this->template_path.$template, $template_data);
-  	} catch (Exception $e) {
-  		$this->setError(sprintf(idea_error_template_error, $template, $e->getMessage()));
-  		return false;
-  	}
-  	return $result;
-  } // getTemplate()
-
-  /**
-   * Save the $vars array as $_SESSION
-   *
-   * @param ARRAY $vars
-   */
-  private function setTempVars($vars=array()) {
-		$_SESSION[self::SESSION_TEMP_VARS] = http_build_query($vars);
-	} // setTempVars()
-
-	/**
-	 * Get the $vars array from the $_SESSION and rewrite the items
-	 * as $_REQUEST array
-	 */
-	private function getTempVars() {
-		if (isset($_SESSION[self::SESSION_TEMP_VARS])) {
-			parse_str($_SESSION[self::SESSION_TEMP_VARS], $vars);
-			foreach ($vars as $key => $value) {
-				if (!isset($_REQUEST[$key])) $_REQUEST[$key] = $value;
-			}
-			unset($_SESSION[self::SESSION_TEMP_VARS]);
-		}
-	} // getTempVars()
-
-	/**
-   * Prevent XSS Cross Site Scripting
-   *
-   * @param REFERENCE ARRAY $request
-   * @return ARRAY $request
-   */
-	public function xssPrevent(&$request) {
-  	if (is_string($request)) {
-	    $request = html_entity_decode($request);
-	    $request = strip_tags($request);
-	    $request = trim($request);
-	    $request = stripslashes($request);
-  	}
-	  return $request;
-  } // xssPrevent()
-
-  /**
-   * Action handler for kitIdeaFrontend
-   *
-   * @return STR result
-   */
-  public function action() {
-  	// rewrite temporary variables to $_REQUESTs...
-  	$this->getTempVars();
-
-  	$html_allowed = array(dbIdeaProject::field_desc_long, dbIdeaProject::field_desc_short, self::REQUEST_WYSIWYG);
-  	foreach ($_REQUEST as $key => $value) {
-  		if (!in_array($key, $html_allowed)) {
-  			$_REQUEST[$key] = $this->xssPrevent($value);
-  		}
-  	}
-    $action = isset($_REQUEST[self::REQUEST_MAIN_ACTION]) ? $_REQUEST[self::REQUEST_MAIN_ACTION] : self::ACTION_DEFAULT;
-
-    // load CSS?
-    if ($this->params[self::PARAM_CSS]) {
-			if (!is_registered_droplet_css('kit_idea', PAGE_ID)) {
-	  		register_droplet_css('kit_idea', PAGE_ID, 'kit_idea', 'kit_idea.css');
-			}
-    }
-    elseif (is_registered_droplet_css('kit_idea', PAGE_ID)) {
-		  unregister_droplet_css('kit_idea', PAGE_ID);
+    /**
+     * @return the $logLogin
+     */
+    protected function getLogLogin() {
+        return $this->logLogin;
     }
 
-    // load Javascript?
-    if ($this->params[self::PARAM_JS]) {
-    	if (!is_registered_droplet_js('kit_idea', PAGE_ID)) {
-    		register_droplet_js('kit_idea', PAGE_ID, 'kit_idea', 'kit_idea.js');
-    	}
-    }
-    elseif (is_registered_droplet_js('kit_idea', PAGE_ID)) {
-    	unregister_droplet_js('kit_idea', PAGE_ID);
+	/**
+     * @param boolean $logLogin
+     */
+    protected function setLogLogin($logLogin) {
+        $this->logLogin = $logLogin;
     }
 
-  	switch ($action):
-  	case self::ACTION_ACCOUNT:
-  		// switch to account
-  		return $this->show_main(self::ACTION_ACCOUNT, $this->accountAction());
-  	case self::ACTION_DEFAULT:
-  	default:
-  		// switch to project management
-  		return $this->show_main(self::ACTION_PROJECTS, $this->projectAction());
-  	endswitch;
-  } // action
-
 	/**
-   * prompt the formatted result
-   *
-   * @param STR $action - active navigation element
-   * @param STR $content - content to show
-   *
-   * @return STR dialog
-   */
-  public function show_main($action, $content) {
-  	$navigation = array();
-  	foreach ($this->tab_main_navigation_array as $key => $value) {
-  		// skip account tab if using LEPTON authentication
-  		if ($this->use_lepton_auth && ($key == self::ACTION_ACCOUNT)) continue;
-  		$navigation[] = array(
-  		        'active' => ($key == $action) ? 1 : 0,
-  		        'url' => sprintf('%s%s%s=%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', self::REQUEST_MAIN_ACTION, $key),
-  		        'text' => $value
-  		        );
-  	}
-  	$data = array(
-  	        'WB_URL' => WB_URL,
-  	        'anchor' => self::ANCHOR,
-  	        'navigation' => $navigation,
-  	        'error'	=> ($this->isError()) ? 1 : 0,
-  	        'content' => ($this->isError()) ? $this->getError() : $content
-  	        );
-  	return $this->getTemplate('body.lte', $data);
-  } // show_main()
-
-  /**
-   * ACCOUNT FUNCTIONS
-   */
-
-  /**
-   * Action handler for all user account actions
-   *
-   * @return STR dialog or message
-   */
-  public function accountAction() {
-  	global $kitContactInterface;
-
-  	$action = isset($_REQUEST[self::REQUEST_ACCOUNT_ACTION]) ? $_REQUEST[self::REQUEST_ACCOUNT_ACTION] : self::ACTION_DEFAULT;
-
-  	if (!$this->accountIsAuthenticated()) {
-  		// user is not authenticated and must login first!
-  		$action = self::ACTION_LOGIN;
-		}
-
-		switch ($action):
-  	case self::ACTION_LOGOUT:
-  		$kitContactInterface->logout();
-  		// important: no break! show login dialog after logout!
-  	case self::ACTION_LOGIN:
-  		// login - save the main action as $_SESSION
-  		$this->setTempVars(array(self::REQUEST_MAIN_ACTION => self::ACTION_ACCOUNT));
-  		// show the login dialog
-			$result = $this->accountLoginDlg();
-			if (is_string($result)) return $result; // login failed, retry ...
-			if (is_bool($result) && ($result == false)) return false; // error ...
-			// login success! no break! show the account dialog of the user
-  	case self::ACTION_ACCOUNT:
-  	case self::ACTION_DEFAULT:
-  	default:
-  		// show user account dialog
-  		return $this->accountShow(self::ACTION_ACCOUNT, $this->accountAccountDlg());
-  	endswitch;
-  } // accountAction()
-
-	/**
-   * Show the user account actions
-   *
-   * @param STR $action - navigation item
-   * @param STR $content
-   *
-   * @return STR formatted $content
-   */
-  public function accountShow($action, $content) {
-  	$navigation = array();
-  	foreach ($this->tab_account_navigation_array as $key => $value) {
-  		$navigation[] = array(
-  			'active' 	=> ($key == $action) ? 1 : 0,
-  			'url'			=> sprintf(	'%s%s%s',
-  														$this->page_link,
-  														(strpos($this->page_link, '?') === false) ? '?' : '&',
-  														http_build_query(array(	self::REQUEST_MAIN_ACTION 		=> self::ACTION_ACCOUNT,
-  																										self::REQUEST_ACCOUNT_ACTION	=> $key))),
-  			'text'		=> $value
-  		);
-  	}
-  	$data = array(
-  		'WB_URL'			=> WB_URL,
-  		'navigation'	=> $navigation,
-  		'error'				=> ($this->isError()) ? 1 : 0,
-  		'content'			=> ($this->isError()) ? $this->getError() : $content
-  	);
-  	return $this->getTemplate('body.account.lte', $data);
-  } // accountShow()
-
-  /**
-   * Check if the user is authenticated by the KIT interface or
-   * by the LEPTON interface and if he is allowed to access kitIdea
-   *
-   * @return BOOL
-   */
-  private function accountIsAuthenticated() {
-		global $kitContactInterface;
-		global $dbIdeaCfg;
-		global $wb;
-		global $dbRegister;
-		global $database;
-
-		if ($this->use_lepton_auth && $wb->is_authenticated()) {
-			// authenticate via LEPTON
-			if (!isset($_SESSION['GROUPS_ID']) || empty($this->params[self::PARAM_LEPTON_GROUPS])) {
-				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_lepton_group_missing));
-				return false;
-			}
-			// unset KIT session vars...
-			unset($_SESSION[kitContactInterface::session_kit_aid]);
-			unset($_SESSION[kitContactInterface::session_kit_key]);
-			unset($_SESSION[kitContactInterface::session_kit_contact_id]);
-
-			$lepton_groups = explode(',', $_SESSION['GROUPS_ID']);
-			$idea_groups = explode(',', $this->params[self::PARAM_LEPTON_GROUPS]);
-			foreach ($lepton_groups as $lepton_group) {
-				if (in_array($lepton_group, $idea_groups)) {
-					// ok - LEPTON user is authenticated, now switch him to KIT ...
-					$contact_id = -1;
-					$status = -1;
-					$email = $_SESSION['EMAIL'];
-					if (!$kitContactInterface->isEMailRegistered($email, $contact_id, $status)) {
-						// Bugfixing, work around: clean up register records!
-						$where = array(dbKITregister::field_email => $_SESSION['EMAIL']);
-						if (!$dbRegister->sqlDeleteRecord($where)) {
-							$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbRegister->getError()));
-							return false;
-						}
-						// user must be registered in KIT
-						$contact_array = array();
-						$contact_array[kitContactInterface::kit_email] = $_SESSION['EMAIL'];
-						$contact_array[kitContactInterface::kit_intern] = $dbIdeaCfg->getValue(dbIdeaCfg::cfgKITcategory);
-						$register = array();
-						// insert contact
-						if (!$kitContactInterface->addContact($contact_array, $contact_id, $register)) {
-							$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
-							return false;
-						}
-
-						// update register record, set to active
-						$where = array(dbKITregister::field_contact_id => $contact_id);
-						$data = array(
-							dbKITregister::field_status => dbKITregister::status_active,
-							dbKITregister::field_register_confirmed => date('Y-m-d H:i:s'),
-							dbKITregister::field_update_when => date('Y-m-d H:i:s'),
-							dbKITregister::field_update_by => 'kitIdea'
-						);
-						if (!$dbRegister->sqlUpdateRecord($data, $where)) {
-							$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbRegister->getError()));
-							return false;
-						}
-						// ok - login user via KIT
-						$_SESSION[kitContactInterface::session_kit_aid] = $register[dbKITregister::field_id];
-						$_SESSION[kitContactInterface::session_kit_key] = $register[dbKITregister::field_register_key];
-						$_SESSION[kitContactInterface::session_kit_contact_id] = $register[dbKITregister::field_contact_id];
-						return true;
-					}
-					else {
-						// user is registered in KIT
-						$where = array(
-							dbKITregister::field_contact_id => $contact_id,
-							dbKITregister::field_status => dbKITregister::status_active);
-						$register = array();
-						if (!$dbRegister->sqlSelectRecord($where, $register)) {
-							$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbRegister->getError()));
-							return false;
-						}
-						if (count($register) < 1) {
-							$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $contact_id)));
-							return false;
-						}
-						$register = end($register);
-						$_SESSION[kitContactInterface::session_kit_aid] = $register[dbKITregister::field_id];
-						$_SESSION[kitContactInterface::session_kit_key] = $register[dbKITregister::field_register_key];
-						$_SESSION[kitContactInterface::session_kit_contact_id] = $register[dbKITregister::field_contact_id];
-						return true;
-					}
-				}
-			}
-		}
-		elseif ($kitContactInterface->isAuthenticated()) {
-			// user is authenticated so check categories
-			$cat = $dbIdeaCfg->getValue(dbIdeaCfg::cfgKITcategory);
-			if (!$kitContactInterface->existsCategory(kitContactInterface::category_type_intern, $cat)) {
-				if (!$kitContactInterface->addCategory(kitContactInterface::category_type_intern, $cat, $cat)) {
-					$this->setError(sprintf('[%s - %] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
-					return false;
-				}
-			}
-			$categories = array();
-			if (!$kitContactInterface->getCategories($_SESSION[kitContactInterface::session_kit_contact_id], $categories)) {
-				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
-				return false;
-			}
-			if (in_array($cat, $categories)) {
-				// user is authenticated and allowed to use kitIdea
-				return true;
-			}
-			else {
-				// user is authenticated but not allowed to access kitIdea
-				$this->setError(idea_error_auth_wrong_category);
-				return false;
-			}
-		}
-		// user is not authenticated
-		return false;
-	} // accountIsAuthenticated()
-
-	/**
-	 * User Account Login Dialog
-	 *
-	 * @return MIXED STR dialog if login is needed, BOOL TRUE on success or BOOL FALSE on error
-	 */
-  public function accountLoginDlg() {
-		global $kitContactInterface;
-		global $dbIdeaCfg;
-
-		// get the login dialog from the settings
-		$dlg = $dbIdeaCfg->getValue(dbIdeaCfg::cfgKITformDlgLogin);
-
-		// new instance of kitForm
-		$form = new formFrontend();
-		// get the params array of kitForm
-		$params = $form->getParams();
-		// set the needed params
-		$params[formFrontend::param_form] = $dlg;
-		$params[formFrontend::param_return] = true;
-		$form->setParams($params);
-
-		$result = $form->action();
-		if (is_string($result)) {
-			// return the dialog
-			return $result;
-		}
-		elseif (is_bool($result) && ($result == false) && $form->isError()) {
-			// error while executing the kitForm dialog
-			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $form->getError()));
-			return false;
-		}
-		elseif (is_bool($result) && ($result == true)) {
-			// the user is logged in, now check if he is allowed to access kitIdea
-			return $this->accountIsAuthenticated();
-		}
-		else {
-			// Oooops, unspecified problem ...
-			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_undefined));
-			return false;
-		}
-	} // accountLoginDlg()
-
-	/**
-	 * Show the user account dialog
-	 *
-	 *
-	 */
-	public function accountAccountDlg() {
-		global $kitContactInterface;
-		global $dbIdeaCfg;
-
-		// save action to $_SESSION
-		$this->setTempVars(array(self::REQUEST_MAIN_ACTION => self::ACTION_ACCOUNT, self::REQUEST_ACCOUNT_ACTION => self::ACTION_ACCOUNT));
-
-		// get the user account dialog from the settings
-		$dlg = $dbIdeaCfg->getValue(dbIdeaCfg::cfgKITformDlgAccount);
-
-		// create new instance of kitForm
-		$form = new formFrontend();
-		// get the params array
-		$params = $form->getParams();
-		// set the needed params
-		$params[formFrontend::param_form] = $dlg;
-		$params[formFrontend::param_return] = true;
-		$form->setParams($params);
-		// return the user account dialog
-		$result = $form->action();
-		if (is_bool($result)) {
-			// show welcome message
-			return sprintf(idea_msg_login_welcome, sprintf(	'%s%s%s',
-																											$this->page_link,
-																											(strpos($this->page_link, '?') === false) ? '?' : '&',
-																											http_build_query(array(self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS))),
-																						 sprintf( '%s%s%s',
-																						 					$this->page_link,
-																						 					(strpos($this->page_link, '?') === false) ? '?' : '&',
-																						 					http_build_query(array(self::REQUEST_MAIN_ACTION => self::ACTION_ACCOUNT, self::REQUEST_ACCOUNT_ACTION => self::ACTION_ACCOUNT))));
-		}
-		return $result;
-	} // accountAccountDlg()
-
-	/**
-	 * Get the author name
-	 *
-	 * @return MIXED STR $author or BOOL FALSE on error
-	 */
-	public function accountGetAuthor() {
-		global $kitContactInterface;
-		if ($this->accountIsAuthenticated()) {
-			if ($this->use_lepton_auth) {
-				// user is logged in via LEPTON user interface
-				return $_SESSION['DISPLAY_NAME'];
-			}
-			else {
-				// use KIT contact informations
-				$contact = array();
-				if (!$kitContactInterface->getContact($_SESSION[kitContactInterface::session_kit_contact_id], $contact)) {
-					$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
-					return false;
-				}
-				if (!empty($contact[kitContactInterface::kit_first_name]) && !empty($contact[kitContactInterface::kit_last_name])) {
-					return sprintf('%s %s', $contact[kitContactInterface::kit_first_name], $contact[kitContactInterface::kit_last_name]);
-				}
-				elseif (!empty($contact[kitContactInterface::kit_last_name])) {
-					return $contact[kitContactInterface::kit_last_name];
-				}
-				elseif (!empty($contact[kitContactInterface::kit_first_name])) {
-					return $contact[kitContactInterface::kit_first_name];
-				}
-				else {
-					return $contact[kitContactInterface::kit_email];
-				}
-			}
-		}
-		else {
-			return idea_str_author_anonymous;
-		}
-	} // accountGetAuthor()
-
-	/**
-	 * PROJECT FUNCTIONS
-	 */
-
-	/**
-	 * Action handler for all project functions
-	 *
-	 * @return STR project dialog
-	 */
-  public function projectAction() {
-  	global $dbIdeaProject;
-
-  	// check project group
-  	if ($this->params[self::PARAM_PROJECT_GROUP] < 1) {
-  		// invalid project group
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_project_group_invalid));
-  		return false;
-  	}
-
-  	$action = isset($_REQUEST[self::REQUEST_PROJECT_ACTION]) ? $_REQUEST[self::REQUEST_PROJECT_ACTION] : self::ACTION_DEFAULT;
-
-  	// special: need no further checks for commands!
-  	if ($action == self::ACTION_COMMAND) {
-  	    return $this->projectShow($this->projectCommand());
-  	}
-
-  	// check first if access is allowed!
-  	if (($action != self::ACTION_DEFAULT) && ($action != self::ACTION_PROJECT_OVERVIEW) && ($action != self::ACTION_PROJECT_EDIT) && ($action != self::ACTION_PROJECT_EDIT_CHECK)) {
-  		// At direct access to a project the authentication must be checked first!
-  		if (!isset($_REQUEST[dbIdeaProject::field_id])) {
-  			// missing project ID, break!
-  			$this->setError(idea_error_project_access_invalid);
-  			return $this->projectShow(false);
-  		}
-  		$SQL = sprintf("SELECT %s FROM %s WHERE %s='%s' AND %s='%s'", dbIdeaProject::field_access, $dbIdeaProject->getTableName(), dbIdeaProject::field_id, $_REQUEST[dbIdeaProject::field_id], dbIdeaProject::field_project_group, $this->params[self::PARAM_PROJECT_GROUP]);
-  		$project = array();
-  		if (!$dbIdeaProject->sqlExec($SQL, $project)) {
-  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
-  			return $this->projectShow(false);
-  		}
-  		if (count($project) < 1) {
-  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $_REQUEST[dbIdeaProject::field_id])));
-  			return $this->projectShow(false);
-  		}
-  		if ($project[0][dbIdeaProject::field_access] == dbIdeaProject::access_closed) {
-  			// check authentication!
-  			if (!$this->accountIsAuthenticated()) {
-  				$this->setError(idea_error_access_not_auth);
-  				return $this->projectShow(false);
-  			}
-  			$_SESSION[self::SESSION_PROJECT_ACCESS] = self::ACCESS_CLOSED;
-  		}
-  		else {
-  			$_SESSION[self::SESSION_PROJECT_ACCESS] = self::ACCESS_PUBLIC;
-  		}
-  		// set the project session for the editor
-  		$_SESSION['KIT_IDEA_PROJECT_ID'] = $_REQUEST[dbIdeaProject::field_id];
-  	}
+     * Set $this->error to $error
+     *
+     * @param STR $error
+     */
+    public function setError($error) {
+        $this->error = $error;
+    } // setError()
 
 
-  	// get the access rights for the user
-  	$this->projectGetAccessRights();
-  	switch ($action):
-  	case self::ACTION_SECTION_EDIT:
-  		return $this->projectShow($this->projectSectionEdit());
-  	case self::ACTION_SECTION_EDIT_CHECK:
-  		return $this->projectShow($this->projectSectionCheck());
-  	case self::ACTION_PROJECT_VIEW:
-  		return $this->projectShow($this->projectProjectView());
-  	case self::ACTION_PROJECT_EDIT:
-  		return $this->projectShow($this->projectProjectEdit());
-  	case self::ACTION_PROJECT_EDIT_CHECK:
-  		return $this->projectShow($this->projectProjectCheck());
-  	case self::ACTION_ARTICLE_CHECK:
-  		return $this->projectShow($this->projectArticleCheck());
-  	case self::ACTION_DEFAULT:
-  	case self::ACTION_PROJECT_OVERVIEW:
-  		// show projects overview
-  		return $this->projectShow($this->projectOverview());
-  	default:
-  		// illegal function call ...
-  		$this->setError(idea_error_illegal_function_call);
-  		return $this->projectShow(false);
-  	endswitch;
-  } // projectAction()
-
-  /**
-   * Show the project actions
-   *
-   * @param STR $action - navigation item // not used yet!
-   * @param STR $content
-   *
-   * @return STR formatted $content
-   */
-  public function projectShow($content) {
-  	// don't use TAB navigation at the moment!
-  	$navigation = array();
-  	$data = array(
-  		'WB_URL'					=> WB_URL,
-  		'use_navigation'	=> 0, // don't use
-  		'navigation'			=> $navigation,
-  		'error'						=> ($this->isError()) ? 1 : 0,
-  		'content'					=> ($this->isError()) ? $this->getError() : $content
-  	);
-  	return $this->getTemplate('body.project.lte', $data);
-  } // accountShow()
-
-  /**
-   * Get the access rights for the actual user and set
-   * $_SESSION[self::SESSION_USER_ACCESS]
-   *
-   * @return INT $access_rights
-   */
-  private function projectGetAccessRights() {
-  	global $dbIdeaProjectGroups;
-  	global $dbIdeaProjectUsers;
-  	global $wb;
-
-  	// check if the user is authenticated
-  	if (isset($_SESSION[kitContactInterface::session_kit_aid]) && isset($_SESSION[kitContactInterface::session_kit_key]) && isset($_SESSION[kitContactInterface::session_kit_contact_id])) {
-  		$is_authenticated = true;
-  	}
-  	elseif ($wb->is_authenticated() && $this->use_lepton_auth) {
-  	    $is_authenticated = $this->accountIsAuthenticated();
-  	}
-  	else {
-  		$is_authenticated = false;
-  	}
-  	// get the access rights for the actual user
-  	$where = array(dbIdeaProjectGroups::field_id => $this->params[self::PARAM_PROJECT_GROUP]);
-  	$project_group = array();
-  	if (!$dbIdeaProjectGroups->sqlSelectRecord($where, $project_group)) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectGroups->getError()));
-  		return false;
-  	}
-  	if (count($project_group) < 1) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(kit_error_invalid_id, -1)));
-  		return false;
-  	}
-  	$project_group = $project_group[0];
-  	if ($is_authenticated) {
-  		// get the access rights for this user
-  		$SQL = sprintf( "SELECT * FROM %s WHERE %s='%s' AND %s='%s' AND %s!='%s'",
-  										$dbIdeaProjectUsers->getTableName(),
-  										dbIdeaProjectUsers::field_group_id,
-  										$this->params[self::PARAM_PROJECT_GROUP],
-  										dbIdeaProjectUsers::field_kit_id,
-  										$_SESSION[kitContactInterface::session_kit_contact_id],
-  										dbIdeaProjectUsers::field_status,
-  										dbIdeaProjectUsers::status_deleted);
-  		$user_data = array();
-  		if (!$dbIdeaProjectUsers->sqlExec($SQL, $user_data)) {
-  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
-  			return false;
-  		}
-  		if (count($user_data) < 1) {
-  			// record does not exists, create it
-  			$data = array(
-  				dbIdeaProjectUsers::field_access => $project_group[dbIdeaProjectGroups::field_access_default],
-  				dbIdeaProjectUsers::field_group_id => $this->params[self::PARAM_PROJECT_GROUP],
-  				dbIdeaProjectUsers::field_kit_id => $_SESSION[kitContactInterface::session_kit_contact_id],
-  				dbIdeaProjectUsers::field_register_id => $_SESSION[kitContactInterface::session_kit_aid],
-  				dbIdeaProjectUsers::field_status => dbIdeaProjectUsers::status_active
-  			);
-  			if (!$dbIdeaProjectUsers->sqlInsertRecord($data)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
-  				return false;
-  			}
-  			$access_rights = $project_group[$data[dbIdeaProjectUsers::field_access]];
-  		}
-  		else {
-  			$access_rights = $project_group[$user_data[0][dbIdeaProjectUsers::field_access]];
-  		}
-  	}
-  	else {
-  		// use the first access group
-  		$access_rights = $project_group[dbIdeaProjectGroups::field_access_rights_1];
-  	}
-  	$_SESSION[self::SESSION_USER_ACCESS] = $access_rights;
-  	return $access_rights;
-  } // projectGetAccessRights()
-
-  /**
-   * Show the actual available projects
-   *
-   * @return STR project list
-   */
-  public function projectOverview() {
-  	global $dbIdeaProject;
-  	global $dbIdeaProjectGroups;
-  	global $dbIdeaTableSort;
-
-  	$where = array(
-  	        dbIdeaTableSort::field_table => 'mod_kit_idea_project_group',
-  	        dbIdeaTableSort::field_value => $this->params[self::PARAM_PROJECT_GROUP]);
-  	$order = array();
-  	if (!$dbIdeaTableSort->sqlSelectRecord($where, $order)) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
-  		return false;
-  	}
-  	if (count($order) > 0) {
-  		$sort = sprintf(" ORDER BY FIND_IN_SET(%s, '%s')", dbIdeaProject::field_id, $order[0][dbIdeaTableSort::field_order]);
-  	}
-  	else {
-  		$sort = '';
-  	}
-
-  	if (isset($_SESSION[kitContactInterface::session_kit_aid]) && isset($_SESSION[kitContactInterface::session_kit_key]) && isset($_SESSION[kitContactInterface::session_kit_contact_id])) {
-  		// show all active projects
-  		$is_authenticated = true;
-  		$SQL = sprintf(	"SELECT * FROM %s WHERE %s='%s' AND %s='%s'%s", $dbIdeaProject->getTableName(), dbIdeaProject::field_status, dbIdeaProject::status_active, dbIdeaProject::field_project_group, $this->params[self::PARAM_PROJECT_GROUP], $sort);
-  	}
-  	else {
-  		// show only public projects
-  		$is_authenticated = false;
-  		$SQL = sprintf( "SELECT * FROM %s WHERE %s='%s' AND %s='%s' AND %s='%s'%s",
-  										$dbIdeaProject->getTableName(),
-  										dbIdeaProject::field_access,
-  										dbIdeaProject::access_public,
-  										dbIdeaProject::field_status,
-  										dbIdeaProject::status_active,
-  										dbIdeaProject::field_project_group,
-  										$this->params[self::PARAM_PROJECT_GROUP],
-  										$sort);
-  	}
-  	$projects = array();
-  	if (!$dbIdeaProject->sqlExec($SQL, $projects)) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
-  		return false;
-  	}
-  	$items = array();
-  	foreach ($projects as $project) {
-  		$items[] = array(
-  		  'id'						=> $project[dbIdeaProject::field_id],
-  			'title'					=> $project[dbIdeaProject::field_title],
-  			'desc_short'		=> $project[dbIdeaProject::field_desc_short],
-  			'desc_long'			=> $project[dbIdeaProject::field_desc_long],
-  			'keywords'			=> $project[dbIdeaProject::field_keywords],
-  			'access'				=> ($project[dbIdeaProject::field_access] == dbIdeaProject::access_public) ? 'public' : 'closed',
-  			'status'				=> $project[dbIdeaProject::field_status],
-  			'timestamp'			=> $project[dbIdeaProject::field_timestamp],
-  			'detail_url'		=> sprintf(	'%s%s%s',
-  																	$this->page_link,
-  																	(strpos($this->page_link, '?') === false) ? '?' : '&',
-  																	http_build_query(array( self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
-  																													self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
-  																													dbIdeaProject::field_id => $project[dbIdeaProject::field_id])))
-  		);
-  	}
-
-  	// preparing and initialize the table sorter
-  	$sorter_table = 'mod_kit_idea_project_group';
-  	$SQL = sprintf( "SELECT * FROM %s WHERE %s='%s' AND %s='%s' AND %s='%s'",
-  									$dbIdeaTableSort->getTableName(),
-  									dbIdeaTableSort::field_table,
-  									$sorter_table,
-  									dbIdeaTableSort::field_value,
-  									$this->params[self::PARAM_PROJECT_GROUP],
-  									dbIdeaTableSort::field_item,
-  									0);
-  	$sorter = array();
-  	if (!$dbIdeaTableSort->sqlExec($SQL, $sorter)) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
-  		return false;
-  	}
-  	if (count($sorter) < 1) {
-  		$data = array(
-  			dbIdeaTableSort::field_table 	=> $sorter_table,
-  			dbIdeaTableSort::field_value 	=> $this->params[self::PARAM_PROJECT_GROUP],
-  			dbIdeaTableSort::field_order 	=> '',
-  			dbIdeaTableSort::field_item		=> 0
-  		);
-  		if (!$dbIdeaTableSort->sqlInsertRecord($data)) {
-  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
-  			return false;
-  		}
-  	}
-  	$sorter_active = 1;
+    /**
+     * Get Error from $this->error;
+     *
+     * @return STR $this->error
+     */
+    public function getError() {
+        return $this->error;
+    } // getError()
 
 
+    /**
+     * Check if $this->error is empty
+     *
+     * @return BOOL
+     */
+    public function isError() {
+        return (bool) ! empty($this->error);
+    } // isError
 
-  	$data = array(
-  		'projects'			=> array(	'items'			=> $items,
-  															'count'			=> count($items),
-  															'action'		=> array(	'create_url'	=> sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS, self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_EDIT))))),
-  		'login_url'			=> sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(self::REQUEST_MAIN_ACTION => self::ACTION_ACCOUNT, self::REQUEST_ACCOUNT_ACTION => self::ACTION_LOGIN))),
-  		'access'				=> $dbIdeaProjectGroups->getAccessArray($is_authenticated, $_SESSION[self::SESSION_USER_ACCESS]),
-  		'sorter_table'		=> $sorter_table,
-	  	'sorter_active'		=> $sorter_active,
-	  	'sorter_value'		=> $this->params[self::PARAM_PROJECT_GROUP],
-	  	'sorter_item'			=> 0
-  	);
 
-  	return $this->getTemplate('project.list.lte', $data);
-  } // projectOverview()
+    /**
+     * Reset Error to empty String
+     */
+    public function clearError() {
+        $this->error = '';
+    }
 
-  /**
-   * Dialog to create and edit kitIdea Projects
-   *
-   * @return STR dialog
-   */
-  public function projectProjectEdit() {
-  	global $dbIdeaProject;
-  	global $dbIdeaCfg;
+    /** Set $this->message to $message
+     *
+     * @param STR $message
+     */
+    public function setMessage($message) {
+        $this->message = $message;
+    } // setMessage()
 
-  	$project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : -1;
 
-  	if ($project_id > 0) {
-  		// get the desired project
-  		$SQL = sprintf( "SELECT * FROM %s WHERE %s='%s'", $dbIdeaProject->getTableName(), dbIdeaProject::field_id, $project_id);
-  		$project = array();
-  		if (!$dbIdeaProject->sqlExec($SQL, $project)) {
-  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
-  			return false;
-  		}
-  		if (count($project) < 1) {
-  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
-  			return false;
-  		}
-  		$project = $project[0];
-  	}
-  	else {
-  		// set defaults
-  		$project = $dbIdeaProject->getFields();
-  		$project[dbIdeaProject::field_id] = $project_id;
-  		$project[dbIdeaProject::field_access] = dbIdeaProject::access_closed;
-  		$project[dbIdeaProject::field_kit_categories] = $dbIdeaCfg->getValue(dbIdeaCfg::cfgKITcategory);
-  		$project[dbIdeaProject::field_status] = dbIdeaProject::status_active;
-  	}
+    /**
+     * Get Message from $this->message;
+     *
+     * @return STR $this->message
+     */
+    public function getMessage() {
+        return $this->message;
+    } // getMessage()
 
-  	$wysiwyg_height = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGeditorHeight);
-  	$wysiwyg_width = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGeditorWidth);
 
-  	$items = array();
-  	foreach ($project as $name => $value) {
-  		$its = array();
-  		$editor = '';
-  		if ($name == dbIdeaProject::field_status) $its = $dbIdeaProject->status_array;
-  		if ($name == dbIdeaProject::field_access) $its = $dbIdeaProject->access_array;
-  		if (($name == dbIdeaProject::field_desc_long) || ($name == dbIdeaProject::field_desc_short)) {
-  			ob_start();
-  			show_wysiwyg_editor($name, $name, stripslashes($value), $wysiwyg_width, $wysiwyg_height);
-  			$editor = ob_get_contents();
-  			ob_end_clean();
-  		}
-  		$items[$name] = array(
-  			'name'		=> $name,
-  			'value'		=> $value,
-  			'editor'	=> $editor,
-  			'items'		=> $its,
-  			'label'		=> constant(sprintf('idea_label_%s', $name)),
-  			'hint'		=> constant(sprintf('idea_hint_%s', $name))
-  		);
-  	}
-  	$data = array(
-  		'head'				=> ($project_id < 1) ? idea_head_project_create : idea_head_project_edit,
-  		'intro'				=> ($this->isMessage()) ? $this->getMessage() : idea_intro_project_edit,
-  		'project'			=> $items,
-  		'page_link'		=> $this->page_link,
-  		'form'				=> array(	'name'			=> 'project_edit',
-  														'btn'				=> array(	'ok'	=> tool_btn_ok, 'abort' => tool_btn_abort)
-  										),
-  		'main_action'	=> array('name' => self::REQUEST_MAIN_ACTION, 'value' => self::ACTION_PROJECTS),
-  		'project_action' => array('name' => self::REQUEST_PROJECT_ACTION, 'value' => self::ACTION_PROJECT_EDIT_CHECK)
-  	);
-  	return $this->getTemplate('project.edit.lte', $data);
-  } // projectProjectEdit()
+    /**
+     * Return Version of Module
+     *
+     * @return FLOAT
+     */
+    public function getVersion() {
+        // read info.php into array
+        $info_text = file(WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/info.php');
+        if ($info_text == false) {
+            return - 1;
+        }
+        // walk through array
+        foreach ($info_text as $item) {
+            if (strpos($item, '$module_version') !== false) {
+                // split string $module_version
+                $value = explode('=', $item);
+                // return floatval
+                return floatval(preg_replace('([\'";,\(\)[:space:][:alpha:]])', '', $value[1]));
+            }
+        }
+        return - 1;
+    } // getVersion()
 
-  /**
-   * Check the project data and insert or update an record
-   *
-   * @return STR dialog projectProjectEdit()
-   */
-  public function projectProjectCheck() {
-  	global $dbIdeaProject;
-  	global $dbIdeaRevisionArchive;
-  	//global $statusMails;
-  	global $dbIdeaStatusChange;
 
-  	$project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : -1;
+    /**
+     * Check if $this->message is empty
+     *
+     * @return BOOL
+     */
+    public function isMessage() {
+        return (bool) ! empty($this->message);
+    } // isMessage
 
-  	if ($project_id > 0) {
-  		$where = array(dbIdeaProject::field_id => $project_id);
-  		$project = array();
-  		if (!$dbIdeaProject->sqlSelectRecord($where, $project)) {
-  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
-  			return false;
-  		}
-  		if (count($project) < 1) {
-  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
-  			return false;
-  		}
-  		$project = $project[0];
-  	}
-  	else {
-  		$project = $dbIdeaProject->getFields();
-  		$project[dbIdeaProject::field_id] = $project_id;
-  	}
-  	// save project for revision archive
-  	$old_project = $project;
 
-  	$changed = false;
-  	$checked = true;
-  	$fields = $dbIdeaProject->getFields();
-  	$message = '';
+    /**
+     * Process the desired template and returns the result as string
+     *
+     * @param STR $template
+     * @param ARRAY $template_data
+     * @return STR $result
+     */
+    public function getTemplate($template, $template_data) {
+        global $parser;
+        try {
+            $result = $parser->get($this->template_path . $template, $template_data);
+        } catch (Exception $e) {
+            $this->setError(sprintf(idea_error_template_error, $template, $e->getMessage()));
+            return false;
+        }
+        return $result;
+    } // getTemplate()
 
-  	foreach ($fields as $key => $value) {
-  		$must_field = false;
-  		switch ($key):
-  		case dbIdeaProject::field_access:
-  		case dbIdeaProject::field_kit_categories:
-  		case dbIdeaProject::field_title:
-  		case dbIdeaProject::field_desc_short:
-  		case dbIdeaProject::field_desc_long:
-  		case dbIdeaProject::field_status:
-  			// these fields must contain a value
-  			$must_field = true;
-  		case dbIdeaProject::field_keywords:
-  			$value = isset($_REQUEST[$key]) ? stripslashes($_REQUEST[$key]) : '';
-  			if ($value != $project[$key]) {
-  				$changed = true;
-  				$project[$key] = $value;
-  			}
-  			if (empty($value) && $must_field) {
-  				// must fields should not be empty!
-  				$checked = false;
-  				$message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
-  			}
-  		default:
-  			// ignore all other fields
-  			break;
-  		endswitch;
-  	}
 
-  	unset($project[dbIdeaProject::field_timestamp]);
+    /**
+     * Save the $vars array as $_SESSION
+     *
+     * @param ARRAY $vars
+     */
+    private function setTempVars($vars = array()) {
+        $_SESSION[self::SESSION_TEMP_VARS] = http_build_query($vars);
+    } // setTempVars()
 
-  	if ($checked && $changed) {
-  		if ($project_id < 1) {
-  			// insert a new record
-  			$project[dbIdeaProject::field_desc_long] = $project[dbIdeaProject::field_desc_long];
-  			$project[dbIdeaProject::field_desc_short] = $project[dbIdeaProject::field_desc_short];
-  			$project[dbIdeaProject::field_author] = $this->accountGetAuthor();
-  			$project[dbIdeaProject::field_status] = dbIdeaProject::status_active;
-  			$project[dbIdeaProject::field_revision] = 1;
-  			$project[dbIdeaProject::field_project_group] = $this->params[self::PARAM_PROJECT_GROUP];
-  			if (!$dbIdeaProject->sqlInsertRecord($project, $project_id)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
-  				return false;
-  			}
-  			$message .= sprintf(idea_msg_project_inserted, $project_id);
-  			/*
+
+    /**
+     * Get the $vars array from the $_SESSION and rewrite the items
+     * as $_REQUEST array
+     */
+    private function getTempVars() {
+        if (isset($_SESSION[self::SESSION_TEMP_VARS])) {
+            parse_str($_SESSION[self::SESSION_TEMP_VARS], $vars);
+            foreach ($vars as $key => $value) {
+                if (! isset($_REQUEST[$key])) $_REQUEST[$key] = $value;
+            }
+            unset($_SESSION[self::SESSION_TEMP_VARS]);
+        }
+    } // getTempVars()
+
+
+    /**
+     * Prevent XSS Cross Site Scripting
+     *
+     * @param REFERENCE ARRAY $request
+     * @return ARRAY $request
+     */
+    public function xssPrevent(&$request) {
+        if (is_string($request)) {
+            $request = html_entity_decode($request);
+            $request = strip_tags($request);
+            $request = trim($request);
+            $request = stripslashes($request);
+        }
+        return $request;
+    } // xssPrevent()
+
+
+    /**
+     * Action handler for kitIdeaFrontend
+     *
+     * @return STR result
+     */
+    public function action() {
+        // rewrite temporary variables to $_REQUESTs...
+        $this->getTempVars();
+
+        $html_allowed = array(dbIdeaProject::field_desc_long,
+        dbIdeaProject::field_desc_short, self::REQUEST_WYSIWYG);
+        foreach ($_REQUEST as $key => $value) {
+            if (! in_array($key, $html_allowed)) {
+                $_REQUEST[$key] = $this->xssPrevent($value);
+            }
+        }
+        $action = isset($_REQUEST[self::REQUEST_MAIN_ACTION]) ? $_REQUEST[self::REQUEST_MAIN_ACTION] : self::ACTION_DEFAULT;
+
+        // load CSS?
+        if ($this->params[self::PARAM_CSS]) {
+            if (! is_registered_droplet_css('kit_idea', PAGE_ID)) {
+                register_droplet_css('kit_idea', PAGE_ID, 'kit_idea', 'kit_idea.css');
+            }
+        } elseif (is_registered_droplet_css('kit_idea', PAGE_ID)) {
+            unregister_droplet_css('kit_idea', PAGE_ID);
+        }
+
+        // load Javascript?
+        if ($this->params[self::PARAM_JS]) {
+            if (! is_registered_droplet_js('kit_idea', PAGE_ID)) {
+                register_droplet_js('kit_idea', PAGE_ID, 'kit_idea', 'kit_idea.js');
+            }
+        } elseif (is_registered_droplet_js('kit_idea', PAGE_ID)) {
+            unregister_droplet_js('kit_idea', PAGE_ID);
+        }
+
+        switch ($action) :
+            case self::ACTION_ACCOUNT:
+                // switch to account
+                return $this->show_main(self::ACTION_ACCOUNT, $this->accountAction());
+            case self::ACTION_DEFAULT:
+            default:
+                // switch to project management
+                return $this->show_main(self::ACTION_PROJECTS, $this->projectAction());
+        endswitch
+        ;
+    } // action
+
+
+    /**
+     * prompt the formatted result
+     *
+     * @param STR $action - active navigation element
+     * @param STR $content - content to show
+     *
+     * @return STR dialog
+     */
+    public function show_main($action, $content) {
+        $navigation = array();
+        foreach ($this->tab_main_navigation_array as $key => $value) {
+            // skip account tab if using LEPTON authentication
+            if ($this->use_lepton_auth && ($key == self::ACTION_ACCOUNT)) continue;
+            $navigation[] = array('active' => ($key == $action) ? 1 : 0,
+            'url' => sprintf('%s%s%s=%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', self::REQUEST_MAIN_ACTION, $key),
+            'text' => $value);
+        }
+        $data = array('WB_URL' => WB_URL, 'anchor' => self::ANCHOR,
+        'navigation' => $navigation, 'error' => ($this->isError()) ? 1 : 0,
+        'content' => ($this->isError()) ? $this->getError() : $content);
+        return $this->getTemplate('body.lte', $data);
+    } // show_main()
+
+
+    /**
+     * ACCOUNT FUNCTIONS
+     */
+
+    /**
+     * Action handler for all user account actions
+     *
+     * @return STR dialog or message
+     */
+    public function accountAction() {
+        global $kitContactInterface;
+        global $dbContact;
+
+        $action = isset($_REQUEST[self::REQUEST_ACCOUNT_ACTION]) ? $_REQUEST[self::REQUEST_ACCOUNT_ACTION] : self::ACTION_DEFAULT;
+
+        if (! $this->accountIsAuthenticated()) {
+            // user is not authenticated and must login first!
+            $action = self::ACTION_LOGIN;
+        }
+
+        switch ($action) :
+            case self::ACTION_LOGOUT:
+                if ($this->getLogLogin() && isset($_SESSION[self::SESSION_LOG_LOGIN])) {
+                    // if tracking for login is enabled also track the logout...
+                    $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id],
+                            sprintf(idea_log_logout, date(idea_cfg_time_str)));
+                }
+                unset($_SESSION[self::SESSION_LOG_LOGIN]);
+                $kitContactInterface->logout();
+            // important: no break! show login dialog after logout!
+            case self::ACTION_LOGIN:
+                // login - save the main action as $_SESSION
+                $this->setTempVars(array(
+                self::REQUEST_MAIN_ACTION => self::ACTION_ACCOUNT));
+                // show the login dialog
+                $result = $this->accountLoginDlg();
+                if (is_string($result)) return $result; // login failed, retry ...
+                if (is_bool($result) && ($result == false)) return false; // error ...
+            // login success! no break! show the account dialog of the user
+            case self::ACTION_ACCOUNT:
+            case self::ACTION_DEFAULT:
+            default:
+                // show user account dialog
+                return $this->accountShow(self::ACTION_ACCOUNT, $this->accountAccountDlg());
+        endswitch;
+    } // accountAction()
+
+
+    /**
+     * Show the user account actions
+     *
+     * @param STR $action - navigation item
+     * @param STR $content
+     *
+     * @return STR formatted $content
+     */
+    public function accountShow($action, $content) {
+        $navigation = array();
+        foreach ($this->tab_account_navigation_array as $key => $value) {
+            $navigation[] = array('active' => ($key == $action) ? 1 : 0,
+            'url' => sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
+            self::REQUEST_MAIN_ACTION => self::ACTION_ACCOUNT,
+            self::REQUEST_ACCOUNT_ACTION => $key))), 'text' => $value);
+        }
+        $data = array('WB_URL' => WB_URL, 'navigation' => $navigation,
+        'error' => ($this->isError()) ? 1 : 0,
+        'content' => ($this->isError()) ? $this->getError() : $content);
+        return $this->getTemplate('body.account.lte', $data);
+    } // accountShow()
+
+
+    /**
+     * Check if the user is authenticated by the KIT interface or
+     * by the LEPTON interface and if he is allowed to access kitIdea
+     *
+     * @return BOOL
+     */
+    private function accountIsAuthenticated() {
+        global $kitContactInterface;
+        global $dbIdeaCfg;
+        global $wb;
+        global $dbRegister;
+        global $database;
+        global $dbContact;
+
+        if ($this->use_lepton_auth && $wb->is_authenticated()) {
+            // authenticate via LEPTON
+            if (! isset($_SESSION['GROUPS_ID']) || empty($this->params[self::PARAM_LEPTON_GROUPS])) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_lepton_group_missing));
+                return false;
+            }
+            // unset KIT session vars...
+            unset($_SESSION[kitContactInterface::session_kit_aid]);
+            unset($_SESSION[kitContactInterface::session_kit_key]);
+            unset($_SESSION[kitContactInterface::session_kit_contact_id]);
+
+            $lepton_groups = explode(',', $_SESSION['GROUPS_ID']);
+            $idea_groups = explode(',', $this->params[self::PARAM_LEPTON_GROUPS]);
+            foreach ($lepton_groups as $lepton_group) {
+                if (in_array($lepton_group, $idea_groups)) {
+                    // ok - LEPTON user is authenticated, now switch him to KIT ...
+                    $contact_id = - 1;
+                    $status = - 1;
+                    $email = $_SESSION['EMAIL'];
+                    if (! $kitContactInterface->isEMailRegistered($email, $contact_id, $status)) {
+                        // Bugfixing, work around: clean up register records!
+                        $where = array(
+                        dbKITregister::field_email => $_SESSION['EMAIL']);
+                        if (! $dbRegister->sqlDeleteRecord($where)) {
+                            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbRegister->getError()));
+                            return false;
+                        }
+                        // user must be registered in KIT
+                        $contact_array = array();
+                        $contact_array[kitContactInterface::kit_email] = $_SESSION['EMAIL'];
+                        $contact_array[kitContactInterface::kit_intern] = $dbIdeaCfg->getValue(dbIdeaCfg::cfgKITcategory);
+                        $register = array();
+                        // insert contact
+                        if (! $kitContactInterface->addContact($contact_array, $contact_id, $register)) {
+                            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+                            return false;
+                        }
+
+                        // update register record, set to active
+                        $where = array(
+                        dbKITregister::field_contact_id => $contact_id);
+                        $data = array(
+                        dbKITregister::field_status => dbKITregister::status_active,
+                        dbKITregister::field_register_confirmed => date('Y-m-d H:i:s'),
+                        dbKITregister::field_update_when => date('Y-m-d H:i:s'),
+                        dbKITregister::field_update_by => 'kitIdea');
+                        if (! $dbRegister->sqlUpdateRecord($data, $where)) {
+                            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbRegister->getError()));
+                            return false;
+                        }
+                        // ok - login user via KIT
+                        $_SESSION[kitContactInterface::session_kit_aid] = $register[dbKITregister::field_id];
+                        $_SESSION[kitContactInterface::session_kit_key] = $register[dbKITregister::field_register_key];
+                        $_SESSION[kitContactInterface::session_kit_contact_id] = $register[dbKITregister::field_contact_id];
+                        if ($this->getLogLogin() && !isset($_SESSION[self::SESSION_LOG_LOGIN])) {
+                            $_SESSION[self::SESSION_LOG_LOGIN] = time();
+                            $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], sprintf(idea_log_login, date(idea_cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN])));
+                        }
+                        return true;
+                    } else {
+                        // user is registered in KIT
+                        $where = array(
+                        dbKITregister::field_contact_id => $contact_id,
+                        dbKITregister::field_status => dbKITregister::status_active);
+                        $register = array();
+                        if (! $dbRegister->sqlSelectRecord($where, $register)) {
+                            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbRegister->getError()));
+                            return false;
+                        }
+                        if (count($register) < 1) {
+                            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $contact_id)));
+                            return false;
+                        }
+                        $register = end($register);
+                        $_SESSION[kitContactInterface::session_kit_aid] = $register[dbKITregister::field_id];
+                        $_SESSION[kitContactInterface::session_kit_key] = $register[dbKITregister::field_register_key];
+                        $_SESSION[kitContactInterface::session_kit_contact_id] = $register[dbKITregister::field_contact_id];
+                        if ($this->getLogLogin() && !isset($_SESSION[self::SESSION_LOG_LOGIN])) {
+                            $_SESSION[self::SESSION_LOG_LOGIN] = time();
+                            $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], sprintf(idea_log_login, date(idea_cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN])));
+                        }
+                        return true;
+                    }
+                }
+            }
+        } elseif ($kitContactInterface->isAuthenticated()) {
+            // user is authenticated so check categories
+            $cat = $dbIdeaCfg->getValue(dbIdeaCfg::cfgKITcategory);
+            if (! $kitContactInterface->existsCategory(kitContactInterface::category_type_intern, $cat)) {
+                if (! $kitContactInterface->addCategory(kitContactInterface::category_type_intern, $cat, $cat)) {
+                    $this->setError(sprintf('[%s - %] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+                    return false;
+                }
+            }
+            $categories = array();
+            if (! $kitContactInterface->getCategories($_SESSION[kitContactInterface::session_kit_contact_id], $categories)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+                return false;
+            }
+            if (in_array($cat, $categories)) {
+                // user is authenticated and allowed to use kitIdea
+                if ($this->getLogLogin() && !isset($_SESSION[self::SESSION_LOG_LOGIN])) {
+                    $_SESSION[self::SESSION_LOG_LOGIN] = time();
+                    $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], sprintf(idea_log_login, date(idea_cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN])));
+                }
+                return true;
+            } else {
+                // user is authenticated but not allowed to access kitIdea
+                $this->setError(idea_error_auth_wrong_category);
+                return false;
+            }
+        }
+        // user is not authenticated
+        return false;
+    } // accountIsAuthenticated()
+
+
+    /**
+     * User Account Login Dialog
+     *
+     * @return MIXED STR dialog if login is needed, BOOL TRUE on success or BOOL FALSE on error
+     */
+    public function accountLoginDlg() {
+        global $kitContactInterface;
+        global $dbIdeaCfg;
+
+        // get the login dialog from the settings
+        $dlg = $dbIdeaCfg->getValue(dbIdeaCfg::cfgKITformDlgLogin);
+
+        // new instance of kitForm
+        $form = new formFrontend();
+        // get the params array of kitForm
+        $params = $form->getParams();
+        // set the needed params
+        $params[formFrontend::param_form] = $dlg;
+        $params[formFrontend::param_return] = true;
+        $form->setParams($params);
+
+        $result = $form->action();
+        if (is_string($result)) {
+            // return the dialog
+            return $result;
+        } elseif (is_bool($result) && ($result == false) && $form->isError()) {
+            // error while executing the kitForm dialog
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $form->getError()));
+            return false;
+        } elseif (is_bool($result) && ($result == true)) {
+            // the user is logged in, now check if he is allowed to access kitIdea
+            return $this->accountIsAuthenticated();
+        } else {
+            // Oooops, unspecified problem ...
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_undefined));
+            return false;
+        }
+    } // accountLoginDlg()
+
+
+    /**
+     * Show the user account dialog
+     *
+     *
+     */
+    public function accountAccountDlg() {
+        global $kitContactInterface;
+        global $dbIdeaCfg;
+
+        // save action to $_SESSION
+        $this->setTempVars(array(
+        self::REQUEST_MAIN_ACTION => self::ACTION_ACCOUNT,
+        self::REQUEST_ACCOUNT_ACTION => self::ACTION_ACCOUNT));
+
+        // get the user account dialog from the settings
+        $dlg = $dbIdeaCfg->getValue(dbIdeaCfg::cfgKITformDlgAccount);
+
+        // create new instance of kitForm
+        $form = new formFrontend();
+        // get the params array
+        $params = $form->getParams();
+        // set the needed params
+        $params[formFrontend::param_form] = $dlg;
+        $params[formFrontend::param_return] = true;
+        $form->setParams($params);
+        // return the user account dialog
+        $result = $form->action();
+        if (is_bool($result)) {
+            // show welcome message
+            return sprintf(idea_msg_login_welcome, sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
+            self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS))), sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
+            self::REQUEST_MAIN_ACTION => self::ACTION_ACCOUNT,
+            self::REQUEST_ACCOUNT_ACTION => self::ACTION_ACCOUNT))));
+        }
+        return $result;
+    } // accountAccountDlg()
+
+
+    /**
+     * Get the author name
+     *
+     * @return MIXED STR $author or BOOL FALSE on error
+     */
+    public function accountGetAuthor() {
+        global $kitContactInterface;
+        if ($this->accountIsAuthenticated()) {
+            if ($this->use_lepton_auth) {
+                // user is logged in via LEPTON user interface
+                return $_SESSION['DISPLAY_NAME'];
+            } else {
+                // use KIT contact informations
+                $contact = array();
+                if (! $kitContactInterface->getContact($_SESSION[kitContactInterface::session_kit_contact_id], $contact)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+                    return false;
+                }
+                if (! empty($contact[kitContactInterface::kit_first_name]) && ! empty($contact[kitContactInterface::kit_last_name])) {
+                    return sprintf('%s %s', $contact[kitContactInterface::kit_first_name], $contact[kitContactInterface::kit_last_name]);
+                } elseif (! empty($contact[kitContactInterface::kit_last_name])) {
+                    return $contact[kitContactInterface::kit_last_name];
+                } elseif (! empty($contact[kitContactInterface::kit_first_name])) {
+                    return $contact[kitContactInterface::kit_first_name];
+                } else {
+                    return $contact[kitContactInterface::kit_email];
+                }
+            }
+        } else {
+            return idea_str_author_anonymous;
+        }
+    } // accountGetAuthor()
+
+
+    /**
+     * PROJECT FUNCTIONS
+     */
+
+    /**
+     * Action handler for all project functions
+     *
+     * @return STR project dialog
+     */
+    public function projectAction() {
+        global $dbIdeaProject;
+
+        // check project group
+        if ($this->params[self::PARAM_PROJECT_GROUP] < 1) {
+            // invalid project group
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_project_group_invalid));
+            return false;
+        }
+
+        $action = isset($_REQUEST[self::REQUEST_PROJECT_ACTION]) ? $_REQUEST[self::REQUEST_PROJECT_ACTION] : self::ACTION_DEFAULT;
+
+        // special: need no further checks for commands!
+        if ($action == self::ACTION_COMMAND) {
+            return $this->projectShow($this->projectCommand());
+        }
+
+        // check first if access is allowed!
+        if (($action != self::ACTION_DEFAULT) && ($action != self::ACTION_PROJECT_OVERVIEW) && ($action != self::ACTION_PROJECT_EDIT) && ($action != self::ACTION_PROJECT_EDIT_CHECK)) {
+            // At direct access to a project the authentication must be checked first!
+            if (! isset($_REQUEST[dbIdeaProject::field_id])) {
+                // missing project ID, break!
+                $this->setError(idea_error_project_access_invalid);
+                return $this->projectShow(false);
+            }
+            $SQL = sprintf("SELECT %s FROM %s WHERE %s='%s' AND %s='%s'", dbIdeaProject::field_access, $dbIdeaProject->getTableName(), dbIdeaProject::field_id, $_REQUEST[dbIdeaProject::field_id], dbIdeaProject::field_project_group, $this->params[self::PARAM_PROJECT_GROUP]);
+            $project = array();
+            if (! $dbIdeaProject->sqlExec($SQL, $project)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
+                return $this->projectShow(false);
+            }
+            if (count($project) < 1) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $_REQUEST[dbIdeaProject::field_id])));
+                return $this->projectShow(false);
+            }
+            if ($project[0][dbIdeaProject::field_access] == dbIdeaProject::access_closed) {
+                // check authentication!
+                if (! $this->accountIsAuthenticated()) {
+                    $this->setError(idea_error_access_not_auth);
+                    return $this->projectShow(false);
+                }
+                $_SESSION[self::SESSION_PROJECT_ACCESS] = self::ACCESS_CLOSED;
+            } else {
+                $_SESSION[self::SESSION_PROJECT_ACCESS] = self::ACCESS_PUBLIC;
+            }
+            // set the project session for the editor
+            $_SESSION['KIT_IDEA_PROJECT_ID'] = $_REQUEST[dbIdeaProject::field_id];
+        }
+
+        // get the access rights for the user
+        $this->projectGetAccessRights();
+        switch ($action) :
+            case self::ACTION_SECTION_EDIT:
+                return $this->projectShow($this->projectSectionEdit());
+            case self::ACTION_SECTION_EDIT_CHECK:
+                return $this->projectShow($this->projectSectionCheck());
+            case self::ACTION_PROJECT_VIEW:
+                return $this->projectShow($this->projectProjectView());
+            case self::ACTION_PROJECT_EDIT:
+                return $this->projectShow($this->projectProjectEdit());
+            case self::ACTION_PROJECT_EDIT_CHECK:
+                return $this->projectShow($this->projectProjectCheck());
+            case self::ACTION_ARTICLE_CHECK:
+                return $this->projectShow($this->projectArticleCheck());
+            case self::ACTION_DEFAULT:
+            case self::ACTION_PROJECT_OVERVIEW:
+                // show projects overview
+                return $this->projectShow($this->projectOverview());
+            default:
+                // illegal function call ...
+                $this->setError(idea_error_illegal_function_call);
+                return $this->projectShow(false);
+        endswitch
+        ;
+    } // projectAction()
+
+
+    /**
+     * Show the project actions
+     *
+     * @param STR $action - navigation item // not used yet!
+     * @param STR $content
+     *
+     * @return STR formatted $content
+     */
+    public function projectShow($content) {
+        // don't use TAB navigation at the moment!
+        $navigation = array();
+        $data = array('WB_URL' => WB_URL, 'use_navigation' => 0,  // don't use
+        'navigation' => $navigation,
+        'error' => ($this->isError()) ? 1 : 0,
+        'content' => ($this->isError()) ? $this->getError() : $content);
+        return $this->getTemplate('body.project.lte', $data);
+    } // accountShow()
+
+
+    /**
+     * Get the access rights for the actual user and set
+     * $_SESSION[self::SESSION_USER_ACCESS]
+     *
+     * @return INT $access_rights
+     */
+    private function projectGetAccessRights() {
+        global $dbIdeaProjectGroups;
+        global $dbIdeaProjectUsers;
+        global $wb;
+
+        // check if the user is authenticated
+        if (isset($_SESSION[kitContactInterface::session_kit_aid]) && isset($_SESSION[kitContactInterface::session_kit_key]) && isset($_SESSION[kitContactInterface::session_kit_contact_id])) {
+            $is_authenticated = true;
+        } elseif ($wb->is_authenticated() && $this->use_lepton_auth) {
+            $is_authenticated = $this->accountIsAuthenticated();
+        } else {
+            $is_authenticated = false;
+        }
+        // get the access rights for the actual user
+        $where = array(
+        dbIdeaProjectGroups::field_id => $this->params[self::PARAM_PROJECT_GROUP]);
+        $project_group = array();
+        if (! $dbIdeaProjectGroups->sqlSelectRecord($where, $project_group)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectGroups->getError()));
+            return false;
+        }
+        if (count($project_group) < 1) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(kit_error_invalid_id, - 1)));
+            return false;
+        }
+        $project_group = $project_group[0];
+        if ($is_authenticated) {
+            // get the access rights for this user
+            $SQL = sprintf("SELECT * FROM %s WHERE %s='%s' AND %s='%s' AND %s!='%s'", $dbIdeaProjectUsers->getTableName(), dbIdeaProjectUsers::field_group_id, $this->params[self::PARAM_PROJECT_GROUP], dbIdeaProjectUsers::field_kit_id, $_SESSION[kitContactInterface::session_kit_contact_id], dbIdeaProjectUsers::field_status, dbIdeaProjectUsers::status_deleted);
+            $user_data = array();
+            if (! $dbIdeaProjectUsers->sqlExec($SQL, $user_data)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
+                return false;
+            }
+            if (count($user_data) < 1) {
+                // record does not exists, create it
+                $data = array(
+                dbIdeaProjectUsers::field_access => $project_group[dbIdeaProjectGroups::field_access_default],
+                dbIdeaProjectUsers::field_group_id => $this->params[self::PARAM_PROJECT_GROUP],
+                dbIdeaProjectUsers::field_kit_id => $_SESSION[kitContactInterface::session_kit_contact_id],
+                dbIdeaProjectUsers::field_register_id => $_SESSION[kitContactInterface::session_kit_aid],
+                dbIdeaProjectUsers::field_status => dbIdeaProjectUsers::status_active);
+                if (! $dbIdeaProjectUsers->sqlInsertRecord($data)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
+                    return false;
+                }
+                $access_rights = $project_group[$data[dbIdeaProjectUsers::field_access]];
+            } else {
+                $access_rights = $project_group[$user_data[0][dbIdeaProjectUsers::field_access]];
+            }
+        } else {
+            // use the first access group
+            $access_rights = $project_group[dbIdeaProjectGroups::field_access_rights_1];
+        }
+        $_SESSION[self::SESSION_USER_ACCESS] = $access_rights;
+        return $access_rights;
+    } // projectGetAccessRights()
+
+
+    /**
+     * Show the actual available projects
+     *
+     * @return STR project list
+     */
+    public function projectOverview() {
+        global $dbIdeaProject;
+        global $dbIdeaProjectGroups;
+        global $dbIdeaTableSort;
+
+        $where = array(
+        dbIdeaTableSort::field_table => 'mod_kit_idea_project_group',
+        dbIdeaTableSort::field_value => $this->params[self::PARAM_PROJECT_GROUP]);
+        $order = array();
+        if (! $dbIdeaTableSort->sqlSelectRecord($where, $order)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
+            return false;
+        }
+        if (count($order) > 0) {
+            $sort = sprintf(" ORDER BY FIND_IN_SET(%s, '%s')", dbIdeaProject::field_id, $order[0][dbIdeaTableSort::field_order]);
+        } else {
+            $sort = '';
+        }
+
+        if (isset($_SESSION[kitContactInterface::session_kit_aid]) && isset($_SESSION[kitContactInterface::session_kit_key]) && isset($_SESSION[kitContactInterface::session_kit_contact_id])) {
+            // show all active projects
+            $is_authenticated = true;
+            $SQL = sprintf("SELECT * FROM %s WHERE %s='%s' AND %s='%s'%s", $dbIdeaProject->getTableName(), dbIdeaProject::field_status, dbIdeaProject::status_active, dbIdeaProject::field_project_group, $this->params[self::PARAM_PROJECT_GROUP], $sort);
+        } else {
+            // show only public projects
+            $is_authenticated = false;
+            $SQL = sprintf("SELECT * FROM %s WHERE %s='%s' AND %s='%s' AND %s='%s'%s", $dbIdeaProject->getTableName(), dbIdeaProject::field_access, dbIdeaProject::access_public, dbIdeaProject::field_status, dbIdeaProject::status_active, dbIdeaProject::field_project_group, $this->params[self::PARAM_PROJECT_GROUP], $sort);
+        }
+        $projects = array();
+        if (! $dbIdeaProject->sqlExec($SQL, $projects)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
+            return false;
+        }
+        $items = array();
+        foreach ($projects as $project) {
+            $items[] = array(
+                    'id' => $project[dbIdeaProject::field_id],
+                    'title' => $project[dbIdeaProject::field_title],
+                    'desc_short' => $project[dbIdeaProject::field_desc_short],
+                    'desc_long' => $project[dbIdeaProject::field_desc_long],
+                    'keywords' => $project[dbIdeaProject::field_keywords],
+                    'access' => ($project[dbIdeaProject::field_access] == dbIdeaProject::access_public) ? 'public' : 'closed',
+                    'status' => $project[dbIdeaProject::field_status],
+                    'timestamp' => $project[dbIdeaProject::field_timestamp],
+                    'detail_url' => sprintf(
+                            '%s%s%s',
+                            $this->page_link,
+                            (strpos($this->page_link, '?') === false) ? '?' : '&',
+                            http_build_query(array(
+                                    self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+                                    self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
+                                    dbIdeaProject::field_id => $project[dbIdeaProject::field_id]
+                                    ))
+                            )
+                    );
+        }
+
+        // preparing and initialize the table sorter
+        $sorter_table = 'mod_kit_idea_project_group';
+        $SQL = sprintf("SELECT * FROM %s WHERE %s='%s' AND %s='%s' AND %s='%s'", $dbIdeaTableSort->getTableName(), dbIdeaTableSort::field_table, $sorter_table, dbIdeaTableSort::field_value, $this->params[self::PARAM_PROJECT_GROUP], dbIdeaTableSort::field_item, 0);
+        $sorter = array();
+        if (! $dbIdeaTableSort->sqlExec($SQL, $sorter)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
+            return false;
+        }
+        if (count($sorter) < 1) {
+            $data = array(dbIdeaTableSort::field_table => $sorter_table,
+            dbIdeaTableSort::field_value => $this->params[self::PARAM_PROJECT_GROUP],
+            dbIdeaTableSort::field_order => '',
+            dbIdeaTableSort::field_item => 0);
+            if (! $dbIdeaTableSort->sqlInsertRecord($data)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
+                return false;
+            }
+        }
+        $sorter_active = 1;
+
+        $data = array(
+                'projects' => array(
+                        'items' => $items,
+                        'count' => count($items),
+                        'action' => array(
+                                'create_url' => sprintf(
+                                        '%s%s%s',
+                                        $this->page_link,
+                                        (strpos($this->page_link, '?') === false) ? '?' : '&',
+                                        http_build_query(array(
+                                                self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+                                                self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_EDIT
+                                                ))
+                                ))
+                        ),
+                'login_url' => sprintf(
+                        '%s%s%s',
+                        $this->page_link,
+                        (strpos($this->page_link, '?') === false) ? '?' : '&',
+                        http_build_query(array(
+                                self::REQUEST_MAIN_ACTION => self::ACTION_ACCOUNT,
+                                self::REQUEST_ACCOUNT_ACTION => self::ACTION_LOGIN
+                                ))
+                        ),
+                'access' => $dbIdeaProjectGroups->getAccessArray($is_authenticated, $_SESSION[self::SESSION_USER_ACCESS]),
+                'sorter_table' => $sorter_table, 'sorter_active' => $sorter_active,
+                'sorter_value' => $this->params[self::PARAM_PROJECT_GROUP],
+                'sorter_item' => 0
+                );
+
+        return $this->getTemplate('project.list.lte', $data);
+    } // projectOverview()
+
+
+    /**
+     * Dialog to create and edit kitIdea Projects
+     *
+     * @return STR dialog
+     */
+    public function projectProjectEdit() {
+        global $dbIdeaProject;
+        global $dbIdeaCfg;
+
+        $project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : - 1;
+
+        if ($project_id > 0) {
+            // get the desired project
+            $SQL = sprintf("SELECT * FROM %s WHERE %s='%s'", $dbIdeaProject->getTableName(), dbIdeaProject::field_id, $project_id);
+            $project = array();
+            if (! $dbIdeaProject->sqlExec($SQL, $project)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
+                return false;
+            }
+            if (count($project) < 1) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+                return false;
+            }
+            $project = $project[0];
+        } else {
+            // set defaults
+            $project = $dbIdeaProject->getFields();
+            $project[dbIdeaProject::field_id] = $project_id;
+            $project[dbIdeaProject::field_access] = dbIdeaProject::access_closed;
+            $project[dbIdeaProject::field_kit_categories] = $dbIdeaCfg->getValue(dbIdeaCfg::cfgKITcategory);
+            $project[dbIdeaProject::field_status] = dbIdeaProject::status_active;
+        }
+
+        $wysiwyg_height = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGeditorHeight);
+        $wysiwyg_width = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGeditorWidth);
+
+        $items = array();
+        foreach ($project as $name => $value) {
+            $its = array();
+            $editor = '';
+            if ($name == dbIdeaProject::field_status) $its = $dbIdeaProject->status_array;
+            if ($name == dbIdeaProject::field_access) $its = $dbIdeaProject->access_array;
+            if (($name == dbIdeaProject::field_desc_long) || ($name == dbIdeaProject::field_desc_short)) {
+                ob_start();
+                show_wysiwyg_editor($name, $name, stripslashes($value), $wysiwyg_width, $wysiwyg_height);
+                $editor = ob_get_contents();
+                ob_end_clean();
+            }
+            $items[$name] = array('name' => $name, 'value' => $value,
+            'editor' => $editor, 'items' => $its,
+            'label' => constant(sprintf('idea_label_%s', $name)),
+            'hint' => constant(sprintf('idea_hint_%s', $name)));
+        }
+        $data = array(
+        'head' => ($project_id < 1) ? idea_head_project_create : idea_head_project_edit,
+        'intro' => ($this->isMessage()) ? $this->getMessage() : idea_intro_project_edit,
+        'project' => $items, 'page_link' => $this->page_link,
+        'form' => array('name' => 'project_edit',
+        'btn' => array('ok' => tool_btn_ok, 'abort' => tool_btn_abort)),
+        'main_action' => array('name' => self::REQUEST_MAIN_ACTION,
+        'value' => self::ACTION_PROJECTS),
+        'project_action' => array('name' => self::REQUEST_PROJECT_ACTION,
+        'value' => self::ACTION_PROJECT_EDIT_CHECK));
+        return $this->getTemplate('project.edit.lte', $data);
+    } // projectProjectEdit()
+
+
+    /**
+     * Check the project data and insert or update an record
+     *
+     * @return STR dialog projectProjectEdit()
+     */
+    public function projectProjectCheck() {
+        global $dbIdeaProject;
+        global $dbIdeaRevisionArchive;
+        //global $statusMails;
+        global $dbIdeaStatusChange;
+
+        $project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : - 1;
+
+        if ($project_id > 0) {
+            $where = array(dbIdeaProject::field_id => $project_id);
+            $project = array();
+            if (! $dbIdeaProject->sqlSelectRecord($where, $project)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
+                return false;
+            }
+            if (count($project) < 1) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+                return false;
+            }
+            $project = $project[0];
+        } else {
+            $project = $dbIdeaProject->getFields();
+            $project[dbIdeaProject::field_id] = $project_id;
+        }
+        // save project for revision archive
+        $old_project = $project;
+
+        $changed = false;
+        $checked = true;
+        $fields = $dbIdeaProject->getFields();
+        $message = '';
+
+        foreach ($fields as $key => $value) {
+            $must_field = false;
+            switch ($key) :
+                case dbIdeaProject::field_access:
+                case dbIdeaProject::field_kit_categories:
+                case dbIdeaProject::field_title:
+                case dbIdeaProject::field_desc_short:
+                case dbIdeaProject::field_desc_long:
+                case dbIdeaProject::field_status:
+                    // these fields must contain a value
+                    $must_field = true;
+                case dbIdeaProject::field_keywords:
+                    $value = isset($_REQUEST[$key]) ? stripslashes($_REQUEST[$key]) : '';
+                    if ($value != $project[$key]) {
+                        $changed = true;
+                        $project[$key] = $value;
+                    }
+                    if (empty($value) && $must_field) {
+                        // must fields should not be empty!
+                        $checked = false;
+                        $message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
+                    }
+                default:
+                    // ignore all other fields
+                    break;
+            endswitch
+            ;
+        }
+
+        unset($project[dbIdeaProject::field_timestamp]);
+
+        if ($checked && $changed) {
+            if ($project_id < 1) {
+                // insert a new record
+                $project[dbIdeaProject::field_desc_long] = $project[dbIdeaProject::field_desc_long];
+                $project[dbIdeaProject::field_desc_short] = $project[dbIdeaProject::field_desc_short];
+                $project[dbIdeaProject::field_author] = $this->accountGetAuthor();
+                $project[dbIdeaProject::field_status] = dbIdeaProject::status_active;
+                $project[dbIdeaProject::field_revision] = 1;
+                $project[dbIdeaProject::field_project_group] = $this->params[self::PARAM_PROJECT_GROUP];
+                if (! $dbIdeaProject->sqlInsertRecord($project, $project_id)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
+                    return false;
+                }
+                $message .= sprintf(idea_msg_project_inserted, $project_id);
+                /*
   			 * Dont send mail on creating projects, there are no members now !!!
   			$data = array(
   				'project'				=> $project,
@@ -1168,31 +1200,30 @@ class kitIdeaFrontend {
   				return false;
   			}
   			*/
-  		}
-  		else {
-  			// save the previous record to the revision archive
-  			$data = array(
-  				dbIdeaRevisionArchive::field_archived_id				=> $project_id,
-  				dbIdeaRevisionArchive::field_archived_record		=> serialize($old_project),
-  				dbIdeaRevisionArchive::field_archived_revision	=> $old_project[dbIdeaProject::field_revision],
-  				dbIdeaRevisionArchive::field_archived_type			=> dbIdeaRevisionArchive::archive_type_project,
-  			);
-  			if (!$dbIdeaRevisionArchive->sqlInsertRecord($data)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaRevisionArchive->getError()));
-  				return false;
-  			}
-  			// add a new revision
-  			$where = array(dbIdeaProject::field_id => $project_id);
-  			$project[dbIdeaProject::field_desc_long] = $project[dbIdeaProject::field_desc_long];
-  			$project[dbIdeaProject::field_desc_short] = $project[dbIdeaProject::field_desc_short];
-  			$project[dbIdeaProject::field_author] = $this->accountGetAuthor();
-  			$project[dbIdeaProject::field_revision] = $project[dbIdeaProject::field_revision]+1;
-  			if (!$dbIdeaProject->sqlUpdateRecord($project, $where)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
-  				return false;
-  			}
-  			$message .= sprintf(idea_msg_project_updated, $project_id);
-  			/*
+            } else {
+                // save the previous record to the revision archive
+                $data = array(
+                dbIdeaRevisionArchive::field_archived_id => $project_id,
+                dbIdeaRevisionArchive::field_archived_record => serialize($old_project),
+                dbIdeaRevisionArchive::field_archived_revision => $old_project[dbIdeaProject::field_revision],
+                dbIdeaRevisionArchive::field_archived_type => dbIdeaRevisionArchive::archive_type_project);
+                if (! $dbIdeaRevisionArchive->sqlInsertRecord($data)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaRevisionArchive->getError()));
+                    return false;
+                }
+                // add a new revision
+                $where = array(
+                dbIdeaProject::field_id => $project_id);
+                $project[dbIdeaProject::field_desc_long] = $project[dbIdeaProject::field_desc_long];
+                $project[dbIdeaProject::field_desc_short] = $project[dbIdeaProject::field_desc_short];
+                $project[dbIdeaProject::field_author] = $this->accountGetAuthor();
+                $project[dbIdeaProject::field_revision] = $project[dbIdeaProject::field_revision] + 1;
+                if (! $dbIdeaProject->sqlUpdateRecord($project, $where)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
+                    return false;
+                }
+                $message .= sprintf(idea_msg_project_updated, $project_id);
+                /*
   			$data = array(
   				'project'				=> $project,
   				'project_url'		=> $this->page_link
@@ -1203,727 +1234,642 @@ class kitIdeaFrontend {
   				return false;
   			}
   			*/
-  			$data = array(
-  			        dbIdeaStatusChange::FIELD_ARTICLE_ID => -1,
-  			        dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : -1,
-  			        dbIdeaStatusChange::FIELD_INFO => sprintf(idea_msg_project_updated, $project_id),
-  			        dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
-  			        dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
-  			        dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
-  			        dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_UNDELIVERED
-  			        );
-  		    if (!$dbIdeaStatusChange->sqlInsertRecord($data)) {
-  		        $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
-  		        return false;
-  		    }
-  		}
-  		foreach ($fields as $key => $value) unset($_REQUEST[$key]);
-  		$_REQUEST[dbIdeaProject::field_id] = $project_id;
-  	}
-  	$this->setMessage($message);
-  	return $checked ? $this->projectProjectView() : $this->projectProjectEdit();
-  } // projectProjectCheck()
-
-  /**
-   * General view for the desired project with all possible actions
-   *
-   * @return MIXED STR dialog or BOOL FALSE on error
-   */
-  public function projectProjectView() {
-  	global $dbIdeaProject;
-  	global $dbIdeaCfg;
-  	global $dbIdeaProjectSections;
-  	global $dbIdeaProjectArticles;
-  	global $dbIdeaRevisionArchive;
-  	global $dbIdeaTableSort;
-  	global $dbIdeaProjectGroups;
-
-  	$is_authenticated = $this->accountIsAuthenticated() ? true : false;
-
-  	$project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : -1;
-
-  	if ($project_id < 1) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
-  		return false;
-  	}
-
-  	// getting the project record
-  	$where = array(dbIdeaProject::field_id => $project_id);
-  	$project = array();
-  	if (!$dbIdeaProject->sqlSelectRecord($where, $project)) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
-  		return false;
-  	}
-  	if (count($project) < 1) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
-  		return false;
-  	}
-  	$project = $project[0];
-
-  	// get the access rights for visitors
-  	$visitor_permissions = 0;
-  	if ($project[dbIdeaProject::field_access] == dbIdeaProject::access_public) {
-  	    // public project - the first access group defines the rights for the visitors
-  	    $where = array(dbIdeaProjectGroups::field_id => $project[dbIdeaProject::field_project_group]);
-  	    $pg = array();
-  	    if (!$dbIdeaProjectGroups->sqlSelectRecord($where, $pg)) {
-  	        $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectGroups->getError()));
-  	        return false;
-  	    }
-  	    $visitor_permissions = $pg[0][dbIdeaProjectGroups::field_access_rights_1];
-  	}
-
-  	// create project array for parser
-  	$project_array = array();
-  	$compare_revisions = $dbIdeaCfg->getValue(dbIdeaCfg::cfgCompareRevisions);
-  	$differ_prefix = $dbIdeaCfg->getValue(dbIdeaCfg::cfgCompareDifferPrefix);
-  	$differ_suffix = $dbIdeaCfg->getValue(dbIdeaCfg::cfgCompareDifferSuffix);
-
-  	$calcTable = new calcTable();
-
-  	foreach ($project as $name => $value) {
-  		if ($compare_revisions && ($name == dbIdeaProject::field_desc_long) && ($project[dbIdeaProject::field_revision] > 1)) {
-  			$where = array(	dbIdeaRevisionArchive::field_archived_id => $project[dbIdeaProject::field_id],
-  											dbIdeaRevisionArchive::field_archived_revision => $project[dbIdeaProject::field_revision]-1,
-  											dbIdeaRevisionArchive::field_archived_type => dbIdeaRevisionArchive::archive_type_project);
-  			$previous_record = array();
-  			if (!$dbIdeaRevisionArchive->sqlSelectRecord($where, $previous_record)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaRevisionArchive->getError()));
-  				return false;
-  			}
-  			if (count($previous_record) > 0) {
-  				$prev_record = unserialize($previous_record[0][dbIdeaRevisionArchive::field_archived_record]);
-  				$prev_content = $prev_record[dbIdeaProject::field_desc_long];
-  				// start revision compare
-  				$compare = new reportstorageHTML4lcs();
-  				$lcs = new lcs();
-  				$diff = $lcs->HTMLwordCompare($prev_content, $value, $compare);
-  				// rewrite the content
-					$value = $compare->getHTML(1, $differ_prefix, $differ_suffix, '');
-  			}
-  		}
-  		$project_array[$name] = array(
-  			'name'	=> $name,
-  			'value'	=> $value
-  		);
-  	}
-  	$project_edit = array('text'		=> idea_str_edit,
-  												'url'			=> sprintf(	'%s%s%s',
-  																							$this->page_link,
-  																							(strpos($this->page_link, '?') === false) ? '?' : '&',
-  																							http_build_query(array( self::REQUEST_MAIN_ACTION  			=> self::ACTION_PROJECTS,
-  																																			self::REQUEST_PROJECT_ACTION		=> self::ACTION_PROJECT_EDIT,
-  																																			dbIdeaProject::field_id					=> $project_id))));
-  	// creating the section bar
-  	$where = array( dbIdeaTableSort::field_table	=> 'mod_kit_idea_project_section',
-  									dbIdeaTableSort::field_value	=> $project_id);
-  	$order = array();
-  	if (!$dbIdeaTableSort->sqlSelectRecord($where, $order)) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
-  		return false;
-  	}
-  	if (count($order) > 0) {
-  		$sort = sprintf(" ORDER BY FIND_IN_SET(%s, '%s')", dbIdeaProjectSections::field_id, $order[0][dbIdeaTableSort::field_order]);
-  	}
-  	else {
-  		$sort = '';
-  	}
-  	$SQL = sprintf( "SELECT * FROM %s WHERE %s='%s'%s",
-  									$dbIdeaProjectSections->getTableName(),
-  									dbIdeaProjectSections::field_project_id,
-  									$project_id,
-  									$sort);
-  	$project_sections = array();
-  	if (!$dbIdeaProjectSections->sqlExec($SQL, $project_sections)) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
-  		return false;
-  	}
-  	if (count($project_sections) < 1) {
-  		// no entries - create the default sections!
-	  	$secs = $dbIdeaCfg->getValue(dbIdeaCfg::cfgProjectDefaultSections);
-	  	$sections = array();
-	  	foreach ($secs as $sec) {
-	  		if (strpos($sec, '|') === false) {
-	  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_section_definition_invalid, $sec)));
-	  			return false;
-	  		}
-	  		list($text, $identifier) = explode('|', $sec);
-	  		$data = array(
-	  			dbIdeaProjectSections::field_text				=> $text,
-	  			dbIdeaProjectSections::field_identifier	=> $identifier,
-	  			dbIdeaProjectSections::field_project_id	=> $project_id,
-	  		);
-	  		if (!$dbIdeaProjectSections->sqlInsertRecord($data)) {
-	  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
-	  			return false;
-	  		}
-	  	}
-	  	$SQL = sprintf( "SELECT * FROM %s WHERE %s='%s'",
-	  									$dbIdeaProjectSections->getTableName(),
-	  									dbIdeaProjectSections::field_project_id,
-	  									$project_id);
-	  	$project_sections = array();
-	  	if (!$dbIdeaProjectSections->sqlExec($SQL, $project_sections)) {
-	  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
-	  		return false;
-	  	}
-  	}
-
-  	$section_identifier = isset($_REQUEST[dbIdeaProjectSections::field_identifier]) ? $_REQUEST[dbIdeaProjectSections::field_identifier] : $project_sections[0][dbIdeaProjectSections::field_identifier];
-  	$sections = array();
-  	foreach ($project_sections as $section) {
-  		$sections[$section[dbIdeaProjectSections::field_identifier]] = array(
-  			'text'				=> $section[dbIdeaProjectSections::field_text],
-  			'identifier'	=> $section[dbIdeaProjectSections::field_identifier],
-  			'link'				=> sprintf(	'%s%s%s',
-  																$this->page_link,
-  																(strpos($this->page_link, '?') === false) ? '?' : '&',
-  																http_build_query(array( self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
-  																												self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
-  																												dbIdeaProjectSections::field_identifier => $section[dbIdeaProjectSections::field_identifier],
-  																												dbIdeaProject::field_id => $project_id))),
-  			'active'			=> ($section_identifier == $section[dbIdeaProjectSections::field_identifier]) ? 1 : 0
-  		);
-  	}
-
-  	if ($this->params[self::PARAM_SECTION_FILES] &&
-  	        ($is_authenticated ||
-  	                $dbIdeaProjectGroups->checkPermissions($visitor_permissions, dbIdeaProjectGroups::file_download)
-  	                )
-  	        ) {
-	  	// add the section for the files
-	  	$sections[self::IDENTIFIER_FILES] = array(
-	  	        'text' => idea_tab_files,
-	  	        'identifier' => self::IDENTIFIER_FILES,
-	  	        'link' => sprintf(
-	  	                '%s%s%s',
-	  	                $this->page_link,
-	  	                (strpos($this->page_link, '?') === false) ? '?' : '&',
-	  	                http_build_query(array(
-	  	                        self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
-	  	                        self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
-	  	                        dbIdeaProjectSections::field_identifier => self::IDENTIFIER_FILES,
-	  	                        dbIdeaProject::field_id => $project_id
-	  	                        ))
-	  	                ),
-	  	        'active' => ($section_identifier == self::IDENTIFIER_FILES) ? 1 : 0
-	  	);
-  	} // section files
-
-  	if ($this->params[self::PARAM_SECTION_ABOUT]) {
-	  	// add the about section
-	  	$sections[self::IDENTIFIER_ABOUT] = array(
-	  		'text'				=> idea_tab_about,
-	  		'identifier'	=> self::IDENTIFIER_ABOUT,
-	  		'link'				=> sprintf(	'%s%s%s',
-	  															$this->page_link,
-	  															(strpos($this->page_link, '?') === false) ? '?' : '&',
-	  															http_build_query(array( self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
-	  																											self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
-	  																											dbIdeaProjectSections::field_identifier => self::IDENTIFIER_ABOUT,
-	  																											dbIdeaProject::field_id => $project_id))),
-	  		'active'			=> ($section_identifier == self::IDENTIFIER_ABOUT) ? 1 : 0
-	  	);
-  	} // section about
+                $data = array(dbIdeaStatusChange::FIELD_ARTICLE_ID => - 1,
+                dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : - 1,
+                dbIdeaStatusChange::FIELD_INFO => sprintf(idea_msg_project_updated, $project_id),
+                dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
+                dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
+                dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
+                dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_UNDELIVERED);
+                if (! $dbIdeaStatusChange->sqlInsertRecord($data)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
+                    return false;
+                }
+            }
+            foreach ($fields as $key => $value)
+                unset($_REQUEST[$key]);
+            $_REQUEST[dbIdeaProject::field_id] = $project_id;
+        }
+        $this->setMessage($message);
+        return $checked ? $this->projectProjectView() : $this->projectProjectEdit();
+    } // projectProjectCheck()
 
 
-  	// add the edit button to the section
-  	$sections_edit = array(	'text'		=> idea_str_edit,
-  													'url'			=> sprintf(	'%s%s%s',
-  																								$this->page_link,
-  																								(strpos($this->page_link, '?') === false) ? '?' : '&',
-  																								http_build_query(array( self::REQUEST_MAIN_ACTION  			=> self::ACTION_PROJECTS,
-  																																				self::REQUEST_PROJECT_ACTION		=> self::ACTION_SECTION_EDIT,
-  																																				dbIdeaProject::field_id					=> $project_id))));
+    /**
+     * General view for the desired project with all possible actions
+     *
+     * @return MIXED STR dialog or BOOL FALSE on error
+     */
+    public function projectProjectView() {
+        global $dbIdeaProject;
+        global $dbIdeaCfg;
+        global $dbIdeaProjectSections;
+        global $dbIdeaProjectArticles;
+        global $dbIdeaRevisionArchive;
+        global $dbIdeaTableSort;
+        global $dbIdeaProjectGroups;
 
-  	if ($section_identifier == self::IDENTIFIER_FILES) {
-  		/**
-  		 * Prepare the "files" section
-  		 */
-  		$kdl = new kitDirList();
-  		$params = $kdl->getParams();
-  		// set the kitIdea URL to kitDirList!
-  		$params[kitDirList::param_page_link] = sprintf( '%s%s%s',
-  																										$this->page_link,
-  																										(strpos($this->page_link, '?') === false) ? '?' : '&',
-  																										http_build_query(array(
-  																											self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
-  																											self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
-  																											dbIdeaProjectSections::field_identifier => self::IDENTIFIER_FILES,
-  																											dbIdeaProject::field_id => $project_id
-  																										)));
-  	  // set KIT Category
-  		$params[kitDirList::param_kit_intern] = $dbIdeaCfg->getValue(dbIdeaCfg::cfgKITcategory);
-  		$project_files_path = 'kit_protected/kit_idea/project/'.$project_id;
-  		if (!file_exists(WB_PATH.MEDIA_DIRECTORY.'/'.$project_files_path)) {
-  			if (!mkdir(WB_PATH.MEDIA_DIRECTORY.'/'.$project_files_path, 0755, true)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_mkdir, $project_files_path)));
-  				return false;
-  			}
-  		}
-  		$params[kitDirList::param_media] = $project_files_path;
-  		// allow upload
-  		$params[kitDirList::param_recursive] = true;
-  		$params[kitDirList::param_copyright] = false;
-  		$params[kitDirList::param_hide_account] = true;
-  		$params[kitDirList::param_css] = true;
-  		$params[kitDirList::param_upload] = $dbIdeaProjectGroups->checkPermissions($_SESSION[self::SESSION_USER_ACCESS], dbIdeaProjectGroups::file_upload) ? true : false;
-  		$params[kitDirList::param_unlink] = $dbIdeaProjectGroups->checkPermissions($_SESSION[self::SESSION_USER_ACCESS], dbIdeaProjectGroups::file_delete_file) ? true : false;
-  		$params[kitDirList::param_mkdir] = $dbIdeaProjectGroups->checkPermissions($_SESSION[self::SESSION_USER_ACCESS], dbIdeaProjectGroups::file_create_dir) ? true : false;
-  		$kdl->setParams($params);
-  		$kit_dirlist = $kdl->action();
+        $is_authenticated = $this->accountIsAuthenticated() ? true : false;
 
-  		// setting data for the template
-	  	$data = array(
-	  		'project'					=> array(	'fields'	=> $project_array,
-	  																'sections'=> array( 'navigation'=> $sections,
-	  																										'edit'			=> $sections_edit,
-	  																										'active'		=> $section_identifier),
-	  																'edit'		=> $project_edit),
-	  		'page_link'				=> $this->page_link,
-	  		'is_message'			=> $this->isMessage() ? 1 : 0,
-	  		'intro'						=> $this->isMessage() ? $this->getMessage() : idea_intro_project_view,
-	  		'kit_dirlist'			=> $kit_dirlist
-	  	);
+        $project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : - 1;
 
-  		return $this->getTemplate('project.overview.lte', $data);
-  	}
-  	elseif ($section_identifier == self::IDENTIFIER_ABOUT) {
-  		/**
-  		 * Prepare the "About" section
-  		 */
-  		$data = array(
-  			'version'					=> sprintf('%01.2f', $this->getVersion()),
-  			'img_url'					=> $this->img_url,
-  			'release_notes'		=> file_get_contents(WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/info.txt'),
-  			'project'					=> array(	'fields'	=> $project_array,
-	  																'sections'=> array( 'navigation'=> $sections,
-	  																										'edit'			=> $sections_edit,
-	  																										'active'		=> $section_identifier),
-	  																'edit'		=> $project_edit),
-	  		'page_link'				=> $this->page_link,
-	  		'is_message'			=> $this->isMessage() ? 1 : 0,
-	  		'intro'						=> $this->isMessage() ? $this->getMessage() : '',
-  		);
-  		return $this->getTemplate('project.overview.lte', $data);
-  	}
-  	else {
-  		/**
-  		 * Prepare Data for all "non files" sections!
-  		 */
-	  	$article_id = isset($_REQUEST[dbIdeaProjectArticles::field_id]) ? $_REQUEST[dbIdeaProjectArticles::field_id] : -1;
+        if ($project_id < 1) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            return false;
+        }
 
-	  	// get sections in the correct sort order
-	  	$where = array( dbIdeaTableSort::field_table	=> 'mod_kit_idea_project_articles',
-	  									dbIdeaTableSort::field_value	=> $project_id,
-	  									dbIdeaTableSort::field_item		=> $section_identifier);
-	  	$order = array();
-	  	if (!$dbIdeaTableSort->sqlSelectRecord($where, $order)) {
-	  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
-	  		return false;
-	  	}
-	  	if (count($order) > 0) {
-	  		$sort = sprintf(" ORDER BY FIND_IN_SET(%s, '%s')", dbIdeaProjectArticles::field_id, $order[0][dbIdeaTableSort::field_order]);
-	  	}
-	  	else {
-	  		$sort = '';
-	  	}
+        // getting the project record
+        $where = array(dbIdeaProject::field_id => $project_id);
+        $project = array();
+        if (! $dbIdeaProject->sqlSelectRecord($where, $project)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
+            return false;
+        }
+        if (count($project) < 1) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            return false;
+        }
+        $project = $project[0];
 
-	  	// get the articles for this project ID and this section
-	  	$SQL = sprintf( "SELECT * FROM %s WHERE %s='%s' AND %s='%s' AND %s='%s'%s",
-	  									$dbIdeaProjectArticles->getTableName(),
-	  									dbIdeaProjectArticles::field_project_id,
-	  									$project_id,
-	  									dbIdeaProjectArticles::field_section_identifier,
-	  									$section_identifier,
-	  									dbIdeaProjectArticles::field_status,
-	  									dbIdeaProjectArticles::status_active,
-	  									$sort);
-	  	$articles = array();
-	  	if (!$dbIdeaProjectArticles->sqlExec($SQL, $articles)) {
-	  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
-	  		return false;
-	  	}
-	  	$article_items = array();
-	  	foreach ($articles as $item) {
-	  		if ($item[dbIdeaProjectArticles::field_id] == $article_id) continue;
-	  		$fields = array();
-	  		foreach ($dbIdeaProjectArticles->getFields() as $name => $value) {
+        // get the access rights for visitors
+        $visitor_permissions = 0;
+        if ($project[dbIdeaProject::field_access] == dbIdeaProject::access_public) {
+            // public project - the first access group defines the rights for the visitors
+            $where = array(
+            dbIdeaProjectGroups::field_id => $project[dbIdeaProject::field_project_group]);
+            $pg = array();
+            if (! $dbIdeaProjectGroups->sqlSelectRecord($where, $pg)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectGroups->getError()));
+                return false;
+            }
+            $visitor_permissions = $pg[0][dbIdeaProjectGroups::field_access_rights_1];
+        }
 
-	  			if ($compare_revisions && ($name == dbIdeaProjectArticles::field_content_html) &&
-	  			    ($item[dbIdeaProjectArticles::field_revision] > 1)) {
-		  			$where = array(	dbIdeaRevisionArchive::field_archived_id => $item[dbIdeaProjectArticles::field_id],
-		  							dbIdeaRevisionArchive::field_archived_revision => $item[dbIdeaProjectArticles::field_revision]-1,
-		  							dbIdeaRevisionArchive::field_archived_type => dbIdeaRevisionArchive::archive_type_article);
-		  			$previous_record = array();
-		  			if (!$dbIdeaRevisionArchive->sqlSelectRecord($where, $previous_record)) {
-		  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaRevisionArchive->getError()));
-		  				return false;
-		  			}
-		  			if (count($previous_record) > 0) {
-		  				$prev_record = unserialize($previous_record[0][dbIdeaRevisionArchive::field_archived_record]);
-		  				$prev_content = $prev_record[dbIdeaProjectArticles::field_content_html];
-		  				// start revision compare
-		  				$compare = new reportstorageHTML4lcs();
-		  				$lcs = new lcs();
-		  				$diff = $lcs->HTMLwordCompare($prev_content, $item[$name], $compare);
-		  				// rewrite the content
-						$item[$name] = $compare->getHTML(1, $differ_prefix, $differ_suffix, '');
-		  			}
-		  		}
-		  		if (!$calcTable->parseTables($item[$name])) {
-		  		    if ($calcTable->isError()) {
-		  		        $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $calcTable->getError()));
-		  		        return false;
-		  		    }
-		  		    else {
-		  		        $this->setMessage($calcTable->getMessage());
-		  		    }
-		  		}
-	  			$fields[$name] = array(
-	  				'name'	=> $name,
-	  				'value'	=> $item[$name]
-	  			);
-	  		}
-	  		$article_items[$item[dbIdeaProjectArticles::field_id]] = array(
-	  		  'fields'	=> $fields,
-	  		  'links'	=> array(
-	  		    'edit'    => array(
-    	  		  'text'    => idea_str_edit,
-    	  		  'url'     => sprintf('%s%s%s',
-    	  				   	              $this->page_link,
-    	  								  (strpos($this->page_link, '?') === false) ? '?' : '&',
-    	  								  http_build_query(array(
-    	  								      self::REQUEST_MAIN_ACTION     => self::ACTION_PROJECTS,
-    	  									  self::REQUEST_PROJECT_ACTION	=> self::ACTION_PROJECT_VIEW,
-    	  									  dbIdeaProject::field_id		=> $project_id,
-    	  									  dbIdeaProjectArticles::field_id => $item[dbIdeaProjectArticles::field_id],
-    	  									  dbIdeaProjectArticles::field_section_identifier => $item[dbIdeaProjectArticles::field_section_identifier]
-    	  									  ))
-	  								     )
-	  				)
-	  			)
+        // create project array for parser
+        $project_array = array();
+        $compare_revisions = $dbIdeaCfg->getValue(dbIdeaCfg::cfgCompareRevisions);
+        $differ_prefix = $dbIdeaCfg->getValue(dbIdeaCfg::cfgCompareDifferPrefix);
+        $differ_suffix = $dbIdeaCfg->getValue(dbIdeaCfg::cfgCompareDifferSuffix);
 
-	  		);
-	  	}
+        $calcTable = new calcTable();
 
-	  	// preparing the WYSIWYG editor
-	  	$content = '';
-	  	if ($article_id > 0) {
-	  		// load the specific article into the WYSIWYG editor
-	  		$where = array(dbIdeaProjectArticles::field_id => $article_id);
-	  		$article = array();
-	  		if (!$dbIdeaProjectArticles->sqlSelectRecord($where, $article)) {
-	  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
-	  			return false;
-	  		}
-	  		if (count($article) < 1) {
-	  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $article_id)));
-	  			return false;
-	  		}
-	  		$article = $article[0];
-	  		$content = $article[dbIdeaProjectArticles::field_content_html];
-	  	}
-	  	else {
-	  		$article = $dbIdeaProjectArticles->getFields();
-	  		$article[dbIdeaProjectArticles::field_id] = -1;
-	  		$article[dbIdeaProjectArticles::field_project_id] = $project_id;
-	  		$article[dbIdeaProjectArticles::field_revision] = -1;
-	  		$article[dbIdeaProjectArticles::field_status] = dbIdeaProjectArticles::status_active;
-	  		$article[dbIdeaProjectArticles::field_section_identifier] = $section_identifier;
-	  	}
-	  	// create article array for parser
-	  	$article_array = array();
-	  	foreach ($article as $name => $value) {
-	  		$article_array[$name] = array(
-	  			'name'	=> $name,
-	  			'value'	=> $value
-	  		);
-	  	}
+        foreach ($project as $name => $value) {
+            if ($compare_revisions && ($name == dbIdeaProject::field_desc_long) && ($project[dbIdeaProject::field_revision] > 1)) {
+                $where = array(
+                dbIdeaRevisionArchive::field_archived_id => $project[dbIdeaProject::field_id],
+                dbIdeaRevisionArchive::field_archived_revision => $project[dbIdeaProject::field_revision] - 1,
+                dbIdeaRevisionArchive::field_archived_type => dbIdeaRevisionArchive::archive_type_project);
+                $previous_record = array();
+                if (! $dbIdeaRevisionArchive->sqlSelectRecord($where, $previous_record)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaRevisionArchive->getError()));
+                    return false;
+                }
+                if (count($previous_record) > 0) {
+                    $prev_record = unserialize($previous_record[0][dbIdeaRevisionArchive::field_archived_record]);
+                    $prev_content = $prev_record[dbIdeaProject::field_desc_long];
+                    // start revision compare
+                    $compare = new reportstorageHTML4lcs();
+                    $lcs = new lcs();
+                    $diff = $lcs->HTMLwordCompare($prev_content, $value, $compare);
+                    // rewrite the content
+                    $value = $compare->getHTML(1, $differ_prefix, $differ_suffix, '');
+                }
+            }
+            $project_array[$name] = array('name' => $name, 'value' => $value);
+        }
+        $project_edit = array('text' => idea_str_edit,
+        'url' => sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
+        self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+        self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_EDIT,
+        dbIdeaProject::field_id => $project_id))));
+        // creating the section bar
+        $where = array(
+        dbIdeaTableSort::field_table => 'mod_kit_idea_project_section',
+        dbIdeaTableSort::field_value => $project_id);
+        $order = array();
+        if (! $dbIdeaTableSort->sqlSelectRecord($where, $order)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
+            return false;
+        }
+        if (count($order) > 0) {
+            $sort = sprintf(" ORDER BY FIND_IN_SET(%s, '%s')", dbIdeaProjectSections::field_id, $order[0][dbIdeaTableSort::field_order]);
+        } else {
+            $sort = '';
+        }
+        $SQL = sprintf("SELECT * FROM %s WHERE %s='%s'%s", $dbIdeaProjectSections->getTableName(), dbIdeaProjectSections::field_project_id, $project_id, $sort);
+        $project_sections = array();
+        if (! $dbIdeaProjectSections->sqlExec($SQL, $project_sections)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
+            return false;
+        }
+        if (count($project_sections) < 1) {
+            // no entries - create the default sections!
+            $secs = $dbIdeaCfg->getValue(dbIdeaCfg::cfgProjectDefaultSections);
+            $sections = array();
+            foreach ($secs as $sec) {
+                if (strpos($sec, '|') === false) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_section_definition_invalid, $sec)));
+                    return false;
+                }
+                list ($text, $identifier) = explode('|', $sec);
+                $data = array(dbIdeaProjectSections::field_text => $text,
+                dbIdeaProjectSections::field_identifier => $identifier,
+                dbIdeaProjectSections::field_project_id => $project_id);
+                if (! $dbIdeaProjectSections->sqlInsertRecord($data)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
+                    return false;
+                }
+            }
+            $SQL = sprintf("SELECT * FROM %s WHERE %s='%s'", $dbIdeaProjectSections->getTableName(), dbIdeaProjectSections::field_project_id, $project_id);
+            $project_sections = array();
+            if (! $dbIdeaProjectSections->sqlExec($SQL, $project_sections)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
+                return false;
+            }
+        }
 
-	  	// set width and height for the editor
-	  	$width = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGeditorWidth);
-	  	$height = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGeditorHeight);
-	  	ob_start();
-	  		show_wysiwyg_editor(self::REQUEST_WYSIWYG, self::REQUEST_WYSIWYG, $content, $width, $height);
-	  		$wysiwyg_editor = ob_get_contents();
-	  	ob_end_clean();
+        $section_identifier = isset($_REQUEST[dbIdeaProjectSections::field_identifier]) ? $_REQUEST[dbIdeaProjectSections::field_identifier] : $project_sections[0][dbIdeaProjectSections::field_identifier];
+        $sections = array();
+        foreach ($project_sections as $section) {
+            $sections[$section[dbIdeaProjectSections::field_identifier]] = array(
+            'text' => $section[dbIdeaProjectSections::field_text],
+            'identifier' => $section[dbIdeaProjectSections::field_identifier],
+            'link' => sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
+            self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+            self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
+            dbIdeaProjectSections::field_identifier => $section[dbIdeaProjectSections::field_identifier],
+            dbIdeaProject::field_id => $project_id))),
+            'active' => ($section_identifier == $section[dbIdeaProjectSections::field_identifier]) ? 1 : 0);
+        }
 
-	  	// preparing and initialize the table sorter
-	  	$sorter_table = 'mod_kit_idea_project_articles';
-	  	$sorter_active = 0;
-	  	if ($project_id > 0) {
-	  		$SQL = sprintf( "SELECT * FROM %s WHERE %s='%s' AND %s='%s' AND %s='%s'",
-	  										$dbIdeaTableSort->getTableName(),
-	  										dbIdeaTableSort::field_table,
-	  										$sorter_table,
-	  										dbIdeaTableSort::field_value,
-	  										$project_id,
-	  										dbIdeaTableSort::field_item,
-	  										$section_identifier);
-	  		$sorter = array();
-	  		if (!$dbIdeaTableSort->sqlExec($SQL, $sorter)) {
-	  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
-	  			return false;
-	  		}
-	  		if (count($sorter) < 1) {
-	  			$data = array(
-	  				dbIdeaTableSort::field_table 	=> $sorter_table,
-	  				dbIdeaTableSort::field_value 	=> $project_id,
-	  				dbIdeaTableSort::field_order 	=> '',
-	  				dbIdeaTableSort::field_item		=> $section_identifier
-	  			);
-	  			if (!$dbIdeaTableSort->sqlInsertRecord($data)) {
-	  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
-	  				return false;
-	  			}
-	  		}
-	  		$sorter_active = 1;
-	  	}
+        if ($this->params[self::PARAM_SECTION_FILES] && ($is_authenticated || $dbIdeaProjectGroups->checkPermissions($visitor_permissions, dbIdeaProjectGroups::file_download))) {
+            // add the section for the files
+            $sections[self::IDENTIFIER_FILES] = array(
+            'text' => idea_tab_files, 'identifier' => self::IDENTIFIER_FILES,
+            'link' => sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
+            self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+            self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
+            dbIdeaProjectSections::field_identifier => self::IDENTIFIER_FILES,
+            dbIdeaProject::field_id => $project_id))),
+            'active' => ($section_identifier == self::IDENTIFIER_FILES) ? 1 : 0);
+        } // section files
 
-	  	// create the status array
-	  	$status_array = array(
-	  		'label'		=> idea_label_article_status,
-	  		'name'		=> dbIdeaProjectArticles::field_status,
-	  		'value'		=> $article[dbIdeaProjectArticles::field_status],
-	  		'items'		=> $dbIdeaProjectArticles->status_array
-	  	);
 
-	  	//create the move to another section array
-	  	$items = array();
-	  	foreach ($project_sections as $sec) {
-	  		$items[] = array(
-	  			'value'		=> $sec[dbIdeaProjectSections::field_identifier],
-	  			'text'		=> $sec[dbIdeaProjectSections::field_text]
-	  		);
-	  	}
-	  	$move_array = array(
-	  		'label'		=> idea_label_article_move_section,
-	  		'name'		=> self::REQUEST_ARTICLE_MOVE,
-	  		'value'		=> $section_identifier,
-	  		'items'		=> $items
-	  	);
+        if ($this->params[self::PARAM_SECTION_ABOUT]) {
+            // add the about section
+            $sections[self::IDENTIFIER_ABOUT] = array(
+            'text' => idea_tab_about, 'identifier' => self::IDENTIFIER_ABOUT,
+            'link' => sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
+            self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+            self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
+            dbIdeaProjectSections::field_identifier => self::IDENTIFIER_ABOUT,
+            dbIdeaProject::field_id => $project_id))),
+            'active' => ($section_identifier == self::IDENTIFIER_ABOUT) ? 1 : 0);
+        } // section about
 
-	  	// get captcha
-	  	ob_start();
-	  	call_captcha();
-	  	$captcha = ob_get_contents();
-	  	ob_end_clean();
 
-	  	// setting data for the template
-	  	$data = array(
-	  		'project'					=> array(	'fields'	=> $project_array,
-	  																'sections'=> array( 'navigation'=> $sections,
-	  																										'edit'			=> $sections_edit),
-	  																'edit'		=> $project_edit),
-	  		'article'					=> array(	'edit'		=> array( 'editor'		=> array( 'label'		=> constant(sprintf('idea_label_%s', dbIdeaProjectArticles::field_content_html)),
-	  																																					'value'		=> $wysiwyg_editor),
-	  																										'title'			=> array( 'label'		=> constant(sprintf('idea_label_%s', dbIdeaProjectArticles::field_title)),
-	  																																					'name'		=> dbIdeaProjectArticles::field_title,
-	  																																					'value'		=> $article[dbIdeaProjectArticles::field_title]),
-	  																										'captcha'		=> $captcha),
-	  																'fields'	=> $article_array,
-	  																'list'		=> $article_items,
-	  																'status'	=> $status_array,
-	  																'move'		=> $move_array),
-	  		'form'						=> array( 'name'		=> 'article_edit',
-	  																'btn'			=> array( 'ok'				=> tool_btn_ok,
-	  																										'abort'			=> tool_btn_abort)),
-	  		'page_link'				=> $this->page_link,
-	  		'main_action'			=> array( 'name'		=> self::REQUEST_MAIN_ACTION,
-	  																'value'		=> self::ACTION_PROJECTS),
-	  		'project_action'	=> array( 'name'		=> self::REQUEST_PROJECT_ACTION,
-	  																'value'		=> self::ACTION_ARTICLE_CHECK),
-	  	  //'is_authenticated'=> $is_authenticated ? 1 : 0,
-	  		'is_message'			=> $this->isMessage() ? 1 : 0,
-	  		'intro'						=> $this->isMessage() ? $this->getMessage() : idea_intro_project_view,
-	  		'access'					=> $dbIdeaProjectGroups->getAccessArray($is_authenticated, $_SESSION[self::SESSION_USER_ACCESS]),
-  			'sorter_table'		=> $sorter_table,
-	  		'sorter_active'		=> $sorter_active,
-	  		'sorter_value'		=> $project_id,
-	  		'sorter_item'			=> $section_identifier
-	  	);
-	  	return $this->getTemplate('project.overview.lte', $data);
-  	} // all other sections
-  } // projectProjectView()
+        // add the edit button to the section
+        $sections_edit = array('text' => idea_str_edit,
+        'url' => sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
+        self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+        self::REQUEST_PROJECT_ACTION => self::ACTION_SECTION_EDIT,
+        dbIdeaProject::field_id => $project_id))));
 
-  /**
-   * Check an article and add or change the record
-   *
-   * @return MIXED STR dialog projectProjectView() on success OR BOOL FALSE on error
-   */
-  public function projectArticleCheck() {
-  	global $dbIdeaProjectArticles;
-  	global $dbIdeaRevisionArchive;
-  	global $dbIdeaProject;
-  	//global $statusMails;
-  	global $dbIdeaStatusChange;
+        if ($section_identifier == self::IDENTIFIER_FILES) {
+            /**
+             * Prepare the "files" section
+             */
+            $kdl = new kitDirList();
+            $params = $kdl->getParams();
+            // set the kitIdea URL to kitDirList!
+            $params[kitDirList::param_page_link] = sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
+            self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+            self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
+            dbIdeaProjectSections::field_identifier => self::IDENTIFIER_FILES,
+            dbIdeaProject::field_id => $project_id)));
+            // set KIT Category
+            $params[kitDirList::param_kit_intern] = $dbIdeaCfg->getValue(dbIdeaCfg::cfgKITcategory);
+            $project_files_path = 'kit_protected/kit_idea/project/' . $project_id;
+            if (! file_exists(WB_PATH . MEDIA_DIRECTORY . '/' . $project_files_path)) {
+                if (! mkdir(WB_PATH . MEDIA_DIRECTORY . '/' . $project_files_path, 0755, true)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_mkdir, $project_files_path)));
+                    return false;
+                }
+            }
+            $params[kitDirList::param_media] = $project_files_path;
+            // allow upload
+            $params[kitDirList::param_recursive] = true;
+            $params[kitDirList::param_copyright] = false;
+            $params[kitDirList::param_hide_account] = true;
+            $params[kitDirList::param_css] = true;
+            $params[kitDirList::param_upload] = $dbIdeaProjectGroups->checkPermissions($_SESSION[self::SESSION_USER_ACCESS], dbIdeaProjectGroups::file_upload) ? true : false;
+            $params[kitDirList::param_unlink] = $dbIdeaProjectGroups->checkPermissions($_SESSION[self::SESSION_USER_ACCESS], dbIdeaProjectGroups::file_delete_file) ? true : false;
+            $params[kitDirList::param_mkdir] = $dbIdeaProjectGroups->checkPermissions($_SESSION[self::SESSION_USER_ACCESS], dbIdeaProjectGroups::file_create_dir) ? true : false;
+            $params[kitDirList::param_idea_project_group] = $this->params[self::PARAM_PROJECT_GROUP];
+            $params[kitDirList::param_idea_project_id] = $project_id;
+            $params[kitDirList::param_use_idea_status] = true;
+            $kdl->setParams($params);
+            $kit_dirlist = $kdl->action();
 
-  	// first check CAPTCHA
-  	if (isset($_REQUEST['captcha']) && ($_REQUEST['captcha'] != $_SESSION['captcha'])) {
-  		// CAPTCHA is invalid
-  		$this->setMessage(idea_msg_captcha_invalid);
-  		return $this->projectProjectView();
-  	}
+            // setting data for the template
+            $data = array(
+            'project' => array('fields' => $project_array,
+            'sections' => array('navigation' => $sections,
+            'edit' => $sections_edit, 'active' => $section_identifier),
+            'edit' => $project_edit), 'page_link' => $this->page_link,
+            'is_message' => $this->isMessage() ? 1 : 0,
+            'intro' => $this->isMessage() ? $this->getMessage() : idea_intro_project_view,
+            'kit_dirlist' => $kit_dirlist);
 
-  	$project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : -1;
-  	if ($project_id < 1) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
-  		return false;
-  	}
-  	$where = array(dbIdeaProject::field_id => $project_id);
-  	$project = array();
-  	if (!$dbIdeaProject->sqlSelectRecord($where, $project)) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
-  		return false;
-  	}
-  	if (count($project) < 1) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
-  		return false;
-  	}
-  	$project = $project[0];
+            return $this->getTemplate('project.overview.lte', $data);
+        } elseif ($section_identifier == self::IDENTIFIER_ABOUT) {
+            /**
+             * Prepare the "About" section
+             */
+            $data = array(
+            'version' => sprintf('%01.2f', $this->getVersion()),
+            'img_url' => $this->img_url,
+            'release_notes' => file_get_contents(WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/info.txt'),
+            'project' => array('fields' => $project_array,
+            'sections' => array('navigation' => $sections,
+            'edit' => $sections_edit, 'active' => $section_identifier),
+            'edit' => $project_edit), 'page_link' => $this->page_link,
+            'is_message' => $this->isMessage() ? 1 : 0,
+            'intro' => $this->isMessage() ? $this->getMessage() : '');
+            return $this->getTemplate('project.overview.lte', $data);
+        } else {
+            /**
+             * Prepare Data for all "non files" sections!
+             */
+            $article_id = isset($_REQUEST[dbIdeaProjectArticles::field_id]) ? $_REQUEST[dbIdeaProjectArticles::field_id] : - 1;
 
-  	$article_id = isset($_REQUEST[dbIdeaProjectArticles::field_id]) ? $_REQUEST[dbIdeaProjectArticles::field_id] : -1;
+            // get sections in the correct sort order
+            $where = array(
+            dbIdeaTableSort::field_table => 'mod_kit_idea_project_articles',
+            dbIdeaTableSort::field_value => $project_id,
+            dbIdeaTableSort::field_item => $section_identifier);
+            $order = array();
+            if (! $dbIdeaTableSort->sqlSelectRecord($where, $order)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
+                return false;
+            }
+            if (count($order) > 0) {
+                $sort = sprintf(" ORDER BY FIND_IN_SET(%s, '%s')", dbIdeaProjectArticles::field_id, $order[0][dbIdeaTableSort::field_order]);
+            } else {
+                $sort = '';
+            }
 
-  	if ($article_id > 0) {
-  		$where = array(dbIdeaProjectArticles::field_id => $article_id);
-  		$article = array();
-  		if (!$dbIdeaProjectArticles->sqlSelectRecord($where, $article)) {
-  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
-  			return false;
-  		}
-  		if (count($article) < 1) {
-  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $article_id)));
-  			return false;
-  		}
-  		$article = $article[0];
-  	}
-  	else {
-  		$article = $dbIdeaProjectArticles->getFields();
-  		$article[dbIdeaProjectArticles::field_id] = $article_id;
-  	}
-  	$old_article = $article;
+            // get the articles for this project ID and this section
+            $SQL = sprintf("SELECT * FROM %s WHERE %s='%s' AND %s='%s' AND %s='%s'%s", $dbIdeaProjectArticles->getTableName(), dbIdeaProjectArticles::field_project_id, $project_id, dbIdeaProjectArticles::field_section_identifier, $section_identifier, dbIdeaProjectArticles::field_status, dbIdeaProjectArticles::status_active, $sort);
+            $articles = array();
+            if (! $dbIdeaProjectArticles->sqlExec($SQL, $articles)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
+                return false;
+            }
+            $article_items = array();
+            foreach ($articles as $item) {
+                if ($item[dbIdeaProjectArticles::field_id] == $article_id) continue;
+                $fields = array();
+                foreach ($dbIdeaProjectArticles->getFields() as $name => $value) {
 
-  	$changed = false;
-  	$checked = true;
-  	$fields = $dbIdeaProjectArticles->getFields();
-  	$message = '';
+                    if ($compare_revisions && ($name == dbIdeaProjectArticles::field_content_html) && ($item[dbIdeaProjectArticles::field_revision] > 1)) {
+                        $where = array(
+                        dbIdeaRevisionArchive::field_archived_id => $item[dbIdeaProjectArticles::field_id],
+                        dbIdeaRevisionArchive::field_archived_revision => $item[dbIdeaProjectArticles::field_revision] - 1,
+                        dbIdeaRevisionArchive::field_archived_type => dbIdeaRevisionArchive::archive_type_article);
+                        $previous_record = array();
+                        if (! $dbIdeaRevisionArchive->sqlSelectRecord($where, $previous_record)) {
+                            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaRevisionArchive->getError()));
+                            return false;
+                        }
+                        if (count($previous_record) > 0) {
+                            $prev_record = unserialize($previous_record[0][dbIdeaRevisionArchive::field_archived_record]);
+                            $prev_content = $prev_record[dbIdeaProjectArticles::field_content_html];
+                            // start revision compare
+                            $compare = new reportstorageHTML4lcs();
+                            $lcs = new lcs();
+                            $diff = $lcs->HTMLwordCompare($prev_content, $item[$name], $compare);
+                            // rewrite the content
+                            $item[$name] = $compare->getHTML(1, $differ_prefix, $differ_suffix, '');
+                        }
+                    }
+                    if (! $calcTable->parseTables($item[$name])) {
+                        if ($calcTable->isError()) {
+                            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $calcTable->getError()));
+                            return false;
+                        } else {
+                            $this->setMessage($calcTable->getMessage());
+                        }
+                    }
+                    $fields[$name] = array('name' => $name,
+                    'value' => $item[$name]);
+                }
+                $article_items[$item[dbIdeaProjectArticles::field_id]] = array(
+                'fields' => $fields,
+                'links' => array(
+                'edit' => array('text' => idea_str_edit,
+                'url' => sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
+                self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+                self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
+                dbIdeaProject::field_id => $project_id,
+                dbIdeaProjectArticles::field_id => $item[dbIdeaProjectArticles::field_id],
+                dbIdeaProjectArticles::field_section_identifier => $item[dbIdeaProjectArticles::field_section_identifier]))))))
 
-  	foreach ($fields as $key => $value) {
-  		$must_field = false;
-  		switch ($key):
-  		case dbIdeaProjectArticles::field_section_identifier:
-  			if (isset($_REQUEST[self::REQUEST_ARTICLE_MOVE]) &&
-  					($_REQUEST[self::REQUEST_ARTICLE_MOVE] != $article[dbIdeaProjectArticles::field_section_identifier])) {
-  				$article[dbIdeaProjectArticles::field_section_identifier] = $_REQUEST[self::REQUEST_ARTICLE_MOVE];
-  				$message .= sprintf(idea_msg_article_moved, $article[dbIdeaProjectArticles::field_title]);
-  				$changed = true;
-  			}
-  			else {
-  				$value = isset($_REQUEST[$key]) ? $_REQUEST[$key] : '';
-  				if ($value != $article[$key]) {
-  					$changed = true;
-  					$article[$key] = $value;
-  				}
-  			}
-  			break;
-  		case dbIdeaProjectArticles::field_project_id;
-  			if (isset($_REQUEST[$key])) {
-  				$value = $_REQUEST[$key];
-  			}
-  			elseif (isset($_REQUEST[dbIdeaProject::field_id])) {
-  				$value = $_REQUEST[dbIdeaProject::field_id];
-  			}
-  			else {
-  				$checked = false;
-  				$message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
-  			}
-  			if ($value != $article[$key]) {
-  				$changed = true;
-  				$article[$key] = $value;
-  			}
-  			break;
-  		case dbIdeaProjectArticles::field_kit_contact_id:
-  			if ($_SESSION[self::SESSION_PROJECT_ACCESS] == self::ACCESS_CLOSED) {
-	  			if (isset($_REQUEST[$key])) {
-	  				$value = $_REQUEST[$key];
-	  			}
-	  			elseif (isset($_SESSION[kitContactInterface::session_kit_contact_id])) {
-	  				$value = $_SESSION[kitContactInterface::session_kit_contact_id];
-	  			}
-	  			else {
-	  				$checked = false;
-	  				$message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
-	  			}
-	  			if ($value != $article[$key]) {
-	  				$changed = true;
-	  				$article[$key] = $value;
-	  			}
-  			}
-  			else {
-  				// public project, no KIT ID needed
-  				$article[$key] = -1;
-  			}
-  			break;
-  		case dbIdeaProjectArticles::field_content_html:
-  			if (isset($_REQUEST[self::REQUEST_WYSIWYG])) {
-  				$value = $_REQUEST[self::REQUEST_WYSIWYG];
-  			}
-  			elseif (isset($_REQUEST[dbIdeaProjectArticles::field_content_html])) {
-  				$value = $_REQUEST[dbIdeaProjectArticles::field_content_html];
-  			}
-  			else {
-  				$checked = false;
-  				$message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
-  			}
-  			if ($value != $article[$key]) {
-  				$changed = true;
-  				$article[$key] = $value;
-  			}
-  			if (empty($value)) {
-  				// must fields should not be empty!
-  				$checked = false;
-  				$message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
-  			}
-  			break;
-  		case dbIdeaProjectArticles::field_id:
-  		case dbIdeaProjectArticles::field_timestamp:
-  			// ignore these fields...
-  			continue;
-  		case dbIdeaProjectArticles::field_revision;
-  		case dbIdeaProjectArticles::field_status;
-  			// these fields must contain a value
-  			$must_field = true;
-  		default:
-  			$value = isset($_REQUEST[$key]) ? $_REQUEST[$key] : '';
-  			if ($value != $article[$key]) {
-  				$changed = true;
-  				$article[$key] = $value;
-  			}
-  			if (empty($value) && ($must_field == true)) {
-  				// must fields should not be empty!
-  				$checked = false;
-  				$message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
-  			}
-  		endswitch;
-  	}
+                ;
+            }
 
-  	unset($article[dbIdeaProjectArticles::field_timestamp]);
+            // preparing the WYSIWYG editor
+            $content = '';
+            if ($article_id > 0) {
+                // load the specific article into the WYSIWYG editor
+                $where = array(
+                dbIdeaProjectArticles::field_id => $article_id);
+                $article = array();
+                if (! $dbIdeaProjectArticles->sqlSelectRecord($where, $article)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
+                    return false;
+                }
+                if (count($article) < 1) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $article_id)));
+                    return false;
+                }
+                $article = $article[0];
+                $content = $article[dbIdeaProjectArticles::field_content_html];
+            } else {
+                $article = $dbIdeaProjectArticles->getFields();
+                $article[dbIdeaProjectArticles::field_id] = - 1;
+                $article[dbIdeaProjectArticles::field_project_id] = $project_id;
+                $article[dbIdeaProjectArticles::field_revision] = - 1;
+                $article[dbIdeaProjectArticles::field_status] = dbIdeaProjectArticles::status_active;
+                $article[dbIdeaProjectArticles::field_section_identifier] = $section_identifier;
+            }
+            // create article array for parser
+            $article_array = array();
+            foreach ($article as $name => $value) {
+                $article_array[$name] = array('name' => $name,
+                'value' => $value);
+            }
 
-  	if ($checked && $changed) {
-  		if ($article_id < 1) {
-  			// add a new record
-  			$article[dbIdeaProjectArticles::field_author] = $this->accountGetAuthor();
-  			$article[dbIdeaProjectArticles::field_content_html] = stripslashes($article[dbIdeaProjectArticles::field_content_html]);
-  			$article[dbIdeaProjectArticles::field_content_text] = strip_tags($article[dbIdeaProjectArticles::field_content_html]);
-  			$article[dbIdeaProjectArticles::field_kit_contact_id] = isset($_SESSION[kitContactInterface::session_kit_contact_id]) ? $_SESSION[kitContactInterface::session_kit_contact_id] : -1;
-  			$article[dbIdeaProjectArticles::field_revision] = 1;
-  			if (!$dbIdeaProjectArticles->sqlInsertRecord($article, $article_id)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
-  				return false;
-  			}
-  			$message .= sprintf(idea_msg_article_inserted, $article_id);
-  			/*
+            // set width and height for the editor
+            $width = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGeditorWidth);
+            $height = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGeditorHeight);
+            ob_start();
+            show_wysiwyg_editor(self::REQUEST_WYSIWYG, self::REQUEST_WYSIWYG, $content, $width, $height);
+            $wysiwyg_editor = ob_get_contents();
+            ob_end_clean();
+
+            // preparing and initialize the table sorter
+            $sorter_table = 'mod_kit_idea_project_articles';
+            $sorter_active = 0;
+            if ($project_id > 0) {
+                $SQL = sprintf("SELECT * FROM %s WHERE %s='%s' AND %s='%s' AND %s='%s'", $dbIdeaTableSort->getTableName(), dbIdeaTableSort::field_table, $sorter_table, dbIdeaTableSort::field_value, $project_id, dbIdeaTableSort::field_item, $section_identifier);
+                $sorter = array();
+                if (! $dbIdeaTableSort->sqlExec($SQL, $sorter)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
+                    return false;
+                }
+                if (count($sorter) < 1) {
+                    $data = array(
+                    dbIdeaTableSort::field_table => $sorter_table,
+                    dbIdeaTableSort::field_value => $project_id,
+                    dbIdeaTableSort::field_order => '',
+                    dbIdeaTableSort::field_item => $section_identifier);
+                    if (! $dbIdeaTableSort->sqlInsertRecord($data)) {
+                        $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
+                        return false;
+                    }
+                }
+                $sorter_active = 1;
+            }
+
+            // create the status array
+            $status_array = array(
+            'label' => idea_label_article_status,
+            'name' => dbIdeaProjectArticles::field_status,
+            'value' => $article[dbIdeaProjectArticles::field_status],
+            'items' => $dbIdeaProjectArticles->status_array);
+
+            //create the move to another section array
+            $items = array();
+            foreach ($project_sections as $sec) {
+                $items[] = array(
+                'value' => $sec[dbIdeaProjectSections::field_identifier],
+                'text' => $sec[dbIdeaProjectSections::field_text]);
+            }
+            $move_array = array('label' => idea_label_article_move_section,
+            'name' => self::REQUEST_ARTICLE_MOVE,
+            'value' => $section_identifier, 'items' => $items);
+
+            // get captcha
+            ob_start();
+            call_captcha();
+            $captcha = ob_get_contents();
+            ob_end_clean();
+
+            // setting data for the template
+            $data = array(
+            'project' => array('fields' => $project_array,
+            'sections' => array('navigation' => $sections,
+            'edit' => $sections_edit), 'edit' => $project_edit),
+            'article' => array(
+            'edit' => array(
+            'editor' => array(
+            'label' => constant(sprintf('idea_label_%s', dbIdeaProjectArticles::field_content_html)),
+            'value' => $wysiwyg_editor),
+            'title' => array(
+            'label' => constant(sprintf('idea_label_%s', dbIdeaProjectArticles::field_title)),
+            'name' => dbIdeaProjectArticles::field_title,
+            'value' => $article[dbIdeaProjectArticles::field_title]),
+            'captcha' => $captcha), 'fields' => $article_array,
+            'list' => $article_items, 'status' => $status_array,
+            'move' => $move_array),
+            'form' => array('name' => 'article_edit',
+            'btn' => array('ok' => tool_btn_ok, 'abort' => tool_btn_abort)),
+            'page_link' => $this->page_link,
+            'main_action' => array('name' => self::REQUEST_MAIN_ACTION,
+            'value' => self::ACTION_PROJECTS),
+            'project_action' => array('name' => self::REQUEST_PROJECT_ACTION,
+            'value' => self::ACTION_ARTICLE_CHECK),
+            //'is_authenticated'=> $is_authenticated ? 1 : 0,
+            'is_message' => $this->isMessage() ? 1 : 0,
+            'intro' => $this->isMessage() ? $this->getMessage() : idea_intro_project_view,
+            'access' => $dbIdeaProjectGroups->getAccessArray($is_authenticated, $_SESSION[self::SESSION_USER_ACCESS]),
+            'sorter_table' => $sorter_table, 'sorter_active' => $sorter_active,
+            'sorter_value' => $project_id,
+            'sorter_item' => $section_identifier);
+            return $this->getTemplate('project.overview.lte', $data);
+        } // all other sections
+    } // projectProjectView()
+
+
+    /**
+     * Check an article and add or change the record
+     *
+     * @return MIXED STR dialog projectProjectView() on success OR BOOL FALSE on error
+     */
+    public function projectArticleCheck() {
+        global $dbIdeaProjectArticles;
+        global $dbIdeaRevisionArchive;
+        global $dbIdeaProject;
+        //global $statusMails;
+        global $dbIdeaStatusChange;
+
+        // first check CAPTCHA
+        if (isset($_REQUEST['captcha']) && ($_REQUEST['captcha'] != $_SESSION['captcha'])) {
+            // CAPTCHA is invalid
+            $this->setMessage(idea_msg_captcha_invalid);
+            return $this->projectProjectView();
+        }
+
+        $project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : - 1;
+        if ($project_id < 1) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            return false;
+        }
+        $where = array(dbIdeaProject::field_id => $project_id);
+        $project = array();
+        if (! $dbIdeaProject->sqlSelectRecord($where, $project)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
+            return false;
+        }
+        if (count($project) < 1) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            return false;
+        }
+        $project = $project[0];
+
+        $article_id = isset($_REQUEST[dbIdeaProjectArticles::field_id]) ? $_REQUEST[dbIdeaProjectArticles::field_id] : - 1;
+
+        if ($article_id > 0) {
+            $where = array(dbIdeaProjectArticles::field_id => $article_id);
+            $article = array();
+            if (! $dbIdeaProjectArticles->sqlSelectRecord($where, $article)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
+                return false;
+            }
+            if (count($article) < 1) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $article_id)));
+                return false;
+            }
+            $article = $article[0];
+        } else {
+            $article = $dbIdeaProjectArticles->getFields();
+            $article[dbIdeaProjectArticles::field_id] = $article_id;
+        }
+        $old_article = $article;
+
+        $changed = false;
+        $checked = true;
+        $fields = $dbIdeaProjectArticles->getFields();
+        $message = '';
+
+        foreach ($fields as $key => $value) {
+            $must_field = false;
+            switch ($key) :
+                case dbIdeaProjectArticles::field_section_identifier:
+                    if (isset($_REQUEST[self::REQUEST_ARTICLE_MOVE]) && ($_REQUEST[self::REQUEST_ARTICLE_MOVE] != $article[dbIdeaProjectArticles::field_section_identifier])) {
+                        $article[dbIdeaProjectArticles::field_section_identifier] = $_REQUEST[self::REQUEST_ARTICLE_MOVE];
+                        $message .= sprintf(idea_msg_article_moved, $article[dbIdeaProjectArticles::field_title]);
+                        $changed = true;
+                    } else {
+                        $value = isset($_REQUEST[$key]) ? $_REQUEST[$key] : '';
+                        if ($value != $article[$key]) {
+                            $changed = true;
+                            $article[$key] = $value;
+                        }
+                    }
+                    break;
+                case dbIdeaProjectArticles::field_project_id:
+                    if (isset($_REQUEST[$key])) {
+                        $value = $_REQUEST[$key];
+                    } elseif (isset($_REQUEST[dbIdeaProject::field_id])) {
+                        $value = $_REQUEST[dbIdeaProject::field_id];
+                    } else {
+                        $checked = false;
+                        $message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
+                    }
+                    if ($value != $article[$key]) {
+                        $changed = true;
+                        $article[$key] = $value;
+                    }
+                    break;
+                case dbIdeaProjectArticles::field_kit_contact_id:
+                    if ($_SESSION[self::SESSION_PROJECT_ACCESS] == self::ACCESS_CLOSED) {
+                        if (isset($_REQUEST[$key])) {
+                            $value = $_REQUEST[$key];
+                        } elseif (isset($_SESSION[kitContactInterface::session_kit_contact_id])) {
+                            $value = $_SESSION[kitContactInterface::session_kit_contact_id];
+                        } else {
+                            $checked = false;
+                            $message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
+                        }
+                        if ($value != $article[$key]) {
+                            $changed = true;
+                            $article[$key] = $value;
+                        }
+                    } else {
+                        // public project, no KIT ID needed
+                        $article[$key] = - 1;
+                    }
+                    break;
+                case dbIdeaProjectArticles::field_content_html:
+                    if (isset($_REQUEST[self::REQUEST_WYSIWYG])) {
+                        $value = $_REQUEST[self::REQUEST_WYSIWYG];
+                    } elseif (isset($_REQUEST[dbIdeaProjectArticles::field_content_html])) {
+                        $value = $_REQUEST[dbIdeaProjectArticles::field_content_html];
+                    } else {
+                        $checked = false;
+                        $message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
+                    }
+                    if ($value != $article[$key]) {
+                        $changed = true;
+                        $article[$key] = $value;
+                    }
+                    if (empty($value)) {
+                        // must fields should not be empty!
+                        $checked = false;
+                        $message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
+                    }
+                    break;
+                case dbIdeaProjectArticles::field_id:
+                case dbIdeaProjectArticles::field_timestamp:
+                    // ignore these fields...
+                    continue;
+                case dbIdeaProjectArticles::field_revision:
+                case dbIdeaProjectArticles::field_status:
+                    // these fields must contain a value
+                    $must_field = true;
+                default:
+                    $value = isset($_REQUEST[$key]) ? $_REQUEST[$key] : '';
+                    if ($value != $article[$key]) {
+                        $changed = true;
+                        $article[$key] = $value;
+                    }
+                    if (empty($value) && ($must_field == true)) {
+                        // must fields should not be empty!
+                        $checked = false;
+                        $message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
+                    }
+            endswitch
+            ;
+        }
+
+        unset($article[dbIdeaProjectArticles::field_timestamp]);
+
+        if ($checked && $changed) {
+            if ($article_id < 1) {
+                // add a new record
+                $article[dbIdeaProjectArticles::field_author] = $this->accountGetAuthor();
+                $article[dbIdeaProjectArticles::field_content_html] = stripslashes($article[dbIdeaProjectArticles::field_content_html]);
+                $article[dbIdeaProjectArticles::field_content_text] = strip_tags($article[dbIdeaProjectArticles::field_content_html]);
+                $article[dbIdeaProjectArticles::field_kit_contact_id] = isset($_SESSION[kitContactInterface::session_kit_contact_id]) ? $_SESSION[kitContactInterface::session_kit_contact_id] : - 1;
+                $article[dbIdeaProjectArticles::field_revision] = 1;
+                if (! $dbIdeaProjectArticles->sqlInsertRecord($article, $article_id)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
+                    return false;
+                }
+                $message .= sprintf(idea_msg_article_inserted, $article_id);
+                /*
   			$data = array(
   				'article'				=> $article,
   				'project'				=> $project,
@@ -1935,45 +1881,43 @@ class kitIdeaFrontend {
   				return false;
   			}
   			*/
-  			$data = array(
-  			        dbIdeaStatusChange::FIELD_ARTICLE_ID => $article_id,
-  			        dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : -1,
-  			        dbIdeaStatusChange::FIELD_INFO => sprintf(idea_msg_article_inserted, $article_id),
-  			        dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
-  			        dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
-  			        dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
-  			        dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_UNDELIVERED
-  			);
-  			if (!$dbIdeaStatusChange->sqlInsertRecord($data)) {
-  			    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
-  			    return false;
-  			}
-  		}
-  		else {
-  			// save the previous record to the revision archive
-  			$data = array(
-  				dbIdeaRevisionArchive::field_archived_id				=> $article_id,
-  				dbIdeaRevisionArchive::field_archived_record		=> serialize($old_article),
-  				dbIdeaRevisionArchive::field_archived_revision	=> $old_article[dbIdeaProjectArticles::field_revision],
-  				dbIdeaRevisionArchive::field_archived_type			=> dbIdeaRevisionArchive::archive_type_article,
-  			);
-  			if (!$dbIdeaRevisionArchive->sqlInsertRecord($data)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaRevisionArchive->getError()));
-  				return false;
-  			}
-  			// add a new revision
-  			$where = array(dbIdeaProjectArticles::field_id => $article_id);
-  			$article[dbIdeaProjectArticles::field_author] = $this->accountGetAuthor();
-  			$article[dbIdeaProjectArticles::field_content_html] = stripslashes($article[dbIdeaProjectArticles::field_content_html]);
-  			$article[dbIdeaProjectArticles::field_content_text] = strip_tags($article[dbIdeaProjectArticles::field_content_html]);
-  			$article[dbIdeaProjectArticles::field_kit_contact_id] = isset($_SESSION[kitContactInterface::session_kit_contact_id]) ? $_SESSION[kitContactInterface::session_kit_contact_id] : -1;
-  			$article[dbIdeaProjectArticles::field_revision] = $article[dbIdeaProjectArticles::field_revision]+1;
-  			if (!$dbIdeaProjectArticles->sqlUpdateRecord($article, $where)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
-  				return false;
-  			}
-  			$message .= sprintf(idea_msg_article_updated, $article_id);
-  			/*
+                $data = array(
+                dbIdeaStatusChange::FIELD_ARTICLE_ID => $article_id,
+                dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : - 1,
+                dbIdeaStatusChange::FIELD_INFO => sprintf(idea_msg_article_inserted, $article_id),
+                dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
+                dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
+                dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
+                dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_UNDELIVERED);
+                if (! $dbIdeaStatusChange->sqlInsertRecord($data)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
+                    return false;
+                }
+            } else {
+                // save the previous record to the revision archive
+                $data = array(
+                dbIdeaRevisionArchive::field_archived_id => $article_id,
+                dbIdeaRevisionArchive::field_archived_record => serialize($old_article),
+                dbIdeaRevisionArchive::field_archived_revision => $old_article[dbIdeaProjectArticles::field_revision],
+                dbIdeaRevisionArchive::field_archived_type => dbIdeaRevisionArchive::archive_type_article);
+                if (! $dbIdeaRevisionArchive->sqlInsertRecord($data)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaRevisionArchive->getError()));
+                    return false;
+                }
+                // add a new revision
+                $where = array(
+                dbIdeaProjectArticles::field_id => $article_id);
+                $article[dbIdeaProjectArticles::field_author] = $this->accountGetAuthor();
+                $article[dbIdeaProjectArticles::field_content_html] = stripslashes($article[dbIdeaProjectArticles::field_content_html]);
+                $article[dbIdeaProjectArticles::field_content_text] = strip_tags($article[dbIdeaProjectArticles::field_content_html]);
+                $article[dbIdeaProjectArticles::field_kit_contact_id] = isset($_SESSION[kitContactInterface::session_kit_contact_id]) ? $_SESSION[kitContactInterface::session_kit_contact_id] : - 1;
+                $article[dbIdeaProjectArticles::field_revision] = $article[dbIdeaProjectArticles::field_revision] + 1;
+                if (! $dbIdeaProjectArticles->sqlUpdateRecord($article, $where)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
+                    return false;
+                }
+                $message .= sprintf(idea_msg_article_updated, $article_id);
+                /*
   			$data = array(
   				'article'				=> $article,
   				'project'				=> $project,
@@ -1985,344 +1929,327 @@ class kitIdeaFrontend {
   				return false;
   			}
   			*/
-  			$data = array(
-  			        dbIdeaStatusChange::FIELD_ARTICLE_ID => $article_id,
-  			        dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : -1,
-  			        dbIdeaStatusChange::FIELD_INFO => sprintf(idea_msg_article_updated, $article_id),
-  			        dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
-  			        dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
-  			        dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
-  			        dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_UNDELIVERED
-  			);
-  			if (!$dbIdeaStatusChange->sqlInsertRecord($data)) {
-  			    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
-  			    return false;
-  			}
-  		}
-  		// unset $_REQUESTs
-  		foreach ($fields as $key => $value) unset($_REQUEST[$key]);
-  		unset($_REQUEST[self::REQUEST_WYSIWYG]);
-  		$_REQUEST[dbIdeaProjectArticles::field_project_id] = $article[dbIdeaProjectArticles::field_project_id];
-  		$_REQUEST[dbIdeaProjectArticles::field_section_identifier] = $article[dbIdeaProjectArticles::field_section_identifier];
-  	}
-  	$this->setMessage($message);
-  	return $this->projectProjectView();
-  } // projectArticleCheck()
+                $data = array(
+                dbIdeaStatusChange::FIELD_ARTICLE_ID => $article_id,
+                dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : - 1,
+                dbIdeaStatusChange::FIELD_INFO => sprintf(idea_msg_article_updated, $article_id),
+                dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
+                dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
+                dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
+                dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_UNDELIVERED);
+                if (! $dbIdeaStatusChange->sqlInsertRecord($data)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
+                    return false;
+                }
+            }
+            // unset $_REQUESTs
+            foreach ($fields as $key => $value)
+                unset($_REQUEST[$key]);
+            unset($_REQUEST[self::REQUEST_WYSIWYG]);
+            $_REQUEST[dbIdeaProjectArticles::field_project_id] = $article[dbIdeaProjectArticles::field_project_id];
+            $_REQUEST[dbIdeaProjectArticles::field_section_identifier] = $article[dbIdeaProjectArticles::field_section_identifier];
+        }
+        $this->setMessage($message);
+        return $this->projectProjectView();
+    } // projectArticleCheck()
 
-  /**
-   * Edit section, add and delete tabs or change order
-   *
-   *  @return MIXED STR dialog on success or BOOL FALSE on error
-   */
-  public function projectSectionEdit() {
-  	global $dbIdeaProjectSections;
-  	global $dbIdeaTableSort;
 
-  	$project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : -1;
-  	if ($project_id < 1) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
-  		return false;
-  	}
-  	// get sections in the correct sort order
-  	$where = array( dbIdeaTableSort::field_table	=> 'mod_kit_idea_project_section',
-  									dbIdeaTableSort::field_value	=> $project_id);
-  	$order = array();
-  	if (!$dbIdeaTableSort->sqlSelectRecord($where, $order)) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
-  		return false;
-  	}
-  	if (count($order) > 0) {
-  		$sort = sprintf(" ORDER BY FIND_IN_SET(%s, '%s')", dbIdeaProjectSections::field_id, $order[0][dbIdeaTableSort::field_order]);
-  	}
-  	else {
-  		$sort = '';
-  	}
-  	$SQL = sprintf( "SELECT * FROM %s WHERE %s='%s'%s",
-  									$dbIdeaProjectSections->getTableName(),
-  									dbIdeaProjectSections::field_project_id,
-  									$project_id,
-  									$sort);
-  	$sections = array();
-  	if (!$dbIdeaProjectSections->sqlExec($SQL, $sections)) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
-  		return false;
-  	}
-  	if (count($sections) < 1) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
-  		return false;
-  	}
+    /**
+     * Edit section, add and delete tabs or change order
+     *
+     * @return MIXED STR dialog on success or BOOL FALSE on error
+     */
+    public function projectSectionEdit() {
+        global $dbIdeaProjectSections;
+        global $dbIdeaTableSort;
 
-  	$section_array = array();
-  	foreach ($sections as $section) {
-  		// ignore always the files section!
-  		if ($section[dbIdeaProjectSections::field_identifier] == self::IDENTIFIER_FILES) continue;
-  		$section_array[] = array('id'	 => $section[dbIdeaProjectSections::field_id],
-  								 'value' => $section[dbIdeaProjectSections::field_text],
-  								 'name'  => $section[dbIdeaProjectSections::field_identifier],
-  		);
-  	}
+        $project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : - 1;
+        if ($project_id < 1) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            return false;
+        }
+        // get sections in the correct sort order
+        $where = array(
+        dbIdeaTableSort::field_table => 'mod_kit_idea_project_section',
+        dbIdeaTableSort::field_value => $project_id);
+        $order = array();
+        if (! $dbIdeaTableSort->sqlSelectRecord($where, $order)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
+            return false;
+        }
+        if (count($order) > 0) {
+            $sort = sprintf(" ORDER BY FIND_IN_SET(%s, '%s')", dbIdeaProjectSections::field_id, $order[0][dbIdeaTableSort::field_order]);
+        } else {
+            $sort = '';
+        }
+        $SQL = sprintf("SELECT * FROM %s WHERE %s='%s'%s", $dbIdeaProjectSections->getTableName(), dbIdeaProjectSections::field_project_id, $project_id, $sort);
+        $sections = array();
+        if (! $dbIdeaProjectSections->sqlExec($SQL, $sections)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
+            return false;
+        }
+        if (count($sections) < 1) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            return false;
+        }
 
-  	$sorter_table = 'mod_kit_idea_project_section';
-  	$sorter_active = 0;
-  	if ($project_id > 0) {
-  		$SQL = sprintf( "SELECT * FROM %s WHERE %s='%s' AND %s='%s'",
-  										$dbIdeaTableSort->getTableName(),
-  										dbIdeaTableSort::field_table,
-  										$sorter_table,
-  										dbIdeaTableSort::field_value,
-  										$project_id);
-  		$sorter = array();
-  		if (!$dbIdeaTableSort->sqlExec($SQL, $sorter)) {
-  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
-  			return false;
-  		}
-  		if (count($sorter) < 1) {
-  			$data = array(
-  				dbIdeaTableSort::field_table => $sorter_table,
-  				dbIdeaTableSort::field_value => $project_id,
-  				dbIdeaTableSort::field_order => ''
-  			);
-  			if (!$dbIdeaTableSort->sqlInsertRecord($data)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
-  				return false;
-  			}
-  		}
-  		$sorter_active = 1;
-  	}
+        $section_array = array();
+        foreach ($sections as $section) {
+            // ignore always the files section!
+            if ($section[dbIdeaProjectSections::field_identifier] == self::IDENTIFIER_FILES) continue;
+            $section_array[] = array(
+            'id' => $section[dbIdeaProjectSections::field_id],
+            'value' => $section[dbIdeaProjectSections::field_text],
+            'name' => $section[dbIdeaProjectSections::field_identifier]);
+        }
 
-  	// create array for delete section
-  	$delete_array = array();
-  	$delete_array[] = array(
-  		'value'		=> -1,
-  		'text'		=> idea_str_please_select
-  	);
-  	if (count($sections) > 1) {
-  		foreach ($sections as $section) {
-  			$delete_array[] = array(
-  				'value'	=> $section[dbIdeaProjectSections::field_identifier],
-  				'text'	=> $section[dbIdeaProjectSections::field_text]
-  			);
-  		}
-  	}
+        $sorter_table = 'mod_kit_idea_project_section';
+        $sorter_active = 0;
+        if ($project_id > 0) {
+            $SQL = sprintf("SELECT * FROM %s WHERE %s='%s' AND %s='%s'", $dbIdeaTableSort->getTableName(), dbIdeaTableSort::field_table, $sorter_table, dbIdeaTableSort::field_value, $project_id);
+            $sorter = array();
+            if (! $dbIdeaTableSort->sqlExec($SQL, $sorter)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
+                return false;
+            }
+            if (count($sorter) < 1) {
+                $data = array(dbIdeaTableSort::field_table => $sorter_table,
+                dbIdeaTableSort::field_value => $project_id,
+                dbIdeaTableSort::field_order => '');
+                if (! $dbIdeaTableSort->sqlInsertRecord($data)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
+                    return false;
+                }
+            }
+            $sorter_active = 1;
+        }
 
-  	$data = array(
-  		'head'							=> idea_head_section_edit,
-  		'intro'							=> $this->isMessage() ? $this->getMessage() : idea_intro_section_edit,
-  		'is_message'				=> $this->isMessage() ? 1 : 0,
-  		'page_link'					=> $this->page_link,
-  		'form'							=> array(	'name'			=> 'section_edit',
-  																	'btn'				=> array(	'ok'		=> tool_btn_ok, 'abort' => tool_btn_abort)),
-  		'sections'					=> array( 'navigation'=> array( 'tabs' 	=> $section_array,
-  																												'hint'	=> idea_hint_section_tab_move),
-  																	'add'				=> array( 'label'	=> idea_label_section_add,
-  																												'name'	=> self::REQUEST_SECTION_ADD,
-  																												'value'	=> '',
-  																												'hint'	=> idea_hint_section_add),
-  																	'delete'		=> array(	'label' => idea_label_section_delete,
-  																												'name'	=> self::REQUEST_SECTION_DELETE,
-  																												'values'=> $delete_array,
-  																												'hint'	=> idea_hint_section_delete)),
-  		'main_action'				=> array('name' => self::REQUEST_MAIN_ACTION, 'value' => self::ACTION_PROJECTS),
-  		'project_action' 		=> array('name' => self::REQUEST_PROJECT_ACTION, 'value' => self::ACTION_SECTION_EDIT_CHECK),
-  		'project_id'				=> array('name' => dbIdeaProject::field_id, 'value' => $project_id),
-  		'sorter_table'			=> $sorter_table,
-  		'sorter_active'			=> $sorter_active,
-  		'sorter_value'			=> $project_id,
-  		'img_url'						=> $this->img_url
-  	);
-  	return $this->getTemplate('project.sections.lte', $data);
-  } // projectSectionEdit()
+        // create array for delete section
+        $delete_array = array();
+        $delete_array[] = array('value' => - 1,
+        'text' => idea_str_please_select);
+        if (count($sections) > 1) {
+            foreach ($sections as $section) {
+                $delete_array[] = array(
+                'value' => $section[dbIdeaProjectSections::field_identifier],
+                'text' => $section[dbIdeaProjectSections::field_text]);
+            }
+        }
 
-  /**
-   * Check the changes in projectSectionEdit()
-   *
-   * @return MIXED STR dialog on success or BOOL FALSE on error
-   */
-  public function projectSectionCheck() {
-  	global $dbIdeaProjectSections;
-  	global $dbIdeaProjectArticles;
-  	global $dbIdeaProject;
-  	global $kitTools;
+        $data = array('head' => idea_head_section_edit,
+        'intro' => $this->isMessage() ? $this->getMessage() : idea_intro_section_edit,
+        'is_message' => $this->isMessage() ? 1 : 0,
+        'page_link' => $this->page_link,
+        'form' => array('name' => 'section_edit',
+        'btn' => array('ok' => tool_btn_ok, 'abort' => tool_btn_abort)),
+        'sections' => array(
+        'navigation' => array('tabs' => $section_array,
+        'hint' => idea_hint_section_tab_move),
+        'add' => array('label' => idea_label_section_add,
+        'name' => self::REQUEST_SECTION_ADD, 'value' => '',
+        'hint' => idea_hint_section_add),
+        'delete' => array('label' => idea_label_section_delete,
+        'name' => self::REQUEST_SECTION_DELETE, 'values' => $delete_array,
+        'hint' => idea_hint_section_delete)),
+        'main_action' => array('name' => self::REQUEST_MAIN_ACTION,
+        'value' => self::ACTION_PROJECTS),
+        'project_action' => array('name' => self::REQUEST_PROJECT_ACTION,
+        'value' => self::ACTION_SECTION_EDIT_CHECK),
+        'project_id' => array('name' => dbIdeaProject::field_id,
+        'value' => $project_id), 'sorter_table' => $sorter_table,
+        'sorter_active' => $sorter_active, 'sorter_value' => $project_id,
+        'img_url' => $this->img_url);
+        return $this->getTemplate('project.sections.lte', $data);
+    } // projectSectionEdit()
 
-  	$project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : -1;
-  	if ($project_id < 1) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
-  		return false;
-  	}
-  	$where = array(dbIdeaProject::field_id => $project_id);
-  	$project = array();
-  	if (!$dbIdeaProject->sqlSelectRecord($where, $project)) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
-  		return false;
-  	}
-  	if (count($project) < 1) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
-  		return false;
-  	}
-  	$project = $project[0];
 
-  	// get sections - order is not important!
-  	$where = array(dbIdeaProjectSections::field_project_id => $project_id);
-  	$sections = array();
-  	if (!$dbIdeaProjectSections->sqlSelectRecord($where, $sections)) {
-  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
-  		return false;
-  	}
-  	$checked = true;
-  	$message = '';
-  	foreach ($sections as $section) {
-  		// check if the sections has changed...
-  		if (isset($_REQUEST[$section[dbIdeaProjectSections::field_identifier]])) {
-  			$value = trim($_REQUEST[$section[dbIdeaProjectSections::field_identifier]]);
-  			if ($section[dbIdeaProjectSections::field_text] != $value) {
-  				if (empty($value)) {
-  					$message .= sprintf(idea_msg_section_text_empty, $section[dbIdeaProjectSections::field_text]);
-  					$checked = false;
-  					continue;
-  				}
-  				if ($value != $section[dbIdeaProjectSections::field_text]) {
-  					// text has changed, update record
-  					$where = array(	dbIdeaProjectSections::field_id	=> $section[dbIdeaProjectSections::field_id]);
-  					$data = array(dbIdeaProjectSections::field_text => $value);
-  					if (!$dbIdeaProjectSections->sqlUpdateRecord($data, $where)) {
-  						$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
-  						return false;
-  					}
-  					$message .= sprintf(idea_msg_section_text_updated, $section[dbIdeaProjectSections::field_text], $value);
-  				}
-  			}
-  		}
-  	}
+    /**
+     * Check the changes in projectSectionEdit()
+     *
+     * @return MIXED STR dialog on success or BOOL FALSE on error
+     */
+    public function projectSectionCheck() {
+        global $dbIdeaProjectSections;
+        global $dbIdeaProjectArticles;
+        global $dbIdeaProject;
+        global $kitTools;
 
-  	// Add a new section?
-  	if (isset($_REQUEST[self::REQUEST_SECTION_ADD]) && !empty($_REQUEST[self::REQUEST_SECTION_ADD])) {
-  		$value = trim($_REQUEST[self::REQUEST_SECTION_ADD]);
-  		if (!empty($value)) {
-	  		$identifier = 'sec'.$kitTools->generatePassword(5);
-	  		$data = array(
-	  			dbIdeaProjectSections::field_identifier		=> $identifier,
-	  			dbIdeaProjectSections::field_text					=> $value,
-	  			dbIdeaProjectSections::field_project_id		=> $project_id
-	  		);
-	  		if (!$dbIdeaProjectSections->sqlInsertRecord($data)) {
-	  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
-	  			return false;
-	  		}
-	  		$message .= sprintf(idea_msg_section_inserted, $value);
-  		}
-  	}
+        $project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : - 1;
+        if ($project_id < 1) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            return false;
+        }
+        $where = array(dbIdeaProject::field_id => $project_id);
+        $project = array();
+        if (! $dbIdeaProject->sqlSelectRecord($where, $project)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
+            return false;
+        }
+        if (count($project) < 1) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            return false;
+        }
+        $project = $project[0];
 
-  	// delete a section?
-  	if (isset($_REQUEST[self::REQUEST_SECTION_DELETE]) && ($_REQUEST[self::REQUEST_SECTION_DELETE] != -1)) {
-  		// check if section is empty...
-  		$identifier = $_REQUEST[self::REQUEST_SECTION_DELETE];
-  		$where = array(
-  			dbIdeaProjectArticles::field_project_id					=> $project_id,
-  			dbIdeaProjectArticles::field_section_identifier	=> $identifier);
-  		$articles = array();
-  		if (!$dbIdeaProjectArticles->sqlSelectRecord($where, $articles)) {
-  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
-  			return false;
-  		}
-  		if (count($articles) == 0) {
-  			// section is empty an can be deleted
-  			$where = array(
-  				dbIdeaProjectSections::field_project_id	=> $project_id,
-  				dbIdeaProjectSections::field_identifier	=> $identifier
-  			);
-  			$article = array();
-  			if (!$dbIdeaProjectSections->sqlSelectRecord($where, $article)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
-  				return false;
-  			}
-  			if (count($article) < 1) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $identifier)));
-  				return false;
-  			}
-  			if (!$dbIdeaProjectSections->sqlDeleteRecord($where)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
-  				return false;
-  			}
-  			$message .= sprintf(idea_msg_section_deleted, $article[0][dbIdeaProjectSections::field_text]);
-  		}
-  		else {
-  			// section is not empty and cant deleted
-  			$where = array(
-  				dbIdeaProjectSections::field_project_id	=> $project_id,
-  				dbIdeaProjectSections::field_identifier	=> $identifier
-  			);
-  			if (!$dbIdeaProjectSections->sqlSelectRecord($where, $article)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
-  				return false;
-  			}
-  			if (count($article) < 1) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $identifier)));
-  				return false;
-  			}
-  			$message .= sprintf(idea_msg_section_not_empty, $article[0][dbIdeaProjectSections::field_text]);
-  			$checked = false;
-  		}
-  	}
+        // get sections - order is not important!
+        $where = array(
+        dbIdeaProjectSections::field_project_id => $project_id);
+        $sections = array();
+        if (! $dbIdeaProjectSections->sqlSelectRecord($where, $sections)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
+            return false;
+        }
+        $checked = true;
+        $message = '';
+        foreach ($sections as $section) {
+            // check if the sections has changed...
+            if (isset($_REQUEST[$section[dbIdeaProjectSections::field_identifier]])) {
+                $value = trim($_REQUEST[$section[dbIdeaProjectSections::field_identifier]]);
+                if ($section[dbIdeaProjectSections::field_text] != $value) {
+                    if (empty($value)) {
+                        $message .= sprintf(idea_msg_section_text_empty, $section[dbIdeaProjectSections::field_text]);
+                        $checked = false;
+                        continue;
+                    }
+                    if ($value != $section[dbIdeaProjectSections::field_text]) {
+                        // text has changed, update record
+                        $where = array(
+                        dbIdeaProjectSections::field_id => $section[dbIdeaProjectSections::field_id]);
+                        $data = array(
+                        dbIdeaProjectSections::field_text => $value);
+                        if (! $dbIdeaProjectSections->sqlUpdateRecord($data, $where)) {
+                            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
+                            return false;
+                        }
+                        $message .= sprintf(idea_msg_section_text_updated, $section[dbIdeaProjectSections::field_text], $value);
+                    }
+                }
+            }
+        }
 
-  	$this->setMessage($message);
-  	return $checked ? $this->projectProjectView() : $this->projectSectionEdit();
-  } // projectSectionCheck()
+        // Add a new section?
+        if (isset($_REQUEST[self::REQUEST_SECTION_ADD]) && ! empty($_REQUEST[self::REQUEST_SECTION_ADD])) {
+            $value = trim($_REQUEST[self::REQUEST_SECTION_ADD]);
+            if (! empty($value)) {
+                $identifier = 'sec' . $kitTools->generatePassword(5);
+                $data = array(
+                dbIdeaProjectSections::field_identifier => $identifier,
+                dbIdeaProjectSections::field_text => $value,
+                dbIdeaProjectSections::field_project_id => $project_id);
+                if (! $dbIdeaProjectSections->sqlInsertRecord($data)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
+                    return false;
+                }
+                $message .= sprintf(idea_msg_section_inserted, $value);
+            }
+        }
 
-  protected function projectCommand() {
-      global $dbKITformCommands;
-      global $dbIdeaProjectUsers;
+        // delete a section?
+        if (isset($_REQUEST[self::REQUEST_SECTION_DELETE]) && ($_REQUEST[self::REQUEST_SECTION_DELETE] != - 1)) {
+            // check if section is empty...
+            $identifier = $_REQUEST[self::REQUEST_SECTION_DELETE];
+            $where = array(
+            dbIdeaProjectArticles::field_project_id => $project_id,
+            dbIdeaProjectArticles::field_section_identifier => $identifier);
+            $articles = array();
+            if (! $dbIdeaProjectArticles->sqlSelectRecord($where, $articles)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
+                return false;
+            }
+            if (count($articles) == 0) {
+                // section is empty an can be deleted
+                $where = array(
+                dbIdeaProjectSections::field_project_id => $project_id,
+                dbIdeaProjectSections::field_identifier => $identifier);
+                $article = array();
+                if (! $dbIdeaProjectSections->sqlSelectRecord($where, $article)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
+                    return false;
+                }
+                if (count($article) < 1) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $identifier)));
+                    return false;
+                }
+                if (! $dbIdeaProjectSections->sqlDeleteRecord($where)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
+                    return false;
+                }
+                $message .= sprintf(idea_msg_section_deleted, $article[0][dbIdeaProjectSections::field_text]);
+            } else {
+                // section is not empty and cant deleted
+                $where = array(
+                dbIdeaProjectSections::field_project_id => $project_id,
+                dbIdeaProjectSections::field_identifier => $identifier);
+                if (! $dbIdeaProjectSections->sqlSelectRecord($where, $article)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
+                    return false;
+                }
+                if (count($article) < 1) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $identifier)));
+                    return false;
+                }
+                $message .= sprintf(idea_msg_section_not_empty, $article[0][dbIdeaProjectSections::field_text]);
+                $checked = false;
+            }
+        }
 
-      if (!isset($_REQUEST[self::REQUEST_COMMAND]) || empty($_REQUEST[self::REQUEST_COMMAND])) {
-          $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_invalid));
-          return false;
-      }
+        $this->setMessage($message);
+        return $checked ? $this->projectProjectView() : $this->projectSectionEdit();
+    } // projectSectionCheck()
 
-      $where = array(dbKITformCommands::FIELD_COMMAND => $_REQUEST[self::REQUEST_COMMAND]);
-      $command = array();
-      if (!$dbKITformCommands->sqlSelectRecord($where, $command)) {
-          $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbKITformCommands->getError()));
-          return false;
-      }
-      if (count($command) < 1) {
-          $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_invalid));
-          return false;
-      }
-      $command = $command[0];
-      if ($command[dbKITformCommands::FIELD_TYPE] != dbKITformCommands::TYPE_IDEA_EMAIL_INFO) {
-          $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_unknown));
-          return false;
-      }
-      $params = array();
-      parse_str($command[dbKITformCommands::FIELD_PARAMS], $params);
-      if (!isset($params['project_group']) || !isset($params['contact']) || !isset($params['email_info']) || !isset($params['kit_id'])) {
-          $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_params_invalid));
-          return false;
-      }
-      $where = array(
-              dbIdeaProjectUsers::field_group_id => $params['project_group'],
-              dbIdeaProjectUSers::field_kit_id => $params['kit_id']
-              );
-      $data = array(
-              dbIdeaProjectUsers::field_email_info => $params['email_info']
-              );
-      if (!$dbIdeaProjectUsers->sqlUpdateRecord($data, $where)) {
-          $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
-          return false;
-      }
-      // delete command
-      $where = array(dbKITformCommands::FIELD_ID => $command[dbKITformCommands::FIELD_ID]);
-      if (!$dbKITformCommands->sqlDeleteRecord($where)) {
-          $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbKITformCommands->getError()));
-          return false;
-      }
 
-      $einfo = $dbIdeaProjectUsers->email_info_array[$params['email_info']];
-      $message = sprintf(
-              idea_msg_email_info_changed,
-              $params['contact'][kitContactInterface::kit_email],
-              $einfo['text']
-              );
-      return $message;
-  } // projectCommand()
+    protected function projectCommand() {
+        global $dbKITformCommands;
+        global $dbIdeaProjectUsers;
+
+        if (! isset($_REQUEST[self::REQUEST_COMMAND]) || empty($_REQUEST[self::REQUEST_COMMAND])) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_invalid));
+            return false;
+        }
+
+        $where = array(
+        dbKITformCommands::FIELD_COMMAND => $_REQUEST[self::REQUEST_COMMAND]);
+        $command = array();
+        if (! $dbKITformCommands->sqlSelectRecord($where, $command)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbKITformCommands->getError()));
+            return false;
+        }
+        if (count($command) < 1) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_invalid));
+            return false;
+        }
+        $command = $command[0];
+        if ($command[dbKITformCommands::FIELD_TYPE] != dbKITformCommands::TYPE_IDEA_EMAIL_INFO) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_unknown));
+            return false;
+        }
+        $params = array();
+        parse_str($command[dbKITformCommands::FIELD_PARAMS], $params);
+        if (! isset($params['project_group']) || ! isset($params['contact']) || ! isset($params['email_info']) || ! isset($params['kit_id'])) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_params_invalid));
+            return false;
+        }
+        $where = array(
+        dbIdeaProjectUsers::field_group_id => $params['project_group'],
+        dbIdeaProjectUSers::field_kit_id => $params['kit_id']);
+        $data = array(
+        dbIdeaProjectUsers::field_email_info => $params['email_info']);
+        if (! $dbIdeaProjectUsers->sqlUpdateRecord($data, $where)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
+            return false;
+        }
+        // delete command
+        $where = array(
+        dbKITformCommands::FIELD_ID => $command[dbKITformCommands::FIELD_ID]);
+        if (! $dbKITformCommands->sqlDeleteRecord($where)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbKITformCommands->getError()));
+            return false;
+        }
+
+        $einfo = $dbIdeaProjectUsers->email_info_array[$params['email_info']];
+        $message = sprintf(idea_msg_email_info_changed, $params['contact'][kitContactInterface::kit_email], $einfo['text']);
+        return $message;
+    } // projectCommand()
+
 
 } // class kitIdeaFrontend

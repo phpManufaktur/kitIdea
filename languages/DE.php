@@ -32,7 +32,6 @@ $module_description 	= 'kitIdea ermöglicht das Formulieren, Teilen und gemeinsa
 // name of the person(s) who translated and edited this language file
 $module_translation_by = 'phpManufaktur by Ralf Hertsch';
 
-
 define('idea_cfg_currency',						'%s €');
 define('idea_cfg_date_separator',				'.');
 define('idea_cfg_date_str',						'd.m.Y');
@@ -255,6 +254,9 @@ define('idea_label_section_delete',				'Abschnitt löschen');
 define('idea_label_sections',					'Abschnitte');
 define('idea_label_timestamp',					'Letzte Änderung');
 define('idea_label_user',						'Benutzer');
+
+define('idea_log_login',                        '[kitIdea] Der Benutzer hat sich um %s Uhr angemeldet.');
+define('idea_log_logout',                       '[kitIdea] Der Benutzer hat sich um %s Uhr abgemeldet.');
 
 define('idea_msg_article_inserted',				'<p>Der Artikel mit der <b>ID %05d</b> wurde erfolgreich angelegt.</p>');
 define('idea_msg_article_moved',				'<p>Der Artikel <b>%s</b> wurde erfolgreich auf diese Seite verschoben!</p>');

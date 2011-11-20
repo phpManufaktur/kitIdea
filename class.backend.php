@@ -63,6 +63,7 @@ class kitIdeaBackend {
 
 	public function __construct() {
 		global $dbIdeaCfg;
+		global $parser;
 		$this->page_link = ADMIN_URL.'/admintools/tool.php?tool=kit_idea';
 		$this->template_path = WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/templates/' ;
 		$this->img_url = WB_URL. '/modules/'.basename(dirname(__FILE__)).'/images/';
@@ -542,7 +543,8 @@ class kitIdeaBackend {
 						'articles'	=> array(
 							'label'		=> idea_label_articles,
 							'options'	=> array(
-								array('value'	=> dbIdeaProjectGroups::article_view,
+								array(
+								'value' => dbIdeaProjectGroups::article_view,
 											'text' => constant('idea_label_access_article_view'),
 											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_view)),
 								array('value'	=> dbIdeaProjectGroups::article_create,
@@ -557,6 +559,11 @@ class kitIdeaBackend {
 								array('value'	=> dbIdeaProjectGroups::article_move,
 											'text' => constant('idea_label_access_article_move'),
 											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_move)),
+							    array(
+							        'value' => dbIdeaProjectGroups::article_move_section,
+							        'text' => constant('idea_label_access_article_move_section'),
+							        'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_move_section)
+							        ),
 								array('value'	=> dbIdeaProjectGroups::article_move_section,
 											'text' => constant('idea_label_access_article_move_section'),
 											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_move_section)),
@@ -977,11 +984,13 @@ class kitIdeaBackend {
 			// get the actual needed USER record into $user
 			if ($usr[dbIdeaProjectUsers::field_group_id] == $group_id) $user = $usr;
 			// generate PROJECT GROUPS selection list for this user
-			$SQL = sprintf( "SELECT %s FROM %s WHERE %s='%s'",
-											dbIdeaProjectGroups::field_name,
-											$dbIdeaProjectGroups->getTableName(),
-											dbIdeaProjectGroups::field_id,
-											$usr[dbIdeaProjectUsers::field_group_id]);
+			$SQL = sprintf(
+			        "SELECT %s FROM %s WHERE %s='%s'",
+					dbIdeaProjectGroups::field_name,
+					$dbIdeaProjectGroups->getTableName(),
+					dbIdeaProjectGroups::field_id,
+					$usr[dbIdeaProjectUsers::field_group_id]
+			        );
 			$grp = array();
 			if (!$dbIdeaProjectGroups->sqlExec($SQL, $grp)) {
 				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
@@ -1000,12 +1009,12 @@ class kitIdeaBackend {
 
 		// create PROJECT GROUP selection
 		$select_group = array(
-			'label'				=> idea_label_project_group_select,
-			'name'				=> dbIdeaProjectGroups::field_id,
-			'id'					=> dbIdeaProjectGroups::field_id,
-			'options'			=> $group_select_option,
-			'hint'				=> idea_hint_user_edit_group_select,
-			'onchange'		=> sprintf(	'javascript:execOnChange(\'%s\',\'%s\');',
+			'label'	=> idea_label_project_group_select,
+			'name' => dbIdeaProjectGroups::field_id,
+			'id' => dbIdeaProjectGroups::field_id,
+			'options' => $group_select_option,
+			'hint' => idea_hint_user_edit_group_select,
+			'onchange' => sprintf('javascript:execOnChange(\'%s\',\'%s\');',
 																sprintf('%s&amp;%s=%s&amp;%s=%s%s&amp;%s=',
 																				$this->page_link,
 																				self::request_action,
@@ -1076,27 +1085,46 @@ class kitIdeaBackend {
 			'articles'	=> array(
 				'label'		=> idea_label_articles,
 				'options'	=> array(
-					array('value'	=> dbIdeaProjectGroups::article_view,
+				        array(
+				                'value'	=> dbIdeaProjectGroups::article_view,
 								'text' => constant('idea_label_access_article_view'),
-								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_view)),
-					array('value'	=> dbIdeaProjectGroups::article_create,
+								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_view)
+				                ),
+				        array(
+				                'value'	=> dbIdeaProjectGroups::article_create,
 								'text' => constant('idea_label_access_article_create'),
-								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_create)),
-					array('value'	=> dbIdeaProjectGroups::article_edit,
+								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_create)
+				                ),
+				        array(
+				                'value'	=> dbIdeaProjectGroups::article_edit,
 								'text' => constant('idea_label_access_article_edit'),
-								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_edit)),
-					array('value'	=> dbIdeaProjectGroups::article_edit_html,
+								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_edit)
+				                ),
+				        array(
+				                'value' => dbIdeaProjectGroups::article_edit_html,
 								'text' => constant('idea_label_access_article_edit_html'),
-								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_edit_html)),
-					array('value'	=> dbIdeaProjectGroups::article_move,
+								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_edit_html)
+				                ),
+				        array(
+				                'value'	=> dbIdeaProjectGroups::article_move,
 								'text' => constant('idea_label_access_article_move'),
-								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_move)),
-					array('value'	=> dbIdeaProjectGroups::article_lock,
+								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_move)
+				                ),
+				        array(
+				                'value' => dbIdeaProjectGroups::article_move_section,
+				                'text' => constant('idea_label_access_article_move_section'),
+				                'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_move_section)
+				                ),
+				        array(
+				                'value'	=> dbIdeaProjectGroups::article_lock,
 								'text' => constant('idea_label_access_article_lock'),
-								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_lock)),
-					array('value'	=> dbIdeaProjectGroups::article_delete,
+								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_lock)
+				                ),
+				        array(
+				                'value' => dbIdeaProjectGroups::article_delete,
 								'text' => constant('idea_label_access_article_delete'),
-								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_delete))
+								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_delete)
+				                )
 				),
 			),
 			'sections'	=> array(

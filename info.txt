@@ -3,6 +3,11 @@ kitIdea
 Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
+Release 0.19
+2011-11-20
+added: parameter "log=login" in droplet [[kit_idea]] tracks the login of kitIdea
+  users in the KIT account protocol 
+
 Release 0.18
 2011-11-16
 fixed: visitors can't see public projects

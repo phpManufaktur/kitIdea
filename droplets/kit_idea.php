@@ -28,6 +28,7 @@ if (file_exists(WB_PATH.'/modules/kit_idea/class.frontend.php')) {
 	$params[kitIdeaFrontend::PARAM_SECTION_FILES] = (isset($section_files) && (strtolower($section_files) == 'false')) ? false : true;
 	$params[kitIdeaFrontend::PARAM_LEPTON_GROUPS] = (isset($lepton_groups)) ? $lepton_groups : '';
 	$params[kitIdeaFrontend::PARAM_PROJECT_GROUP] = (isset($group)) ? $group : -1;
+	$params[kitIdeaFrontend::PARAM_LOG] = (isset($log)) ? strtolower($log) : '';
 	if (!$idea->setParams($params)) return $idea->getError();
 	return $idea->action();
 }

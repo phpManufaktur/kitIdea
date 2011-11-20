@@ -78,7 +78,7 @@ $droplets = array();
 foreach ($droplets as $droplet) {
 	$where = array(dbDroplets::field_name => $droplet);
 	if (!$dbDroplets->sqlDeleteRecord($where)) {
-		$message = sprintf('[UPGRADE] Error uninstalling Droplet: %s', $dbDroplets->getError());
+		$message = sprintf('[UNINSTALL] Error uninstalling Droplet: %s', $dbDroplets->getError());
 	}
 }
 

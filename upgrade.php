@@ -177,7 +177,7 @@ foreach ($names as $file_name) {
 // remove Droplets
 $dbDroplets = new dbDroplets();
 // the array contains the droplets to remove
-$droplets = array();
+$droplets = array('kit_idea');
 foreach ($droplets as $droplet) {
 	$where = array(dbDroplets::field_name => $droplet);
 	if (!$dbDroplets->sqlDeleteRecord($where)) {
