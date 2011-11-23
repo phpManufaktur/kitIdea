@@ -528,6 +528,7 @@ class ideaCronjob {
                             dbKITformCommands::FIELD_COMMAND => $cmd,
                             dbKITformCommands::FIELD_PARAMS => http_build_query(array(
                                     'project_group' => $project[dbIdeaProject::field_project_group],
+                                    'contact' => $contact,
                                     'kit_id' => $user[dbIdeaProjectUsers::field_kit_id],
                                     'email_info' => $command
                             )),

@@ -2383,7 +2383,8 @@ class kitIdeaFrontend {
         }
 
         $where = array(
-        dbKITformCommands::FIELD_COMMAND => $_REQUEST[self::REQUEST_COMMAND]);
+                dbKITformCommands::FIELD_COMMAND => $_REQUEST[self::REQUEST_COMMAND]
+                );
         $command = array();
         if (! $dbKITformCommands->sqlSelectRecord($where, $command)) {
             $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbKITformCommands->getError()));
@@ -2400,7 +2401,8 @@ class kitIdeaFrontend {
         }
         $params = array();
         parse_str($command[dbKITformCommands::FIELD_PARAMS], $params);
-        if (! isset($params['project_group']) || ! isset($params['contact']) || ! isset($params['email_info']) || ! isset($params['kit_id'])) {
+print_R($params);
+        if (! isset($params['project_group']) || !isset($params['contact']) || ! isset($params['email_info']) || ! isset($params['kit_id'])) {
             $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_params_invalid));
             return false;
         }
@@ -2415,7 +2417,8 @@ class kitIdeaFrontend {
         }
         // delete command
         $where = array(
-        dbKITformCommands::FIELD_ID => $command[dbKITformCommands::FIELD_ID]);
+                dbKITformCommands::FIELD_ID => $command[dbKITformCommands::FIELD_ID]
+                );
         if (! $dbKITformCommands->sqlDeleteRecord($where)) {
             $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbKITformCommands->getError()));
             return false;

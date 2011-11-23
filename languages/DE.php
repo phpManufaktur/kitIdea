@@ -57,6 +57,8 @@ $LANG = array(
             => 'OK',
         '<p>Please enter an abstract to describe the changes you want to submit.</p>'
             => '<p>Bitte beschreiben Sie die Änderungen die Sie an dem Artikel durchgeführt haben!</p>',
+        'Protocol'
+            => 'Protokoll',
         'Read protocol'
             => 'Protokoll lesen',
         'Settings'
