@@ -39,6 +39,13 @@
   {if $project.sections.active == 'secFiles'}
     <div class="{if $is_message == 1}message{else}intro{/if}">{$intro}</div>
     {$kit_dirlist}
+  {elseif $project.sections.active == 'secProtocol'}
+    {foreach $protocol item}
+    <div class="protocol_item">
+      <div class="protocol_item_info">{$item.info}</div>
+      <div class="protocol_item_author">{$item.author.name} - {date_format($item.date '%d.%m.%Y - %R')}</div>
+    </div>
+    {/foreach}
   {elseif $project.sections.active == 'secAbout'}
     {include('../../backend.about.lte')}
   {else}

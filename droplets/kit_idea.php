@@ -26,6 +26,8 @@ if (file_exists(WB_PATH.'/modules/kit_idea/class.frontend.php')) {
 	$params[kitIdeaFrontend::PARAM_SEARCH] = (isset($search) && (strtolower($search) == 'false')) ? false : true;
 	$params[kitIdeaFrontend::PARAM_SECTION_ABOUT] = (isset($section_about) && (strtolower($section_about) == 'false')) ? false : true;
 	$params[kitIdeaFrontend::PARAM_SECTION_FILES] = (isset($section_files) && (strtolower($section_files) == 'false')) ? false : true;
+	$params[kitIdeaFrontend::PARAM_SECTION_PROTOCOL] = (isset($section_protocol) && (strtolower($section_protocol) == 'false')) ? false : true;
+	$params[kitIdeaFrontend::PARAM_PROTOCOL_MAX] = (isset($protocol_max)) ? (int) $protocol_max : 20;
 	$params[kitIdeaFrontend::PARAM_LEPTON_GROUPS] = (isset($lepton_groups)) ? $lepton_groups : '';
 	$params[kitIdeaFrontend::PARAM_PROJECT_GROUP] = (isset($group)) ? $group : -1;
 	$params[kitIdeaFrontend::PARAM_LOG] = (isset($log)) ? strtolower($log) : '';

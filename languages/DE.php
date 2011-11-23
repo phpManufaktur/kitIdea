@@ -32,6 +32,48 @@ $module_description 	= 'kitIdea ermöglicht das Formulieren, Teilen und gemeinsa
 // name of the person(s) who translated and edited this language file
 $module_translation_by = 'phpManufaktur by Ralf Hertsch';
 
+$LANG = array(
+        'Abort'
+            => 'Abbruch',
+        'Abstract'
+            => 'Änderung',
+        'Active'
+            => 'Aktiv',
+        'Deleted'
+            => 'Gelöscht',
+        'Description'
+            => 'Beschreibung',
+        'Invalid project ID: {{ id }}'
+            => 'Ungültige Projekt ID: {{ id }}',
+        'Locked'
+            => 'Gesperrt',
+        'this is only a minor change'
+            => 'dies ist eine geringfügige Änderung',
+        'Move'
+            => 'Verschieben',
+        'Name'
+            => "Name",
+        'OK'
+            => 'OK',
+        '<p>Please enter an abstract to describe the changes you want to submit.</p>'
+            => '<p>Bitte beschreiben Sie die Änderungen die Sie an dem Artikel durchgeführt haben!</p>',
+        'Read protocol'
+            => 'Protokoll lesen',
+        'Settings'
+            => 'Einstellungen',
+        'Status'
+            => 'Status',
+        '<p>The article "<b>{{ title }}</b>" was changed.</p>'
+            => '<p>Der Artikel "<b>{{ title }}</b>" wurde geändert.</p>',
+        '<p>The article "<b>{{ title }}</b>" was changed: <br />{{ abstract }}.</p>'
+            => '<p>Der Artikel "<b>{{ title }}</b>" wurde geändert: <br />{{ abstract }}.</p>',
+        '<p>The article "<b>{{ title }}</b>" was successfully created.</p>'
+            => '<p>Der Artikel "<b>{{ title }}</b>" wurde angelegt.</p>',
+        'Value'
+            => 'Wert',
+
+        );
+
 define('idea_cfg_currency',						'%s €');
 define('idea_cfg_date_separator',				'.');
 define('idea_cfg_date_str',						'd.m.Y');
@@ -86,6 +128,8 @@ define('idea_head_user_select',					'Benutzer auswählen');
 define('idea_hint_access_rights',				'Wenn Sie die Berechtigungen dieser Gruppe ändern möchten, wechseln Sie bitte in die jeweilige <a href="%s">Projektgruppe</a>.');
 define('idea_hint_access_rights_group',			'');
 define('idea_hint_cfg_access_grp_default',		'Integer Wert, der die Berechtigungen der jeweiligen Gruppe repräsentiert und als Vorgabe beim Anlegen von neuen Gruppen verwendet wird.');
+define('idea_hint_cfg_article_allow_minor_changes', 'Wenn Sie geringfügige Änderungen erlauben, werden bei solchen Änderungen keine Statusmails versendet.');
+define('idea_hint_cfg_article_use_abstract', 'Legen Sie fest, ob bei Änderungen der Artikel Zusammenfassungen verwendet werden sollen');
 define('idea_hint_cfg_compare_differ_prefix',	'HTML TAG, der die Kennzeichnung von Unterschieden beim Revisionsvergleich von Texten <i>einleitet</i>.');
 define('idea_hint_cfg_compare_differ_suffix',	'HTML TAG, der die Kennzeichnung von Unterschieden beim Revisionsvergleich von Texten <i>beendet</i>.');
 define('idea_hint_cfg_compare_revisions',		'Änderungen in Projektbeschreibungen und Artikeln feststellen und anzeigen (Revisionen vergleichen). 1=AN, 0=Aus');
@@ -135,6 +179,7 @@ define('idea_hint_project_revision',			'');
 define('idea_hint_project_status',				'');
 define('idea_hint_project_timestamp',			'');
 define('idea_hint_project_title',				'');
+define('idea_hint_project_url',                 '');
 define('idea_hint_section_add',					'<p>Fügen Sie einen neuen Abschnitt hinzu, in dem Sie den gewünschten Bezeichner eintragen.</p>');
 define('idea_hint_section_delete',				'<p>Wählen Sie den Abschnitt aus, den Sie löschen möchten.</p><p><u>Bitte beachten Sie:</u> der zu löschende Abschnitt darf keine Artikel enhalten, muss also leer sein und Sie können nicht den letzten (einzigen) Abschnitt löschen.</p>');
 define('idea_hint_section_tab_move',			'<p>Ordnen Sie die einzelnen TAB\'s für die Abschnitte per Drag & Drop in der gewünschten Reihenfolge an und ändern Sie die Bezeichnungen nach Belieben.</p>');
@@ -184,10 +229,10 @@ define('idea_label_article_author',				'Autor');
 define('idea_label_article_content_html',		'Inhalt (HTML)');
 define('idea_label_article_content_text',		'Inhalt (Text)');
 define('idea_label_article_id',					'ID');
-define('idea_label_article_move_section',		'Verschieben');
+//define('idea_label_article_move_section',		'Verschieben');
 define('idea_label_article_revision',			'Revision');
 define('idea_label_article_section',			'Abschnitt');
-define('idea_label_article_status',				'Status');
+//define('idea_label_article_status',				'Status');
 define('idea_label_article_timestamp',			'Letzte Änderung');
 define('idea_label_article_title',				'Überschrift');
 define('idea_label_articles',					'Artikel');
@@ -196,6 +241,8 @@ define('idea_label_cfg_access_grp_default_2',	'Berechtigungen, Gruppe 2');
 define('idea_label_cfg_access_grp_default_3',	'Berechtigungen, Gruppe 3');
 define('idea_label_cfg_access_grp_default_4',	'Berechtigungen, Gruppe 4');
 define('idea_label_cfg_access_grp_default_5',	'Berechtigungen, Gruppe 5');
+define('idea_label_cfg_article_allow_minor_changes', 'Geringfügige Änderungen');
+define('idea_label_cfg_article_use_abstract','Zusammenfassungen verwenden');
 define('idea_label_cfg_compare_differ_prefix',	'Revisionsvergleich, Prefix');
 define('idea_label_cfg_compare_differ_suffix',	'Revisionsvergleich, Suffix');
 define('idea_label_cfg_compare_revisions',		'Revisionen vergleichen');
@@ -249,6 +296,7 @@ define('idea_label_project_revision',			'Revision');
 define('idea_label_project_status',				'Status');
 define('idea_label_project_timestamp',			'Letzte Änderung');
 define('idea_label_project_title',				'Titel');
+define('idea_label_project_url',                'Projekt URL');
 define('idea_label_section_add',				'Abschnitt hinzufügen');
 define('idea_label_section_delete',				'Abschnitt löschen');
 define('idea_label_sections',					'Abschnitte');

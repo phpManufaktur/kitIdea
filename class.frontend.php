@@ -52,13 +52,13 @@ class kitIdeaFrontend {
 
     const REQUEST_MAIN_ACTION = 'mac'; // general actions
     const REQUEST_ACCOUNT_ACTION = 'acc'; // account actions
-    const REQUEST_PROJECT_ACTION = 'pac'; // project actions (default)
+    const REQUEST_PROJECT_ACTION = 'pac'; // DONT CHANGE, also defined in class.cronjob.php!
     const REQUEST_WYSIWYG = 'wysiwyg';
     const REQUEST_ARTICLE = 'art';
     const REQUEST_ARTICLE_MOVE = 'artm';
     const REQUEST_SECTION_ADD = 'seca';
     const REQUEST_SECTION_DELETE = 'secd';
-    const REQUEST_COMMAND = 'kic';
+    const REQUEST_COMMAND = 'kic'; // DONT CHANGE, also defined in class.cronjob.php!
 
     const ACTION_ACCOUNT = 'acc';
     const ACTION_DEFAULT = 'def';
@@ -74,12 +74,13 @@ class kitIdeaFrontend {
     const ACTION_SECTION_EDIT_CHECK = 'secec';
     const ACTION_PROJECT_VIEW = 'prjv';
     const ACTION_ARTICLE_CHECK = 'artc';
-    const ACTION_COMMAND = 'cmd';
+    const ACTION_COMMAND = 'cmd'; // DONT CHANGE, also defined in class.cronjob.php!
 
     const ANCHOR = 'ki';
 
     const IDENTIFIER_ABOUT = 'secAbout';
     const IDENTIFIER_FILES = 'secFiles';
+    const IDENTIFIER_PROTOCOL = 'secProtocol';
 
     const SESSION_TEMP_VARS = 'kit_idea_temp_vars';
     const SESSION_PROJECT_ACCESS = 'idea_project_access';
@@ -104,6 +105,8 @@ class kitIdeaFrontend {
     const PARAM_SEARCH = 'search';
     const PARAM_SECTION_ABOUT = 'section_about';
     const PARAM_SECTION_FILES = 'section_files';
+    const PARAM_SECTION_PROTOCOL = 'section_protocol';
+    const PARAM_PROTOCOL_MAX = 'protocol_max';
     const PARAM_LEPTON_GROUPS = 'lepton_groups';
     const PARAM_PROJECT_GROUP = 'group';
     const PARAM_LOG = 'log';
@@ -115,6 +118,8 @@ class kitIdeaFrontend {
             self::PARAM_SEARCH => true,
             self::PARAM_SECTION_ABOUT => true,
             self::PARAM_SECTION_FILES => true,
+            self::PARAM_SECTION_PROTOCOL => true,
+            self::PARAM_PROTOCOL_MAX => 20,
             self::PARAM_LEPTON_GROUPS => '',
             self::PARAM_PRESET => - 1,
             self::PARAM_LOG => ''
@@ -134,12 +139,15 @@ class kitIdeaFrontend {
             self::ACTION_LOGOUT => idea_tab_logout
             );
 
+    protected $lang = NULL;
+
     /**
      * Constructor of the class kitIdeaFrontend
      */
     public function __construct() {
         global $kitTools;
         global $dbIdeaCfg;
+        global $I18n;
         $url = '';
         $_SESSION['FRONTEND'] = true;
         $kitTools->getPageLinkByPageID(PAGE_ID, $url);
@@ -149,6 +157,7 @@ class kitIdeaFrontend {
         date_default_timezone_set(idea_cfg_time_zone);
         $this->media_path = WB_PATH . MEDIA_DIRECTORY . '/' . $dbIdeaCfg->getValue(dbIdeaCfg::cfgMediaDir) . '/';
         $this->media_url = str_replace(WB_PATH, WB_URL, $this->media_path);
+        $this->lang = $I18n;
     } // __construct()
 
     /**
@@ -963,6 +972,15 @@ class kitIdeaFrontend {
         }
         $items = array();
         foreach ($projects as $project) {
+            if (empty($project[dbIdeaProject::field_url]) || ($project[dbIdeaProject::field_url] != $this->page_link)) {
+                // save the project URL to the project record
+                $where = array(dbIdeaProject::field_id => $project[dbIdeaProject::field_id]);
+                $data = array(dbIdeaProject::field_url => $this->page_link);
+                if (!$dbIdeaProject->sqlUpdateRecord($data, $where)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
+                    return false;
+                }
+            }
             $items[] = array(
                     'id' => $project[dbIdeaProject::field_id],
                     'title' => $project[dbIdeaProject::field_title],
@@ -1114,7 +1132,6 @@ class kitIdeaFrontend {
     public function projectProjectCheck() {
         global $dbIdeaProject;
         global $dbIdeaRevisionArchive;
-        //global $statusMails;
         global $dbIdeaStatusChange;
 
         $project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : - 1;
@@ -1188,18 +1205,6 @@ class kitIdeaFrontend {
                     return false;
                 }
                 $message .= sprintf(idea_msg_project_inserted, $project_id);
-                /*
-  			 * Dont send mail on creating projects, there are no members now !!!
-  			$data = array(
-  				'project'				=> $project,
-  				'project_url'		=> $this->page_link
-  			);
-  			$body = $this->getTemplate('mail.project.inserted.lte', $data);
-  			if (!$statusMails->sendStatusMails($project_id, $project[dbIdeaProject::field_title], $body)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $statusMails->getError()));
-  				return false;
-  			}
-  			*/
             } else {
                 // save the previous record to the revision archive
                 $data = array(
@@ -1223,24 +1228,15 @@ class kitIdeaFrontend {
                     return false;
                 }
                 $message .= sprintf(idea_msg_project_updated, $project_id);
-                /*
-  			$data = array(
-  				'project'				=> $project,
-  				'project_url'		=> $this->page_link
-  			);
-  			$body = $this->getTemplate('mail.project.updated.lte', $data);
-  			if (!$statusMails->sendStatusMails($project_id, $project[dbIdeaProject::field_title], $body)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $statusMails->getError()));
-  				return false;
-  			}
-  			*/
-                $data = array(dbIdeaStatusChange::FIELD_ARTICLE_ID => - 1,
-                dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : - 1,
-                dbIdeaStatusChange::FIELD_INFO => sprintf(idea_msg_project_updated, $project_id),
-                dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
-                dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
-                dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
-                dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_UNDELIVERED);
+                $data = array(
+                        dbIdeaStatusChange::FIELD_ARTICLE_ID => - 1,
+                        dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : - 1,
+                        dbIdeaStatusChange::FIELD_INFO => sprintf(idea_msg_project_updated, $project_id),
+                        dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
+                        dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
+                        dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
+                        dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_UNDELIVERED
+                        );
                 if (! $dbIdeaStatusChange->sqlInsertRecord($data)) {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
                     return false;
@@ -1268,6 +1264,8 @@ class kitIdeaFrontend {
         global $dbIdeaRevisionArchive;
         global $dbIdeaTableSort;
         global $dbIdeaProjectGroups;
+        global $dbIdeaStatusChange;
+        global $kitContactInterface;
 
         $is_authenticated = $this->accountIsAuthenticated() ? true : false;
 
@@ -1337,11 +1335,18 @@ class kitIdeaFrontend {
             }
             $project_array[$name] = array('name' => $name, 'value' => $value);
         }
-        $project_edit = array('text' => idea_str_edit,
-        'url' => sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
-        self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
-        self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_EDIT,
-        dbIdeaProject::field_id => $project_id))));
+        $project_edit = array(
+                'text' => idea_str_edit,
+                'url' => sprintf('%s%s%s',
+                        $this->page_link,
+                        (strpos($this->page_link, '?') === false) ? '?' : '&',
+                        http_build_query(array(
+                                self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+                                self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_EDIT,
+                                dbIdeaProject::field_id => $project_id
+                                ))
+                        )
+                );
         // creating the section bar
         $where = array(
         dbIdeaTableSort::field_table => 'mod_kit_idea_project_section',
@@ -1392,48 +1397,95 @@ class kitIdeaFrontend {
         $sections = array();
         foreach ($project_sections as $section) {
             $sections[$section[dbIdeaProjectSections::field_identifier]] = array(
-            'text' => $section[dbIdeaProjectSections::field_text],
-            'identifier' => $section[dbIdeaProjectSections::field_identifier],
-            'link' => sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
-            self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
-            self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
-            dbIdeaProjectSections::field_identifier => $section[dbIdeaProjectSections::field_identifier],
-            dbIdeaProject::field_id => $project_id))),
-            'active' => ($section_identifier == $section[dbIdeaProjectSections::field_identifier]) ? 1 : 0);
+                    'text' => $section[dbIdeaProjectSections::field_text],
+                    'identifier' => $section[dbIdeaProjectSections::field_identifier],
+                    'link' => sprintf('%s%s%s',
+                            $this->page_link,
+                            (strpos($this->page_link, '?') === false) ? '?' : '&',
+                            http_build_query(array(
+                                    self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+                                    self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
+                                    dbIdeaProjectSections::field_identifier => $section[dbIdeaProjectSections::field_identifier],
+                                    dbIdeaProject::field_id => $project_id
+                                    ))
+                            ),
+                    'active' => ($section_identifier == $section[dbIdeaProjectSections::field_identifier]) ? 1 : 0
+                    );
         }
 
         if ($this->params[self::PARAM_SECTION_FILES] && ($is_authenticated || $dbIdeaProjectGroups->checkPermissions($visitor_permissions, dbIdeaProjectGroups::file_download))) {
             // add the section for the files
             $sections[self::IDENTIFIER_FILES] = array(
-            'text' => idea_tab_files, 'identifier' => self::IDENTIFIER_FILES,
-            'link' => sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
-            self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
-            self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
-            dbIdeaProjectSections::field_identifier => self::IDENTIFIER_FILES,
-            dbIdeaProject::field_id => $project_id))),
-            'active' => ($section_identifier == self::IDENTIFIER_FILES) ? 1 : 0);
+                    'text' => idea_tab_files,
+                    'identifier' => self::IDENTIFIER_FILES,
+                    'link' => sprintf('%s%s%s',
+                            $this->page_link,
+                            (strpos($this->page_link, '?') === false) ? '?' : '&',
+                            http_build_query(array(
+                                    self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+                                    self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
+                                    dbIdeaProjectSections::field_identifier => self::IDENTIFIER_FILES,
+                                    dbIdeaProject::field_id => $project_id
+                                    ))
+                            ),
+                    'active' => ($section_identifier == self::IDENTIFIER_FILES) ? 1 : 0
+                    );
         } // section files
 
+        if ($this->params[self::PARAM_SECTION_PROTOCOL] &&
+            (($is_authenticated && $dbIdeaProjectGroups->checkPermissions($_SESSION[self::SESSION_USER_ACCESS], dbIdeaProjectGroups::project_view_protocol)) ||
+             ($dbIdeaProjectGroups->checkPermissions($visitor_permissions, dbIdeaProjectGroups::project_view_protocol)))) {
+            // add the section for the Protocol
+            $sections[self::IDENTIFIER_PROTOCOL] = array(
+                    'text' => $this->lang->translate('Protocol'),
+                    'identifier' => self::IDENTIFIER_PROTOCOL,
+                    'link' => sprintf('%s%s%s',
+                            $this->page_link,
+                            (strpos($this->page_link, '?') === false) ? '?' : '&',
+                            http_build_query(array(
+                                    self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+                                    self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
+                                    dbIdeaProjectSections::field_identifier => self::IDENTIFIER_PROTOCOL,
+                                    dbIdeaProject::field_id => $project_id
+                            ))
+                    ),
+                    'active' => ($section_identifier == self::IDENTIFIER_PROTOCOL) ? 1 : 0
+            );
+        } // section Protocol
 
         if ($this->params[self::PARAM_SECTION_ABOUT]) {
             // add the about section
             $sections[self::IDENTIFIER_ABOUT] = array(
-            'text' => idea_tab_about, 'identifier' => self::IDENTIFIER_ABOUT,
-            'link' => sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
-            self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
-            self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
-            dbIdeaProjectSections::field_identifier => self::IDENTIFIER_ABOUT,
-            dbIdeaProject::field_id => $project_id))),
-            'active' => ($section_identifier == self::IDENTIFIER_ABOUT) ? 1 : 0);
+                    'text' => idea_tab_about,
+                    'identifier' => self::IDENTIFIER_ABOUT,
+                    'link' => sprintf('%s%s%s',
+                            $this->page_link,
+                            (strpos($this->page_link, '?') === false) ? '?' : '&',
+                            http_build_query(array(
+                                    self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+                                    self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
+                                    dbIdeaProjectSections::field_identifier => self::IDENTIFIER_ABOUT,
+                                    dbIdeaProject::field_id => $project_id
+                                    ))
+                            ),
+                    'active' => ($section_identifier == self::IDENTIFIER_ABOUT) ? 1 : 0
+                    );
         } // section about
 
 
         // add the edit button to the section
-        $sections_edit = array('text' => idea_str_edit,
-        'url' => sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
-        self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
-        self::REQUEST_PROJECT_ACTION => self::ACTION_SECTION_EDIT,
-        dbIdeaProject::field_id => $project_id))));
+        $sections_edit = array(
+                'text' => idea_str_edit,
+                'url' => sprintf('%s%s%s',
+                        $this->page_link,
+                        (strpos($this->page_link, '?') === false) ? '?' : '&',
+                        http_build_query(array(
+                                self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+                                self::REQUEST_PROJECT_ACTION => self::ACTION_SECTION_EDIT,
+                                dbIdeaProject::field_id => $project_id
+                                ))
+                        )
+                );
 
         if ($section_identifier == self::IDENTIFIER_FILES) {
             /**
@@ -1442,11 +1494,16 @@ class kitIdeaFrontend {
             $kdl = new kitDirList();
             $params = $kdl->getParams();
             // set the kitIdea URL to kitDirList!
-            $params[kitDirList::param_page_link] = sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
-            self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
-            self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
-            dbIdeaProjectSections::field_identifier => self::IDENTIFIER_FILES,
-            dbIdeaProject::field_id => $project_id)));
+            $params[kitDirList::param_page_link] = sprintf('%s%s%s',
+                    $this->page_link,
+                    (strpos($this->page_link, '?') === false) ? '?' : '&',
+                    http_build_query(array(
+                            self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+                            self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
+                            dbIdeaProjectSections::field_identifier => self::IDENTIFIER_FILES,
+                            dbIdeaProject::field_id => $project_id
+                            ))
+                    );
             // set KIT Category
             $params[kitDirList::param_kit_intern] = $dbIdeaCfg->getValue(dbIdeaCfg::cfgKITcategory);
             $project_files_path = 'kit_protected/kit_idea/project/' . $project_id;
@@ -1473,29 +1530,105 @@ class kitIdeaFrontend {
 
             // setting data for the template
             $data = array(
-            'project' => array('fields' => $project_array,
-            'sections' => array('navigation' => $sections,
-            'edit' => $sections_edit, 'active' => $section_identifier),
-            'edit' => $project_edit), 'page_link' => $this->page_link,
-            'is_message' => $this->isMessage() ? 1 : 0,
-            'intro' => $this->isMessage() ? $this->getMessage() : idea_intro_project_view,
-            'kit_dirlist' => $kit_dirlist);
+                    'project' => array(
+                            'fields' => $project_array,
+                            'sections' => array(
+                                    'navigation' => $sections,
+                                    'edit' => $sections_edit,
+                                    'active' => $section_identifier
+                                    ),
+                            'edit' => $project_edit
+                            ),
+                    'page_link' => $this->page_link,
+                    'is_message' => $this->isMessage() ? 1 : 0,
+                    'intro' => $this->isMessage() ? $this->getMessage() : idea_intro_project_view,
+                    'kit_dirlist' => $kit_dirlist
+                    );
 
+            return $this->getTemplate('project.overview.lte', $data);
+        } elseif ($section_identifier == self::IDENTIFIER_PROTOCOL) {
+            /**
+             * Prepare the "PROTOCOL" section
+             */
+            $SQL = sprintf(
+                    "SELECT * FROM %s WHERE %s>'%s' AND %s='%s' ORDER BY %s DESC LIMIT %d",
+                    $dbIdeaStatusChange->getTableName(),
+                    dbIdeaStatusChange::FIELD_STATUS,
+                    dbIdeaStatusChange::STATUS_UNKNOWN,
+                    dbIdeaStatusChange::FIELD_PROJECT_ID,
+                    $project_id,
+                    dbIdeaStatusChange::FIELD_INFO_DATE,
+                    $this->params[self::PARAM_PROTOCOL_MAX]
+                    );
+            $protocols = array();
+            if (!$dbIdeaStatusChange->sqlExec($SQL, $protocols)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
+                return false;
+            }
+            $items = array();
+            foreach ($protocols as $protocol) {
+                // gather info about the author
+                $author = array();
+                if (!$kitContactInterface->getContact($protocol[dbIdeaStatusChange::FIELD_KIT_ID], $author)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+                    return false;
+                }
+                if (!empty($author[kitContactInterface::kit_first_name]) && ! empty($author[kitContactInterface::kit_last_name])) {
+                    $name = sprintf('%s %s', $author[kitContactInterface::kit_first_name], $author[kitContactInterface::kit_last_name]);
+                } elseif (! empty($author[kitContactInterface::kit_last_name])) {
+                    $name = $author[kitContactInterface::kit_last_name];
+                } elseif (! empty($author[kitContactInterface::kit_first_name])) {
+                    $name = $author[kitContactInterface::kit_first_name];
+                } else {
+                    $name = $author[kitContactInterface::kit_email];
+                }
+
+                $items[] = array(
+                                'info' => $protocol[dbIdeaStatusChange::FIELD_INFO],
+                                'date' => $protocol[dbIdeaStatusChange::FIELD_INFO_DATE],
+                                'author' => array(
+                                        'name' => $name,
+                                        'contact' => $author
+                                )
+                        );
+            }
+            $data = array(
+                    'protocol' => $items,
+                    'project' => array(
+                            'fields' => $project_array,
+                            'sections' => array(
+                                    'navigation' => $sections,
+                                    'edit' => $sections_edit,
+                                    'active' => $section_identifier
+                                    ),
+                            'edit' => $project_edit
+                            ),
+                    'page_link' => $this->page_link,
+                    'is_message' => $this->isMessage() ? 1 : 0,
+                    'intro' => $this->isMessage() ? $this->getMessage() : ''
+                    );
             return $this->getTemplate('project.overview.lte', $data);
         } elseif ($section_identifier == self::IDENTIFIER_ABOUT) {
             /**
              * Prepare the "About" section
              */
             $data = array(
-            'version' => sprintf('%01.2f', $this->getVersion()),
-            'img_url' => $this->img_url,
-            'release_notes' => file_get_contents(WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/info.txt'),
-            'project' => array('fields' => $project_array,
-            'sections' => array('navigation' => $sections,
-            'edit' => $sections_edit, 'active' => $section_identifier),
-            'edit' => $project_edit), 'page_link' => $this->page_link,
-            'is_message' => $this->isMessage() ? 1 : 0,
-            'intro' => $this->isMessage() ? $this->getMessage() : '');
+                    'version' => sprintf('%01.2f', $this->getVersion()),
+                    'img_url' => $this->img_url,
+                    'release_notes' => file_get_contents(WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/info.txt'),
+                    'project' => array(
+                            'fields' => $project_array,
+                            'sections' => array(
+                                    'navigation' => $sections,
+                                    'edit' => $sections_edit,
+                                    'active' => $section_identifier
+                                    ),
+                            'edit' => $project_edit
+                            ),
+                    'page_link' => $this->page_link,
+                    'is_message' => $this->isMessage() ? 1 : 0,
+                    'intro' => $this->isMessage() ? $this->getMessage() : ''
+                    );
             return $this->getTemplate('project.overview.lte', $data);
         } else {
             /**
@@ -1565,17 +1698,23 @@ class kitIdeaFrontend {
                     'value' => $item[$name]);
                 }
                 $article_items[$item[dbIdeaProjectArticles::field_id]] = array(
-                'fields' => $fields,
-                'links' => array(
-                'edit' => array('text' => idea_str_edit,
-                'url' => sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
-                self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
-                self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
-                dbIdeaProject::field_id => $project_id,
-                dbIdeaProjectArticles::field_id => $item[dbIdeaProjectArticles::field_id],
-                dbIdeaProjectArticles::field_section_identifier => $item[dbIdeaProjectArticles::field_section_identifier]))))))
-
-                ;
+                    'fields' => $fields,
+                    'links' => array(
+                            'edit' => array(
+                                    'text' => idea_str_edit,
+                                    'url' => sprintf('%s%s%s',
+                                            $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&',
+                                            http_build_query(array(
+                                                    self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+                                                    self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
+                                                    dbIdeaProject::field_id => $project_id,
+                                                    dbIdeaProjectArticles::field_id => $item[dbIdeaProjectArticles::field_id],
+                                                    dbIdeaProjectArticles::field_section_identifier => $item[dbIdeaProjectArticles::field_section_identifier]
+                                                    ))
+                                            )
+                                    )
+                            )
+                        );
             }
 
             // preparing the WYSIWYG editor
@@ -1614,8 +1753,8 @@ class kitIdeaFrontend {
             $width = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGeditorWidth);
             $height = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGeditorHeight);
             ob_start();
-            show_wysiwyg_editor(self::REQUEST_WYSIWYG, self::REQUEST_WYSIWYG, $content, $width, $height);
-            $wysiwyg_editor = ob_get_contents();
+                show_wysiwyg_editor(self::REQUEST_WYSIWYG, self::REQUEST_WYSIWYG, $content, $width, $height);
+                $wysiwyg_editor = ob_get_contents();
             ob_end_clean();
 
             // preparing and initialize the table sorter
@@ -1630,10 +1769,11 @@ class kitIdeaFrontend {
                 }
                 if (count($sorter) < 1) {
                     $data = array(
-                    dbIdeaTableSort::field_table => $sorter_table,
-                    dbIdeaTableSort::field_value => $project_id,
-                    dbIdeaTableSort::field_order => '',
-                    dbIdeaTableSort::field_item => $section_identifier);
+                            dbIdeaTableSort::field_table => $sorter_table,
+                            dbIdeaTableSort::field_value => $project_id,
+                            dbIdeaTableSort::field_order => '',
+                            dbIdeaTableSort::field_item => $section_identifier
+                            );
                     if (! $dbIdeaTableSort->sqlInsertRecord($data)) {
                         $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaTableSort->getError()));
                         return false;
@@ -1644,10 +1784,11 @@ class kitIdeaFrontend {
 
             // create the status array
             $status_array = array(
-            'label' => idea_label_article_status,
-            'name' => dbIdeaProjectArticles::field_status,
-            'value' => $article[dbIdeaProjectArticles::field_status],
-            'items' => $dbIdeaProjectArticles->status_array);
+                    'label' => $this->lang->translate('Status'),
+                    'name' => dbIdeaProjectArticles::field_status,
+                    'value' => $article[dbIdeaProjectArticles::field_status],
+                    'items' => $dbIdeaProjectArticles->status_array
+                    );
 
             //create the move to another section array
             $items = array();
@@ -1656,9 +1797,11 @@ class kitIdeaFrontend {
                 'value' => $sec[dbIdeaProjectSections::field_identifier],
                 'text' => $sec[dbIdeaProjectSections::field_text]);
             }
-            $move_array = array('label' => idea_label_article_move_section,
-            'name' => self::REQUEST_ARTICLE_MOVE,
-            'value' => $section_identifier, 'items' => $items);
+            $move_array = array(
+                    'label' => $this->lang->translate('Move'),
+                    'name' => self::REQUEST_ARTICLE_MOVE,
+                    'value' => $section_identifier, 'items' => $items
+                    );
 
             // get captcha
             ob_start();
@@ -1668,35 +1811,68 @@ class kitIdeaFrontend {
 
             // setting data for the template
             $data = array(
-            'project' => array('fields' => $project_array,
-            'sections' => array('navigation' => $sections,
-            'edit' => $sections_edit), 'edit' => $project_edit),
-            'article' => array(
-            'edit' => array(
-            'editor' => array(
-            'label' => constant(sprintf('idea_label_%s', dbIdeaProjectArticles::field_content_html)),
-            'value' => $wysiwyg_editor),
-            'title' => array(
-            'label' => constant(sprintf('idea_label_%s', dbIdeaProjectArticles::field_title)),
-            'name' => dbIdeaProjectArticles::field_title,
-            'value' => $article[dbIdeaProjectArticles::field_title]),
-            'captcha' => $captcha), 'fields' => $article_array,
-            'list' => $article_items, 'status' => $status_array,
-            'move' => $move_array),
-            'form' => array('name' => 'article_edit',
-            'btn' => array('ok' => tool_btn_ok, 'abort' => tool_btn_abort)),
-            'page_link' => $this->page_link,
-            'main_action' => array('name' => self::REQUEST_MAIN_ACTION,
-            'value' => self::ACTION_PROJECTS),
-            'project_action' => array('name' => self::REQUEST_PROJECT_ACTION,
-            'value' => self::ACTION_ARTICLE_CHECK),
-            //'is_authenticated'=> $is_authenticated ? 1 : 0,
-            'is_message' => $this->isMessage() ? 1 : 0,
-            'intro' => $this->isMessage() ? $this->getMessage() : idea_intro_project_view,
-            'access' => $dbIdeaProjectGroups->getAccessArray($is_authenticated, $_SESSION[self::SESSION_USER_ACCESS]),
-            'sorter_table' => $sorter_table, 'sorter_active' => $sorter_active,
-            'sorter_value' => $project_id,
-            'sorter_item' => $section_identifier);
+                    'project' => array(
+                            'fields' => $project_array,
+                            'sections' => array(
+                                    'navigation' => $sections,
+                                    'edit' => $sections_edit
+                                    ),
+                            'edit' => $project_edit
+                            ),
+                    'article' => array(
+                            'edit' => array(
+                                    'editor' => array(
+                                            'label' => constant(sprintf('idea_label_%s', dbIdeaProjectArticles::field_content_html)),
+                                            'value' => $wysiwyg_editor
+                                            ),
+                                    'title' => array(
+                                            'label' => constant(sprintf('idea_label_%s', dbIdeaProjectArticles::field_title)),
+                                            'name' => dbIdeaProjectArticles::field_title,
+                                            'value' => $article[dbIdeaProjectArticles::field_title]
+                                            ),
+                                    'abstract' => array(
+                                            'active' => $article_id > 0 ? $dbIdeaCfg->getValue(dbIdeaCfg::cfgArticleUseAbstract) : 0,
+                                            'label' => $this->lang->translate('Abstract'),
+                                            'name' => dbIdeaProjectArticles::field_abstract,
+                                            'value' => '',
+                                            'minor_change' => array(
+                                                    'active' => $dbIdeaCfg->getValue(dbIdeaCfg::cfgArticleAllowMinorChanges),
+                                                    'label' => $this->lang->translate('this is only a minor change'),
+                                                    'name' => dbIdeaProjectArticles::field_change,
+                                                    'value' => 1
+                                                    )
+                                            ),
+                                    'captcha' => $captcha),
+                            'fields' => $article_array,
+                            'list' => $article_items,
+                            'status' => $status_array,
+                            'move' => $move_array,
+                            ),
+                    'form' => array(
+                            'name' => 'article_edit',
+                            'btn' => array(
+                                    'ok' => $this->lang->translate('OK'),
+                                    'abort' => $this->lang->translate('Abort')
+                                    )
+                            ),
+                    'page_link' => $this->page_link,
+                    'main_action' => array(
+                            'name' => self::REQUEST_MAIN_ACTION,
+                            'value' => self::ACTION_PROJECTS
+                            ),
+                    'project_action' => array(
+                            'name' => self::REQUEST_PROJECT_ACTION,
+                            'value' => self::ACTION_ARTICLE_CHECK
+                            ),
+                            // 'is_authenticated'=> $is_authenticated ? 1 : 0,
+                    'is_message' => $this->isMessage() ? 1 : 0,
+                    'intro' => $this->isMessage() ? $this->getMessage() : idea_intro_project_view,
+                    'access' => $dbIdeaProjectGroups->getAccessArray($is_authenticated, $_SESSION[self::SESSION_USER_ACCESS]),
+                    'sorter_table' => $sorter_table,
+                    'sorter_active' => $sorter_active,
+                    'sorter_value' => $project_id,
+                    'sorter_item' => $section_identifier
+                    );
             return $this->getTemplate('project.overview.lte', $data);
         } // all other sections
     } // projectProjectView()
@@ -1711,8 +1887,8 @@ class kitIdeaFrontend {
         global $dbIdeaProjectArticles;
         global $dbIdeaRevisionArchive;
         global $dbIdeaProject;
-        //global $statusMails;
         global $dbIdeaStatusChange;
+        global $dbIdeaCfg;
 
         // first check CAPTCHA
         if (isset($_REQUEST['captcha']) && ($_REQUEST['captcha'] != $_SESSION['captcha'])) {
@@ -1856,6 +2032,17 @@ class kitIdeaFrontend {
 
         unset($article[dbIdeaProjectArticles::field_timestamp]);
 
+        $abstract = isset($_REQUEST[dbIdeaProjectArticles::field_abstract]) ? $_REQUEST[dbIdeaProjectArticles::field_abstract] : '';
+        $minor_change = isset($_REQUEST[dbIdeaProjectArticles::field_change]) ? 1 : 0;
+        $use_abstract = $dbIdeaCfg->getValue(dbIdeaCfg::cfgArticleUseAbstract);
+
+        if ($checked && $changed && ($article_id > 0) && $use_abstract) {
+            if (empty($abstract)) {
+                $checked = false;
+                $message .= $this->lang->translate('<p>Please enter an abstract to describe the changes you want to submit.</p>');
+            }
+        }
+
         if ($checked && $changed) {
             if ($article_id < 1) {
                 // add a new record
@@ -1868,27 +2055,17 @@ class kitIdeaFrontend {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
                     return false;
                 }
-                $message .= sprintf(idea_msg_article_inserted, $article_id);
-                /*
-  			$data = array(
-  				'article'				=> $article,
-  				'project'				=> $project,
-  				'project_url'		=> $this->page_link
-  			);
-  			$body = $this->getTemplate('mail.article.inserted.lte', $data);
-  			if (!$statusMails->sendStatusMails($project_id, $project[dbIdeaProject::field_title], $body)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $statusMails->getError()));
-  				return false;
-  			}
-  			*/
+                //$message .= sprintf(idea_msg_article_inserted, $article_id);
+                $message .= $this->lang->translate('<p>The article "<b>{{ title }}</b>" was successfully created.</p>', array('title' => $article[dbIdeaProjectArticles::field_title]));
                 $data = array(
-                dbIdeaStatusChange::FIELD_ARTICLE_ID => $article_id,
-                dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : - 1,
-                dbIdeaStatusChange::FIELD_INFO => sprintf(idea_msg_article_inserted, $article_id),
-                dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
-                dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
-                dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
-                dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_UNDELIVERED);
+                        dbIdeaStatusChange::FIELD_ARTICLE_ID => $article_id,
+                        dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : - 1,
+                        dbIdeaStatusChange::FIELD_INFO => $this->lang->translate('<p>The article "<b>{{ title }}</b>" was successfully created.</p>', array('title' => $article[dbIdeaProjectArticles::field_title])),
+                        dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
+                        dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
+                        dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
+                        dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_UNDELIVERED
+                        );
                 if (! $dbIdeaStatusChange->sqlInsertRecord($data)) {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
                     return false;
@@ -1906,7 +2083,8 @@ class kitIdeaFrontend {
                 }
                 // add a new revision
                 $where = array(
-                dbIdeaProjectArticles::field_id => $article_id);
+                        dbIdeaProjectArticles::field_id => $article_id
+                        );
                 $article[dbIdeaProjectArticles::field_author] = $this->accountGetAuthor();
                 $article[dbIdeaProjectArticles::field_content_html] = stripslashes($article[dbIdeaProjectArticles::field_content_html]);
                 $article[dbIdeaProjectArticles::field_content_text] = strip_tags($article[dbIdeaProjectArticles::field_content_html]);
@@ -1916,27 +2094,24 @@ class kitIdeaFrontend {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
                     return false;
                 }
-                $message .= sprintf(idea_msg_article_updated, $article_id);
-                /*
-  			$data = array(
-  				'article'				=> $article,
-  				'project'				=> $project,
-  				'project_url'		=> $this->page_link
-  			);
-  			$body = $this->getTemplate('mail.article.update.lte', $data);
-  			if (!$statusMails->sendStatusMails($project_id, $project[dbIdeaProject::field_title], $body)) {
-  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $statusMails->getError()));
-  				return false;
-  			}
-  			*/
+                $message .= $this->lang->translate('<p>The article "<b>{{ title }}</b>" was changed.</p>',
+                        array('title' => $article[dbIdeaProjectArticles::field_title]));
+                if (!empty($abstract)) {
+                    $changed = $this->lang->translate('<p>The article "<b>{{ title }}</b>" was changed: <br />{{ abstract }}.</p>',
+                            array('title' => $article[dbIdeaProjectArticles::field_title], 'abstract' => $abstract));
+                } else {
+                    $changed = $this->lang->translate('<p>The article "<b>{{ title }}</b>" was changed.</p>',
+                            array('title' => $article[dbIdeaProjectArticles::field_title]));
+                }
                 $data = array(
-                dbIdeaStatusChange::FIELD_ARTICLE_ID => $article_id,
-                dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : - 1,
-                dbIdeaStatusChange::FIELD_INFO => sprintf(idea_msg_article_updated, $article_id),
-                dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
-                dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
-                dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
-                dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_UNDELIVERED);
+                        dbIdeaStatusChange::FIELD_ARTICLE_ID => $article_id,
+                        dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : - 1,
+                        dbIdeaStatusChange::FIELD_INFO => $changed,
+                        dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
+                        dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
+                        dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
+                        dbIdeaStatusChange::FIELD_STATUS => $minor_change ? dbIdeaStatusChange::STATUS_MINOR_CHANGE : dbIdeaStatusChange::STATUS_UNDELIVERED
+                        );
                 if (! $dbIdeaStatusChange->sqlInsertRecord($data)) {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
                     return false;

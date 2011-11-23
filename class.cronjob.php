@@ -37,7 +37,7 @@ require_once WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/initialize.php';
 require_once WB_PATH.'/modules/kit/class.cronjob.php';
 require_once WB_PATH.'/modules/droplets_extension/class.pages.php';
 require_once WB_PATH.'/modules/kit_form/class.form.php';
-require_once WB_PATH.'/modules/kit_idea/class.frontend.php';
+//require_once WB_PATH.'/modules/kit_idea/class.frontend.php';
 
 class ideaCronjob {
 
@@ -68,9 +68,18 @@ class ideaCronjob {
     private $processStatus;
     private $processKIT;
 
-    public function __construct() {
-        $this->setTemplatePath(WB_PATH.'/modules/kit_idea/templates/1/'.KIT_IDEA_LANGUAGE.'/');
+    const REQUEST_PROJECT_ACTION = 'pac'; // project actions (default)
+    const ACTION_COMMAND = 'cmd';
+    const REQUEST_COMMAND = 'kic';
 
+    const ANCHOR = 'ki';
+
+    protected $lang;
+
+    public function __construct() {
+        global $I18n;
+        $this->setTemplatePath(WB_PATH.'/modules/kit_idea/templates/1/'.KIT_IDEA_LANGUAGE.'/');
+        $this->lang = $I18n;
     } // __construct()
 
 
@@ -239,7 +248,7 @@ class ideaCronjob {
      *
      * @param boolean $create_record - if true ohterwise update existing record
      */
-    private function setNextMailMonthly($create_record) {
+    private function setNextMailMonthly($create_record=false) {
         global $dbIdeaCfg;
         global $dbCronjobData;
 
@@ -505,7 +514,6 @@ class ideaCronjob {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
                     return false;
                 }
-
                 // create commands for changing the mail delivery
                 $commands = array(
                         dbIdeaProjectUsers::EMAIL_NO_EMAIL,
@@ -520,7 +528,6 @@ class ideaCronjob {
                             dbKITformCommands::FIELD_COMMAND => $cmd,
                             dbKITformCommands::FIELD_PARAMS => http_build_query(array(
                                     'project_group' => $project[dbIdeaProject::field_project_group],
-                                    'contact' => $contact,
                                     'kit_id' => $user[dbIdeaProjectUsers::field_kit_id],
                                     'email_info' => $command
                             )),
@@ -528,34 +535,55 @@ class ideaCronjob {
                             dbKITformCommands::FIELD_STATUS => dbKITformCommands::STATUS_WAITING
                     );
                     if (!$dbKITformCommands->sqlInsertRecord($data)) {
-                        $this->setError($dbKITformCommands->getError());
+                        $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbKITformCommands->getError()));
                         return false;
                     }
                     $commands_array[$dbIdeaProjectUsers->email_command_array[$command]] = array(
                             'link' => sprintf('%s?%s#%s',
                                     $this->getURLofProjectGroup($project[dbIdeaProject::field_project_group]),
                                     http_build_query(array(
-                                            kitIdeaFrontend::REQUEST_PROJECT_ACTION => kitIdeaFrontend::ACTION_COMMAND,
-                                            kitIdeaFrontend::REQUEST_COMMAND => $cmd
+                                            self::REQUEST_PROJECT_ACTION => self::ACTION_COMMAND,
+                                            self::REQUEST_COMMAND => $cmd
                                     )),
-                                    kitIdeaFrontend::ANCHOR
+                                    self::ANCHOR
                             )
                     );
                 }
 
                 // create message body
+
+                $author = array();
+                if (!$kitContactInterface->getContact($stat[dbIdeaStatusChange::FIELD_KIT_ID], $author)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+                    return false;
+                }
+                if (!empty($author[kitContactInterface::kit_first_name]) && ! empty($author[kitContactInterface::kit_last_name])) {
+                    $name = sprintf('%s %s', $author[kitContactInterface::kit_first_name], $author[kitContactInterface::kit_last_name]);
+                } elseif (! empty($author[kitContactInterface::kit_last_name])) {
+                    $name = $author[kitContactInterface::kit_last_name];
+                } elseif (! empty($author[kitContactInterface::kit_first_name])) {
+                    $name = $author[kitContactInterface::kit_first_name];
+                } else {
+                    $name = $author[kitContactInterface::kit_email];
+                }
+
                 $body_data = array(
                         'status' => array(
                                 'info' => $stat[dbIdeaStatusChange::FIELD_INFO],
-                                'date' => $stat[dbIdeaStatusChange::FIELD_INFO_DATE]
+                                'date' => $stat[dbIdeaStatusChange::FIELD_INFO_DATE],
+                                'author' => array(
+                                        'name' => $name,
+                                        'contact' => $author
+                                        )
                         ),
                         'project' => array(
-                                'id' => $project_id
+                                'id' => $project_id,
+                                'data' => $project
                         ),
                         'commands' => $commands_array
                 );
-                $body = $this->getTemplate('status.update.immediate.lte', $body_data);
 
+                $body = $this->getTemplate('status.update.immediate.lte', $body_data);
                 $kitMail = new kitMail();
                 if (!$kitMail->mail($project[dbIdeaProject::field_title], $body, $kitMail->From, $kitMail->FromName, array($contact[kitContactInterface::kit_email] => $contact[kitContactInterface::kit_email]))) {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitMail->getMailError()));
@@ -589,6 +617,7 @@ class ideaCronjob {
         global $kitLibrary;
         global $dbKITformCommands;
         global $dbCronjobData;
+        global $parser;
 
         $where = array(dbIdeaProjectGroups::field_status => dbIdeaProjectGroups::status_active);
         $project_groups = array();
@@ -609,12 +638,56 @@ class ideaCronjob {
                 $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
                 return false;
             }
+
             $report = '';
+            $item = new Dwoo_Template_File($this->getTemplatePath().'status.update.item.lte');
+
             foreach ($status as $stat) {
-                $report .= date(idea_cfg_datetime_str, strtotime($stat[dbIdeaStatusChange::FIELD_INFO_DATE]));
-                $report .= "\r\n";
-                $report .= $stat[dbIdeaStatusChange::FIELD_INFO];
-                $report .= "\r\n\r\n";
+                // gather info about the author
+                $author = array();
+                if (!$kitContactInterface->getContact($stat[dbIdeaStatusChange::FIELD_KIT_ID], $author)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+                    return false;
+                }
+                if (!empty($author[kitContactInterface::kit_first_name]) && ! empty($author[kitContactInterface::kit_last_name])) {
+                    $name = sprintf('%s %s', $author[kitContactInterface::kit_first_name], $author[kitContactInterface::kit_last_name]);
+                } elseif (! empty($author[kitContactInterface::kit_last_name])) {
+                    $name = $author[kitContactInterface::kit_last_name];
+                } elseif (! empty($author[kitContactInterface::kit_first_name])) {
+                    $name = $author[kitContactInterface::kit_first_name];
+                } else {
+                    $name = $author[kitContactInterface::kit_email];
+                }
+                $where = array(
+                        dbIdeaProject::field_id => $stat[dbIdeaStatusChange::FIELD_PROJECT_ID]
+                        );
+                $project = array();
+                if (!$dbIdeaProject->sqlSelectRecord($where, $project)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
+                    return false;
+                }
+                if (count($project) < 1) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->lang->translate('Invalid project ID: {{ id }}',
+                            array('id' => $stat[dbIdeaStatusChange::FIELD_PROJECT_ID]))));
+                    return false;
+                }
+                $project = $project[0];
+                $data = array(
+                        'status' => array(
+                                'info' => $stat[dbIdeaStatusChange::FIELD_INFO],
+                                'date' => $stat[dbIdeaStatusChange::FIELD_INFO_DATE],
+                                'author' => array(
+                                        'name' => $name,
+                                        'contact' => $author
+                                        )
+                                ),
+                        'project' => array(
+                                'id' => $project[dbIdeaProject::field_id],
+                                'data' => $project
+                                ),
+                        );
+                $report .= $parser->get($item, $data);
+
                 // change the status
                 $where = array(dbIdeaStatusChange::FIELD_ID => $stat[dbIdeaStatusChange::FIELD_ID]);
                 $data = array(dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_DAILY);
@@ -622,6 +695,7 @@ class ideaCronjob {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
                     return false;
                 }
+
             }
             // get the users for this project with daily reporting
             $where = array(
@@ -675,10 +749,10 @@ class ideaCronjob {
                             'link' => sprintf('%s?%s#%s',
                                     $this->getURLofProjectGroup($project_group[dbIdeaProjectGroups::field_id]),
                                     http_build_query(array(
-                                            kitIdeaFrontend::REQUEST_PROJECT_ACTION => kitIdeaFrontend::ACTION_COMMAND,
-                                            kitIdeaFrontend::REQUEST_COMMAND => $cmd
+                                            self::REQUEST_PROJECT_ACTION => self::ACTION_COMMAND,
+                                            self::REQUEST_COMMAND => $cmd
                                     )),
-                                    kitIdeaFrontend::ANCHOR
+                                    self::ANCHOR
                             )
                     );
                 }
@@ -686,6 +760,10 @@ class ideaCronjob {
                 // create message body
                 $body_data = array(
                         'report' => $report,
+                        'group' => array(
+                                'data' => $project_group,
+                                'link' => $this->getURLofProjectGroup($project_group[dbIdeaProjectGroups::field_id])
+                                ),
                         'commands' => $commands_array
                 );
                 $body = $this->getTemplate('status.update.daily.lte', $body_data);
@@ -727,6 +805,7 @@ class ideaCronjob {
         global $kitLibrary;
         global $dbKITformCommands;
         global $dbCronjobData;
+        global $parser;
 
         $where = array(dbIdeaProjectGroups::field_status => dbIdeaProjectGroups::status_active);
         $project_groups = array();
@@ -748,11 +827,54 @@ class ideaCronjob {
                 return false;
             }
             $report = '';
+            $item = new Dwoo_Template_File($this->getTemplatePath().'status.update.item.lte');
+
             foreach ($status as $stat) {
-                $report .= date(idea_cfg_datetime_str, strtotime($stat[dbIdeaStatusChange::FIELD_INFO_DATE]));
-                $report .= "\r\n";
-                $report .= $stat[dbIdeaStatusChange::FIELD_INFO];
-                $report .= "\r\n\r\n";
+                // gather info about the author
+                $author = array();
+                if (!$kitContactInterface->getContact($stat[dbIdeaStatusChange::FIELD_KIT_ID], $author)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+                    return false;
+                }
+                if (!empty($author[kitContactInterface::kit_first_name]) && ! empty($author[kitContactInterface::kit_last_name])) {
+                    $name = sprintf('%s %s', $author[kitContactInterface::kit_first_name], $author[kitContactInterface::kit_last_name]);
+                } elseif (! empty($author[kitContactInterface::kit_last_name])) {
+                    $name = $author[kitContactInterface::kit_last_name];
+                } elseif (! empty($author[kitContactInterface::kit_first_name])) {
+                    $name = $author[kitContactInterface::kit_first_name];
+                } else {
+                    $name = $author[kitContactInterface::kit_email];
+                }
+                $where = array(
+                        dbIdeaProject::field_id => $stat[dbIdeaStatusChange::FIELD_PROJECT_ID]
+                );
+                $project = array();
+                if (!$dbIdeaProject->sqlSelectRecord($where, $project)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
+                    return false;
+                }
+                if (count($project) < 1) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->lang->translate('Invalid project ID: {{ id }}',
+                            array('id' => $stat[dbIdeaStatusChange::FIELD_PROJECT_ID]))));
+                    return false;
+                }
+                $project = $project[0];
+                $data = array(
+                        'status' => array(
+                                'info' => $stat[dbIdeaStatusChange::FIELD_INFO],
+                                'date' => $stat[dbIdeaStatusChange::FIELD_INFO_DATE],
+                                'author' => array(
+                                        'name' => $name,
+                                        'contact' => $author
+                                )
+                        ),
+                        'project' => array(
+                                'id' => $project[dbIdeaProject::field_id],
+                                'data' => $project
+                        ),
+                );
+                $report .= $parser->get($item, $data);
+
                 // change the status
                 $where = array(dbIdeaStatusChange::FIELD_ID => $stat[dbIdeaStatusChange::FIELD_ID]);
                 $data = array(dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_WEEKLY);
@@ -760,6 +882,7 @@ class ideaCronjob {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
                     return false;
                 }
+
             }
 
             // leave if nothing is do...
@@ -814,10 +937,10 @@ class ideaCronjob {
                             'link' => sprintf('%s?%s#%s',
                                     $this->getURLofProjectGroup($project_group[dbIdeaProjectGroups::field_id]),
                                     http_build_query(array(
-                                            kitIdeaFrontend::REQUEST_PROJECT_ACTION => kitIdeaFrontend::ACTION_COMMAND,
-                                            kitIdeaFrontend::REQUEST_COMMAND => $cmd
+                                            self::REQUEST_PROJECT_ACTION => self::ACTION_COMMAND,
+                                            self::REQUEST_COMMAND => $cmd
                                     )),
-                                    kitIdeaFrontend::ANCHOR
+                                    self::ANCHOR
                             )
                     );
                 }
@@ -825,6 +948,10 @@ class ideaCronjob {
                 // create message body
                 $body_data = array(
                         'report' => $report,
+                        'group' => array(
+                                'data' => $project_group,
+                                'link' => $this->getURLofProjectGroup($project_group[dbIdeaProjectGroups::field_id])
+                                ),
                         'commands' => $commands_array
                 );
                 $body = $this->getTemplate('status.update.weekly.lte', $body_data);
@@ -866,6 +993,7 @@ class ideaCronjob {
         global $kitLibrary;
         global $dbKITformCommands;
         global $dbCronjobData;
+        global $parser;
 
         $where = array(dbIdeaProjectGroups::field_status => dbIdeaProjectGroups::status_active);
         $project_groups = array();
@@ -887,11 +1015,54 @@ class ideaCronjob {
                 return false;
             }
             $report = '';
+            $item = new Dwoo_Template_File($this->getTemplatePath().'status.update.item.lte');
+
             foreach ($status as $stat) {
-                $report .= date(idea_cfg_datetime_str, strtotime($stat[dbIdeaStatusChange::FIELD_INFO_DATE]));
-                $report .= "\r\n";
-                $report .= $stat[dbIdeaStatusChange::FIELD_INFO];
-                $report .= "\r\n\r\n";
+                // gather info about the author
+                $author = array();
+                if (!$kitContactInterface->getContact($stat[dbIdeaStatusChange::FIELD_KIT_ID], $author)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+                    return false;
+                }
+                if (!empty($author[kitContactInterface::kit_first_name]) && ! empty($author[kitContactInterface::kit_last_name])) {
+                    $name = sprintf('%s %s', $author[kitContactInterface::kit_first_name], $author[kitContactInterface::kit_last_name]);
+                } elseif (! empty($author[kitContactInterface::kit_last_name])) {
+                    $name = $author[kitContactInterface::kit_last_name];
+                } elseif (! empty($author[kitContactInterface::kit_first_name])) {
+                    $name = $author[kitContactInterface::kit_first_name];
+                } else {
+                    $name = $author[kitContactInterface::kit_email];
+                }
+                $where = array(
+                        dbIdeaProject::field_id => $stat[dbIdeaStatusChange::FIELD_PROJECT_ID]
+                );
+                $project = array();
+                if (!$dbIdeaProject->sqlSelectRecord($where, $project)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaStatusChange->getError()));
+                    return false;
+                }
+                if (count($project) < 1) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->lang->translate('Invalid project ID: {{ id }}',
+                            array('id' => $stat[dbIdeaStatusChange::FIELD_PROJECT_ID]))));
+                    return false;
+                }
+                $project = $project[0];
+                $data = array(
+                        'status' => array(
+                                'info' => $stat[dbIdeaStatusChange::FIELD_INFO],
+                                'date' => $stat[dbIdeaStatusChange::FIELD_INFO_DATE],
+                                'author' => array(
+                                        'name' => $name,
+                                        'contact' => $author
+                                )
+                        ),
+                        'project' => array(
+                                'id' => $project[dbIdeaProject::field_id],
+                                'data' => $project
+                        ),
+                );
+                $report .= $parser->get($item, $data);
+
                 // change the status
                 $where = array(dbIdeaStatusChange::FIELD_ID => $stat[dbIdeaStatusChange::FIELD_ID]);
                 $data = array(dbIdeaStatusChange::FIELD_STATUS => dbIdeaStatusChange::STATUS_MONTHLY);
@@ -952,10 +1123,10 @@ class ideaCronjob {
                             'link' => sprintf('%s?%s#%s',
                                     $this->getURLofProjectGroup($project_group[dbIdeaProjectGroups::field_id]),
                                     http_build_query(array(
-                                            kitIdeaFrontend::REQUEST_PROJECT_ACTION => kitIdeaFrontend::ACTION_COMMAND,
-                                            kitIdeaFrontend::REQUEST_COMMAND => $cmd
+                                            self::REQUEST_PROJECT_ACTION => self::ACTION_COMMAND,
+                                            self::REQUEST_COMMAND => $cmd
                                     )),
-                                    kitIdeaFrontend::ANCHOR
+                                    self::ANCHOR
                             )
                     );
                 }
@@ -963,6 +1134,10 @@ class ideaCronjob {
                 // create message body
                 $body_data = array(
                         'report' => $report,
+                        'group' => array(
+                                'data' => $project_group,
+                                'link' => $this->getURLofProjectGroup($project_group[dbIdeaProjectGroups::field_id])
+                                ),
                         'commands' => $commands_array
                 );
                 $body = $this->getTemplate('status.update.monthly.lte', $body_data);

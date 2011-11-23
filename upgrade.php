@@ -38,6 +38,9 @@ else {
 	require_once(WB_PATH .'/modules/kit_tools/languages/' .LANGUAGE .'.php');
 }
 
+// use LEPTON 2.x I18n for access to language files
+if (! class_exists('LEPTON_Helper_I18n')) require_once WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/framework/LEPTON/Helper/I18n.php';
+
 // include language file for kitIdea
 if(!file_exists(WB_PATH .'/modules/'.basename(dirname(__FILE__)).'/languages/' .LANGUAGE .'.php')) {
 	require_once(WB_PATH .'/modules/'.basename(dirname(__FILE__)).'/languages/DE.php'); // Vorgabe: DE verwenden
@@ -222,6 +225,29 @@ if ($release == '0.18') {
     $data = array(dbIdeaProjectUsers::field_email_info => dbIdeaProjectUsers::EMAIL_DAILY);
     if (!$dbIdeaProjectUsers->sqlUpdateRecord($data, $where)) {
         $error .= sprintf('[UPGRADE] Operation fail: %s', $dbIdeaProjectUsers->getError());
+    }
+}
+
+// Release 0.20
+$dbIdeaProjectArticles = new dbIdeaProjectArticles();
+if (!$dbIdeaProjectArticles->sqlFieldExists(dbIdeaProjectArticles::field_abstract)) {
+    // added abstract for changes and change type
+    if (!$dbIdeaProjectArticles->sqlAlterTableAddField(dbIdeaProjectArticles::field_abstract, "VARCHAR(255) NOT NULL DEFAULT ''", dbIdeaProjectArticles::field_kit_contact_id)) {
+        $error .= sprintf('[UPGRADE mod_kit_idea_project_articles] %s', $dbIdeaProjectArticles->getError());
+    }
+    if (!$dbIdeaProjectArticles->sqlAlterTableAddField(dbIdeaProjectArticles::field_description, "VARCHAR(512) NOT NULL DEFAULT ''", dbIdeaProjectArticles::field_kit_contact_id)) {
+        $error .= sprintf('[UPGRADE mod_kit_idea_project_articles] %s', $dbIdeaProjectArticles->getError());
+    }
+    if (!$dbIdeaProjectArticles->sqlAlterTableAddField(dbIdeaProjectArticles::field_change, "TINYINT NOT NULL DEFAULT '".dbIdeaProjectArticles::CHANGE_NORMAL."'", dbIdeaProjectArticles::field_kit_contact_id)) {
+        $error .= sprintf('[UPGRADE mod_kit_idea_project_articles] %s', $dbIdeaProjectArticles->getError());
+    }
+}
+
+$dbIdeaProject = new dbIdeaProject();
+if (!$dbIdeaProject->sqlFieldExists(dbIdeaProject::field_url)) {
+    // add URL field
+    if (!$dbIdeaProject->sqlAlterTableAddField(dbIdeaProject::field_url, "VARCHAR(255) NOT NULL DEFAULT ''", dbIdeaProject::field_status)) {
+        $error .= sprintf('[UPGRADE mod_kit_idea_project] %s', $dbIdeaProject->getError());
     }
 }
 

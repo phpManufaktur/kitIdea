@@ -14,9 +14,11 @@
  *
  * Use {dump()} to get a list of all in this template available variables!
  *}
-Wöchentliche Zusammenfassung: 
- 
+Wöchentliche Zusammenfassung der Änderungen in der Projektgruppe {$group.data.grp_name}: 
 {$report}
+
+Sie erreichen die Projektgruppe {$group.data.grp_name} über den Link:
+{$group.link}
 
 ##### AUTOMATISCHE BENACHRICHTIGUNG durch kitIdea #####
  

@@ -46,6 +46,7 @@ class dbIdeaProject extends dbConnectLE {
     const field_author = 'project_author';
     const field_revision = 'project_revision';
     const field_status = 'project_status';
+    const field_url = 'project_url';
     const field_timestamp = 'project_timestamp';
 
     const status_active = 1;
@@ -91,6 +92,7 @@ class dbIdeaProject extends dbConnectLE {
         $this->addFieldDefinition(self::field_author, "VARCHAR(64) NOT NULL DEFAULT ''");
         $this->addFieldDefinition(self::field_revision, "INT(11) NOT NULL DEFAULT '1'");
         $this->addFieldDefinition(self::field_status, "TINYINT NOT NULL DEFAULT '" . self::status_active . "'");
+        $this->addFieldDefinition(self::field_url, "VARCHAR(255) NOT NULL DEFAULT ''");
         $this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
         $this->checkFieldDefinitions();
         // Tabelle erstellen
@@ -155,16 +157,20 @@ class dbIdeaProjectArticles extends dbConnectLE {
     const field_status = 'article_status';
     const field_author = 'article_author';
     const field_kit_contact_id = 'kit_contact_id';
+    const field_abstract = 'article_abstract';
+    const field_description = 'article_description';
+    const field_change = 'article_change';
     const field_timestamp = 'article_timestamp';
 
     const status_active = 1;
     const status_locked = 2;
     const status_deleted = 4;
 
-    public $status_array = array(
-    array('value' => self::status_active, 'text' => idea_str_status_active),
-    array('value' => self::status_locked, 'text' => idea_str_status_locked),
-    array('value' => self::status_deleted, 'text' => idea_str_status_deleted));
+    public $status_array;
+
+    const CHANGE_UNDEFINED = 0;
+    const CHANGE_NORMAL = 1;
+    const CHANGE_MINOR = 2;
 
     private $createTables = false;
 
@@ -181,7 +187,10 @@ class dbIdeaProjectArticles extends dbConnectLE {
         $this->addFieldDefinition(self::field_revision, "INT(11) NOT NULL DEFAULT '1'");
         $this->addFieldDefinition(self::field_status, "TINYINT NOT NULL DEFAULT '" . self::status_active . "'");
         $this->addFieldDefinition(self::field_author, "VARCHAR(64) NOT NULL DEFAULT ''");
-        $this->addFieldDefinition(self::field_kit_contact_id, "INT(11) NOT NULl DEFAULT '-1'");
+        $this->addFieldDefinition(self::field_kit_contact_id, "INT(11) NOT NULL DEFAULT '-1'");
+        $this->addFieldDefinition(self::field_abstract, "VARCHAR(255) NOT NULL DEFAULT ''");
+        $this->addFieldDefinition(self::field_change, "TINYINT NOT NULL DEFAULT '".self::CHANGE_NORMAL."'");
+        $this->addFieldDefinition(self::field_description, "VARCHAR(512) NOT NULL DEFAULT ''");
         $this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
         $this->checkFieldDefinitions();
         // Tabelle erstellen
@@ -193,6 +202,23 @@ class dbIdeaProjectArticles extends dbConnectLE {
             }
         }
         date_default_timezone_set(idea_cfg_time_zone);
+
+        $lang = new LEPTON_Helper_I18n();
+        // init arrays
+        $this->status_array = array(
+                array(
+                        'value' => self::status_active,
+                        'text' => $lang->translate('Active')
+                ),
+                array(
+                        'value' => self::status_locked,
+                        'text' => $lang->translate('Locked')
+                ),
+                array(
+                        'value' => self::status_deleted,
+                        'text' => $lang->translate('Deleted')
+                )
+        );
     } // __construct()
 
 
@@ -239,46 +265,6 @@ class dbIdeaRevisionArchive extends dbConnectLE {
 
 } // class dbIdeaRevisionArchive
 
-/*
-class dbIdeaProjectStatusMails extends dbConnectLE {
-
-    const field_id = 'sm_id';
-    const field_project_id = 'project_id';
-    const field_use_kit_cats = 'sm_use_kit_cats';
-    const field_kit_cats = 'sm_kit_cats';
-    const field_invite_emails = 'sm_invite_emails';
-    const field_select_emails = 'sm_select_emails';
-    const field_timestamp = 'sm_timestamp';
-
-    private $createTables = false;
-
-    public function __construct($createTables = false) {
-        $this->createTables = $createTables;
-        parent::__construct();
-        $this->setTableName('mod_kit_idea_project_status_mails');
-        $this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
-        $this->addFieldDefinition(self::field_project_id, "INT(11) NOT NULL DEFAULT '-1'");
-        $this->addFieldDefinition(self::field_use_kit_cats, "TINYINT NOT NULL DEFAULT '1'");
-        $this->addFieldDefinition(self::field_kit_cats, "VARCHAR(255) NOT NULL DEFAULT ''");
-        $this->addFieldDefinition(self::field_select_emails, "TEXT NOT NULL DEFAULT ''");
-        $this->addFieldDefinition(self::field_invite_emails, "TEXT NOT NULL DEFAULT ''");
-        $this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
-        $this->checkFieldDefinitions();
-        // Tabelle erstellen
-        if ($this->createTables) {
-            if (! $this->sqlTableExists()) {
-                if (! $this->sqlCreateTable()) {
-                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->getError()));
-                }
-            }
-        }
-        date_default_timezone_set(idea_cfg_time_zone);
-    } // __construct()
-
-
-} // class dbIdeaProjectStatusMails
-*/
-
 class dbIdeaProjectGroups extends dbConnectLE {
 
     const field_id = 'grp_id';
@@ -317,6 +303,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
     const project_move = 33554432;
     const project_lock = 8;
     const project_delete = 16;
+    const project_view_protocol = 134217728; // last added
 
     // rights: articles
     const article_view = 32;
@@ -324,7 +311,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
     const article_edit = 128;
     const article_edit_html = 256;
     const article_move = 512;
-    const article_move_section = 67108864; // last added
+    const article_move_section = 67108864;
     const article_lock = 1024;
     const article_delete = 2048;
 
@@ -357,7 +344,8 @@ class dbIdeaProjectGroups extends dbConnectLE {
                     'edit' => self::project_edit,
                     'move' => self::project_move,
                     'lock' => self::project_edit,
-                    'delete' => self::project_delete
+                    'delete' => self::project_delete,
+                    'view_protocol' => self::project_view_protocol
                     ),
             'article' => array(
                     'view' => self::article_view,
@@ -639,6 +627,8 @@ class dbIdeaCfg extends dbConnectLE {
     const cfgMailDeliverWeekly = 'cfgMailDeliverWeekly';
     const cfgMailDeliverMonthly = 'cfgMailDeliverMonthly';
     const cfgMailPackageSize = 'cfgMailPackageSize';
+    const cfgArticleUseAbstract = 'cfgArticleUseAbstract';
+    const cfgArticleAllowMinorChanges = 'cfgArticleAllowMinorChanges';
 
     public $config_array = array(
             array(
@@ -800,7 +790,21 @@ class dbIdeaCfg extends dbConnectLE {
                     self::cfgMailPackageSize,
                     self::type_integer,
                     '50',
-                    'idea_hint_cfg_mail_package_size')
+                    'idea_hint_cfg_mail_package_size'),
+            array(
+                    'idea_label_cfg_article_use_abstract',
+                    self::cfgArticleUseAbstract,
+                    self::type_boolean,
+                    '1',
+                    'idea_hint_cfg_article_use_abstract'
+                    ),
+            array(
+                    'idea_label_cfg_article_allow_minor_changes',
+                    self::cfgArticleAllowMinorChanges,
+                    self::type_boolean,
+                    '1',
+                    'idea_hint_cfg_article_allow_minor_changes'
+                    )
             );
 
     public function __construct($createTables = false) {
@@ -1157,6 +1161,7 @@ class dbIdeaStatusChange extends dbConnectLE {
     const STATUS_DAILY = 4;
     const STATUS_WEEKLY = 8;
     const STATUS_MONTHLY = 16;
+    const STATUS_MINOR_CHANGE = 32;
 
     private $createTable = false;
 

@@ -99,89 +99,91 @@ foreach($files as $key=>$p) {
  */
 require_once ( WB_PATH.'/modules/kit_idea/include/ckeditor/ckeditor/ckeditor.php' );
 
-class CKEditor_Plus extends CKEditor {
-	/**
-	 *	@var	boolean
-	 *
-	 */
-	public $pretty = true;
+if (!class_exists('CKEditor_Plus')) {
+    class CKEditor_Plus extends CKEditor {
+    	/**
+    	 *	@var	boolean
+    	 *
+    	 */
+    	public $pretty = true;
 
-	/**
-	 *	@var	array
-	 *
-	 */
-	private $lookup_html = array(
-		'&gt;'	=> ">",
-		'&lt;'	=> "<",
-		'&quot;' => "\"",
-		'&amp;'	 => "&"
-	);
+    	/**
+    	 *	@var	array
+    	 *
+    	 */
+    	private $lookup_html = array(
+    		'&gt;'	=> ">",
+    		'&lt;'	=> "<",
+    		'&quot;' => "\"",
+    		'&amp;'	 => "&"
+    	);
 
-	/**
-	 *	Public var to force the editor to use the given params for width and height
-	 *
-	 */
-	public $force = false;
+    	/**
+    	 *	Public var to force the editor to use the given params for width and height
+    	 *
+    	 */
+    	public $force = false;
 
-	/**
-	 *	@param	string	Any HTML-Source, pass by reference
-	 *
-	 */
-	public function reverse_htmlentities(&$html_source) {
+    	/**
+    	 *	@param	string	Any HTML-Source, pass by reference
+    	 *
+    	 */
+    	public function reverse_htmlentities(&$html_source) {
 
-		$html_source = str_replace(
-			array_keys( $this->lookup_html ),
-			array_values( $this->lookup_html ),
-			$html_source
-		);
+    		$html_source = str_replace(
+    			array_keys( $this->lookup_html ),
+    			array_values( $this->lookup_html ),
+    			$html_source
+    		);
+        }
+
+
+      /**
+       *	Looks for an (local) url
+       *
+       *	@param	string	Key for tha assoc. config array
+       *	@param	string	Local file we are looking for
+       *	@param	string	Optional file-default-path if it not exists
+       *	@param	string	Optional a path_addition, e.g. "wb:"
+       *
+       */
+      public function resolve_path($key= "", $aPath, $aPath_default, $path_addition="") {
+      	global $paths;
+      	$temp = WB_PATH.$aPath;
+
+      	if (true === file_exists($temp)) {
+       		$aPath = $path_addition.WB_URL.$aPath;
+       	} else {
+       		$aPath = $path_addition.WB_URL.$aPath_default;
+       	}
+
+       	if (array_key_exists($key, $paths)) {
+       		$this->config[$key] = (($paths[$key ] == "") ? $aPath : $paths[$key]) ;
+       	} else {
+       		$this->config[$key] = $aPath;
+       	}
+       }
+
+      /**
+       *	More or less for debugging
+       *
+       *	@param	string	Name
+       *	@param	string	Any content. Pass by reference!
+       *	@return	string	The "editor"-JS HTML code
+       *
+       */
+      public function to_HTML($name, &$content) {
+      	$old_return = $this->returnOutput;
+       	$this->returnOutput = true;
+       	$temp_HTML= $this->editor($name, $content);
+       	$this->returnOutput = $old_return;
+       	if (true === $this->pretty) {
+       		$temp_HTML = str_replace (",", ",\n ", $temp_HTML);
+       		$temp_HTML = "\n\n\n".$temp_HTML."\n\n\n";
+       	}
+       	return $temp_HTML;
+      }
     }
-
-
-  /**
-   *	Looks for an (local) url
-   *
-   *	@param	string	Key for tha assoc. config array
-   *	@param	string	Local file we are looking for
-   *	@param	string	Optional file-default-path if it not exists
-   *	@param	string	Optional a path_addition, e.g. "wb:"
-   *
-   */
-  public function resolve_path($key= "", $aPath, $aPath_default, $path_addition="") {
-  	global $paths;
-  	$temp = WB_PATH.$aPath;
-
-  	if (true === file_exists($temp)) {
-   		$aPath = $path_addition.WB_URL.$aPath;
-   	} else {
-   		$aPath = $path_addition.WB_URL.$aPath_default;
-   	}
-
-   	if (array_key_exists($key, $paths)) {
-   		$this->config[$key] = (($paths[$key ] == "") ? $aPath : $paths[$key]) ;
-   	} else {
-   		$this->config[$key] = $aPath;
-   	}
-   }
-
-  /**
-   *	More or less for debugging
-   *
-   *	@param	string	Name
-   *	@param	string	Any content. Pass by reference!
-   *	@return	string	The "editor"-JS HTML code
-   *
-   */
-  public function to_HTML($name, &$content) {
-  	$old_return = $this->returnOutput;
-   	$this->returnOutput = true;
-   	$temp_HTML= $this->editor($name, $content);
-   	$this->returnOutput = $old_return;
-   	if (true === $this->pretty) {
-   		$temp_HTML = str_replace (",", ",\n ", $temp_HTML);
-   		$temp_HTML = "\n\n\n".$temp_HTML."\n\n\n";
-   	}
-   	return $temp_HTML;
-  }
 }
 
 $ckeditor = new CKEditor_Plus( WB_URL.'/modules/kit_idea/include/ckeditor/ckeditor/' );

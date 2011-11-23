@@ -14,8 +14,13 @@
  *
  * Use {dump()} to get a list of all in this template available variables!
  *}
-{$status.date}
+Das Projekt {$project.data.project_title} wurde aktualisiert: 
+ 
+{$status.author.name} - {date_format($status.date '%d.%m.%Y - %R')}
 {$status.info}
+
+Sie erreichen das Projekt {$project.data.project_title} über die URL:
+{$project.data.project_url}
 
 ##### AUTOMATISCHE BENACHRICHTIGUNG durch kitIdea #####
  

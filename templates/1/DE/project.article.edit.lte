@@ -44,6 +44,23 @@
           {$article.edit.editor.value}
         </td>
       </tr>
+      {if $article.edit.abstract.active == 1}
+        <tr>
+          <td>{$article.edit.abstract.label}</td>
+          <td colspan="5">
+            <textarea name="{$article.edit.abstract.name}" rows="3">{$article.edit.abstract.value}</textarea>
+          </td>
+        </tr>
+        {if $article.edit.abstract.minor_change.active == 1}
+        <tr>
+          <td>&nbsp;</td>
+          <td colspan="5">
+            <input type="checkbox" name="{$article.edit.abstract.minor_change.name}" value="{$article.edit.abstract.minor_change.value}" /> {$article.edit.abstract.minor_change.label}
+          </td>
+        </tr>
+        {/if}
+        <tr><td colspan="6">&nbsp;</td></tr>
+      {/if}
       <tr>
         <td>&nbsp;</td>
         <td>{if $access.article.move_section == 1}{$article.move.label}{else}&nbsp;{/if}</td>
@@ -77,6 +94,7 @@
           </td>
         </tr>
       {/if}
+      <tr><td colspan="6">&nbsp;</td></tr>
       <tr>
         <td>&nbsp;</td>
         <td colspan="5">

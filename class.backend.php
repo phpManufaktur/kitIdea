@@ -36,22 +36,22 @@ class kitIdeaBackend {
 	const request_items = 'its';
 	const request_all_groups = 'ag';
 
-	const action_about								= 'abt';
-	const action_config								= 'cfg';
-	const action_config_check					= 'cfgc';
-	const action_default							= 'def';
-	const action_group_edit						= 'grpe';
-	const action_group_edit_check			= 'grpec';
-	const action_user_select					= 'usrs';
-	const action_user_edit						= 'usre';
-	const action_user_edit_check			= 'usrec';
+    const action_about = 'abt';
+    const action_config = 'cfg';
+    const action_config_check = 'cfgc';
+    const action_default = 'def';
+    const action_group_edit = 'grpe';
+    const action_group_edit_check = 'grpec';
+    const action_user_select = 'usrs';
+    const action_user_edit = 'usre';
+    const action_user_edit_check = 'usrec';
 
-	private $tab_navigation_array = array(
-		self::action_group_edit					=> idea_tab_group_edit,
-		self::action_user_edit					=> idea_tab_user_edit,
-		self::action_config							=> idea_tab_config,
-		self::action_about							=> idea_tab_about
-	);
+    private $tab_navigation_array = array(
+            self::action_group_edit => idea_tab_group_edit,
+            self::action_user_edit => idea_tab_user_edit,
+            self::action_config => idea_tab_config,
+            self::action_about => idea_tab_about
+            );
 
 	private $page_link 								= '';
 	private $img_url									= '';
@@ -61,15 +61,19 @@ class kitIdeaBackend {
 	private $media_path								= '';
 	private $media_url								= '';
 
+	protected $lang = NULL;
+
 	public function __construct() {
 		global $dbIdeaCfg;
 		global $parser;
+		global $I18n;
 		$this->page_link = ADMIN_URL.'/admintools/tool.php?tool=kit_idea';
 		$this->template_path = WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/templates/' ;
 		$this->img_url = WB_URL. '/modules/'.basename(dirname(__FILE__)).'/images/';
 		date_default_timezone_set(tool_cfg_time_zone);
 		$this->media_path = WB_PATH.MEDIA_DIRECTORY.'/'.$dbIdeaCfg->getValue(dbIdeaCfg::cfgMediaDir).'/';
 		$this->media_url = str_replace(WB_PATH, WB_URL, $this->media_path);
+		$this->lang = $I18n;
 	} // __construct()
 
 	/**
@@ -263,9 +267,9 @@ class kitIdeaBackend {
    */
   public function dlgAbout() {
   	$data = array(
-  		'version'					=> sprintf('%01.2f', $this->getVersion()),
-  		'img_url'					=> $this->img_url,
-  		'release_notes'		=> file_get_contents(WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/info.txt'),
+  		'version' => sprintf('%01.2f', $this->getVersion()),
+  		'img_url' => $this->img_url,
+  		'release_notes' => file_get_contents(WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/info.txt'),
   	);
   	return $this->getTemplate('backend.about.lte', $data);
   } // dlgAbout()
@@ -290,9 +294,9 @@ class kitIdeaBackend {
 		}
 		$count = array();
 		$header = array(
-			'identifier'	=> tool_header_cfg_identifier,
-			'value'				=> tool_header_cfg_value,
-			'description'	=> tool_header_cfg_description
+			'identifier' => $this->lang->translate('Name'),
+			'value'	=> $this->lang->translate('Value'),
+			'description' => $this->lang->translate('Description')
 		);
 
 		$items = array();
@@ -304,31 +308,31 @@ class kitIdeaBackend {
 			if (isset($_REQUEST[dbIdeaCfg::field_value.'_'.$id])) $value = $_REQUEST[dbIdeaCfg::field_value.'_'.$id];
 			$value = str_replace('"', '&quot;', stripslashes($value));
 			$items[] = array(
-				'id'					=> $id,
-				'identifier'	=> constant($entry[dbIdeaCfg::field_label]),
-				'value'				=> $value,
-				'name'				=> sprintf('%s_%s', dbIdeaCfg::field_value, $id),
-				'description'	=> constant($entry[dbIdeaCfg::field_description]),
-				'type'				=> $dbIdeaCfg->type_array[$entry[dbIdeaCfg::field_type]],
-				'field'				=> $entry[dbIdeaCfg::field_name]
+			        'id' => $id,
+                    'identifier' => constant($entry[dbIdeaCfg::field_label]),
+                    'value' => $value,
+                    'name' => sprintf('%s_%s', dbIdeaCfg::field_value, $id),
+                    'description' => constant($entry[dbIdeaCfg::field_description]),
+                    'type' => $dbIdeaCfg->type_array[$entry[dbIdeaCfg::field_type]],
+                    'field' => $entry[dbIdeaCfg::field_name]
 			);
 		}
-		$data = array(
-			'form_name'						=> 'flex_table_cfg',
-			'form_action'					=> $this->page_link,
-			'action_name'					=> self::request_action,
-			'action_value'				=> self::action_config_check,
-			'items_name'					=> self::request_items,
-			'items_value'					=> implode(",", $count),
-			'head'								=> tool_header_cfg,
-			'intro'								=> $this->isMessage() ? $this->getMessage() : sprintf(tool_intro_cfg, 'kitIdea'),
-			'is_message'					=> $this->isMessage() ? 1 : 0,
-			'items'								=> $items,
-			'btn_ok'							=> tool_btn_ok,
-			'btn_abort'						=> tool_btn_abort,
-			'abort_location'			=> $this->page_link,
-			'header'							=> $header
-		);
+        $data = array(
+                'form_name' => 'flex_table_cfg',
+                'form_action' => $this->page_link,
+                'action_name' => self::request_action,
+                'action_value' => self::action_config_check,
+                'items_name' => self::request_items,
+                'items_value' => implode(",", $count),
+                'head' => $this->lang->translate('Settings'),
+                'intro' => $this->isMessage() ? $this->getMessage() : sprintf(tool_intro_cfg, 'kitIdea'),
+                'is_message' => $this->isMessage() ? 1 : 0,
+                'items' => $items,
+                'btn_ok' => $this->lang->translate('OK'),
+                'btn_abort' => $this->lang->translate('Abort'),
+                'abort_location' => $this->page_link,
+                'header' => $header
+                );
 		return $this->getTemplate('backend.config.lte', $data);
 	} // dlgConfig()
 
@@ -517,7 +521,7 @@ class kitIdeaBackend {
 				case dbIdeaProjectGroups::field_access_rights_4:
 				case dbIdeaProjectGroups::field_access_rights_5:
 					$access_groups = array(
-						'project'		=> array(
+					    'project'		=> array(
 							'label'		=> idea_label_projects,
 							'options'	=> array(
 								array('value'	=> dbIdeaProjectGroups::project_view,
@@ -535,9 +539,15 @@ class kitIdeaBackend {
 								array('value'	=> dbIdeaProjectGroups::project_lock,
 											'text' => constant('idea_label_access_project_lock'),
 											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_lock)),
-								array('value'	=> dbIdeaProjectGroups::project_delete,
+								array(
+								'value'	=> dbIdeaProjectGroups::project_delete,
 											'text' => constant('idea_label_access_project_delete'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_delete))
+											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_delete)),
+						        array(
+						            'value' => dbIdeaProjectGroups::project_view_protocol,
+						            'text' => $this->lang->translate('Read protocol'),
+						            'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_view_protocol)
+						        )
 							),
 						),
 						'articles'	=> array(
@@ -1079,7 +1089,10 @@ class kitIdeaBackend {
 								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::project_lock)),
 					array('value'	=> dbIdeaProjectGroups::project_delete,
 								'text' => constant('idea_label_access_project_delete'),
-								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::project_delete))
+								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::project_delete)),
+				    array('value' => dbIdeaProjectGroups::project_view_protocol,
+				            'text' => $this->lang->translate('Read protocol'),
+				            'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::project_view_protocol))
 				),
 			),
 			'articles'	=> array(

@@ -3,9 +3,16 @@ kitIdea
 Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
+Release 0.20
+2011-11-23
+added: fields "abstract", "minor changes" and "description" for articles
+changed: content and design of all reports (immediate, daily, weekly, monthly)
+added: project protocol show the last changes in a own tab - need permission
+  and can be switched with the droplet parameter "section_protocol"
+
 Release 0.19
 2011-11-20
-added: parameter "log=login" in droplet [[kit_idea]] tracks the login of kitIdea
+added: parameter "log=login" in droplet "kit_idea" tracks the login of kitIdea
   users in the KIT account protocol 
 
 Release 0.18

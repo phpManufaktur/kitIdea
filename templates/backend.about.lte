@@ -30,7 +30,7 @@
       phone +49 (0)30 68813647
     </p>
     <div class="about_release">
-      <p><b>History:</b></p>
+      <h2>History:</h2>
       <pre>{$release_notes}</pre>
     </div>
   </div>
