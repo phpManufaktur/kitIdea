@@ -43,7 +43,7 @@ $PRECHECK['WB_ADDONS'] = array(
 	'kit_tools' => array('VERSION' => '0.15', 'OPRATOR' => '>='),
 	'kit' => array('VERSION' => '0.45', 'OPERATOR' => '>='),
 	'kit_form' => array('VERSION' => '0.22', 'OPERATOR' => '>='),
-	'kit_dirlist' => array('VERSION' => '0.23', 'OPERATOR' => '>=')
+	'kit_dirlist' => array('VERSION' => '0.25', 'OPERATOR' => '>=')
 );
 
 global $database;

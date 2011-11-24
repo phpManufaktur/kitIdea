@@ -103,7 +103,7 @@ class dbIdeaProject extends dbConnectLE {
                 }
             }
         }
-        date_default_timezone_set(idea_cfg_time_zone);
+        date_default_timezone_set(cfg_time_zone);
     } // __construct()
 
 
@@ -138,7 +138,7 @@ class dbIdeaProjectSections extends dbConnectLE {
                 }
             }
         }
-        date_default_timezone_set(idea_cfg_time_zone);
+        date_default_timezone_set(cfg_time_zone);
     } // __construct()
 
 
@@ -201,7 +201,7 @@ class dbIdeaProjectArticles extends dbConnectLE {
                 }
             }
         }
-        date_default_timezone_set(idea_cfg_time_zone);
+        date_default_timezone_set(cfg_time_zone);
 
         $lang = new LEPTON_Helper_I18n();
         // init arrays
@@ -259,7 +259,7 @@ class dbIdeaRevisionArchive extends dbConnectLE {
                 }
             }
         }
-        date_default_timezone_set(idea_cfg_time_zone);
+        date_default_timezone_set(cfg_time_zone);
     } // __construct()
 
 
@@ -406,7 +406,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
                 }
             }
         }
-        date_default_timezone_set(idea_cfg_time_zone);
+        date_default_timezone_set(cfg_time_zone);
     } // __construct()
 
 
@@ -561,7 +561,7 @@ class dbIdeaProjectUsers extends dbConnectLE {
                 }
             }
         }
-        date_default_timezone_set(idea_cfg_time_zone);
+        date_default_timezone_set(cfg_time_zone);
     } // __construct()
 
 
@@ -835,7 +835,7 @@ class dbIdeaCfg extends dbConnectLE {
         if ($this->sqlTableExists()) {
             $this->checkConfig();
         }
-        date_default_timezone_set(idea_cfg_time_zone);
+        date_default_timezone_set(cfg_time_zone);
     } // __construct()
 
 
@@ -882,7 +882,9 @@ class dbIdeaCfg extends dbConnectLE {
             return false;
         }
         if (sizeof($config) < 1) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_cfg_name, $name)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('There is no record for the configuration of <b>{{ name }}</b>!',
+                            array('name' => $name))));
             return false;
         }
         return $this->setValue($new_value, $config[0][self::field_id]);
@@ -957,7 +959,9 @@ class dbIdeaCfg extends dbConnectLE {
             return false;
         }
         if (sizeof($config) < 1) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_cfg_id, $id)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                            array('id', $id))));
             return false;
         }
         $config = $config[0];
@@ -980,7 +984,8 @@ class dbIdeaCfg extends dbConnectLE {
                 if ($this->validateEMail($new_value)) {
                     $value = trim($new_value);
                 } else {
-                    $this->setMessage(sprintf(tool_msg_invalid_email, $new_value));
+                    $this->setMessage($this->lang->translate('<p>The email address <b>{{ email }}</b> is not valid!</p>',
+                            array('email' => $new_value)));
                     return false;
                 }
                 break;
@@ -1040,7 +1045,9 @@ class dbIdeaCfg extends dbConnectLE {
             return false;
         }
         if (sizeof($config) < 1) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_cfg_name, $name)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('There is no record for the configuration of <b>{{ name }}</b>!',
+                            array('name', $name))));
             return false;
         }
         $config = $config[0];
@@ -1137,7 +1144,7 @@ class dbIdeaTableSort extends dbConnectLE {
                 }
             }
         }
-        date_default_timezone_set(idea_cfg_time_zone);
+        date_default_timezone_set(cfg_time_zone);
     } // __construct()
 
 
@@ -1187,7 +1194,7 @@ class dbIdeaStatusChange extends dbConnectLE {
                 }
             }
         }
-        date_default_timezone_set(idea_cfg_time_zone);
+        date_default_timezone_set(cfg_time_zone);
     } // __construct()
 
 	/**

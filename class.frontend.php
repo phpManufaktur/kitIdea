@@ -154,7 +154,7 @@ class kitIdeaFrontend {
         $this->page_link = $url;
         $this->template_path = WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/templates/' . $this->params[self::PARAM_PRESET] . '/' . KIT_IDEA_LANGUAGE . '/';
         $this->img_url = WB_URL . '/modules/' . basename(dirname(__FILE__)) . '/images/';
-        date_default_timezone_set(idea_cfg_time_zone);
+        date_default_timezone_set(cfg_time_zone);
         $this->media_path = WB_PATH . MEDIA_DIRECTORY . '/' . $dbIdeaCfg->getValue(dbIdeaCfg::cfgMediaDir) . '/';
         $this->media_url = str_replace(WB_PATH, WB_URL, $this->media_path);
         $this->lang = $I18n;
@@ -589,7 +589,7 @@ class kitIdeaFrontend {
                         $_SESSION[kitContactInterface::session_kit_contact_id] = $register[dbKITregister::field_contact_id];
                         if ($this->getLogLogin() && !isset($_SESSION[self::SESSION_LOG_LOGIN])) {
                             $_SESSION[self::SESSION_LOG_LOGIN] = time();
-                            $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], sprintf(idea_log_login, date(idea_cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN])));
+                            $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], sprintf(idea_log_login, date(cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN])));
                         }
                         return true;
                     } else {
@@ -603,7 +603,9 @@ class kitIdeaFrontend {
                             return false;
                         }
                         if (count($register) < 1) {
-                            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $contact_id)));
+                            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                                    $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                                            array('id' => $contact_id))));
                             return false;
                         }
                         $register = end($register);
@@ -612,7 +614,7 @@ class kitIdeaFrontend {
                         $_SESSION[kitContactInterface::session_kit_contact_id] = $register[dbKITregister::field_contact_id];
                         if ($this->getLogLogin() && !isset($_SESSION[self::SESSION_LOG_LOGIN])) {
                             $_SESSION[self::SESSION_LOG_LOGIN] = time();
-                            $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], sprintf(idea_log_login, date(idea_cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN])));
+                            $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], sprintf(idea_log_login, date(cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN])));
                         }
                         return true;
                     }
@@ -636,7 +638,7 @@ class kitIdeaFrontend {
                 // user is authenticated and allowed to use kitIdea
                 if ($this->getLogLogin() && !isset($_SESSION[self::SESSION_LOG_LOGIN])) {
                     $_SESSION[self::SESSION_LOG_LOGIN] = time();
-                    $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], sprintf(idea_log_login, date(idea_cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN])));
+                    $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], sprintf(idea_log_login, date(cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN])));
                 }
                 return true;
             } else {
@@ -803,7 +805,9 @@ class kitIdeaFrontend {
                 return $this->projectShow(false);
             }
             if (count($project) < 1) {
-                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $_REQUEST[dbIdeaProject::field_id])));
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                        $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                                array('id' => $_REQUEST[dbIdeaProject::field_id]))));
                 return $this->projectShow(false);
             }
             if ($project[0][dbIdeaProject::field_access] == dbIdeaProject::access_closed) {
@@ -1077,7 +1081,9 @@ class kitIdeaFrontend {
                 return false;
             }
             if (count($project) < 1) {
-                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                        $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                                array('id' => $project_id))));
                 return false;
             }
             $project = $project[0];
@@ -1111,15 +1117,25 @@ class kitIdeaFrontend {
             'hint' => constant(sprintf('idea_hint_%s', $name)));
         }
         $data = array(
-        'head' => ($project_id < 1) ? idea_head_project_create : idea_head_project_edit,
-        'intro' => ($this->isMessage()) ? $this->getMessage() : idea_intro_project_edit,
-        'project' => $items, 'page_link' => $this->page_link,
-        'form' => array('name' => 'project_edit',
-        'btn' => array('ok' => tool_btn_ok, 'abort' => tool_btn_abort)),
-        'main_action' => array('name' => self::REQUEST_MAIN_ACTION,
-        'value' => self::ACTION_PROJECTS),
-        'project_action' => array('name' => self::REQUEST_PROJECT_ACTION,
-        'value' => self::ACTION_PROJECT_EDIT_CHECK));
+                'head' => ($project_id < 1) ? idea_head_project_create : idea_head_project_edit,
+                'intro' => ($this->isMessage()) ? $this->getMessage() : idea_intro_project_edit,
+                'project' => $items, 'page_link' => $this->page_link,
+                'form' => array(
+                        'name' => 'project_edit',
+                        'btn' => array(
+                                'ok' => $this->lang->translate('OK'),
+                                'abort' => $this->lang->translate('Abort')
+                                )
+                        ),
+                'main_action' => array(
+                        'name' => self::REQUEST_MAIN_ACTION,
+                        'value' => self::ACTION_PROJECTS
+                        ),
+                'project_action' => array(
+                        'name' => self::REQUEST_PROJECT_ACTION,
+                        'value' => self::ACTION_PROJECT_EDIT_CHECK
+                        )
+                );
         return $this->getTemplate('project.edit.lte', $data);
     } // projectProjectEdit()
 
@@ -1144,7 +1160,9 @@ class kitIdeaFrontend {
                 return false;
             }
             if (count($project) < 1) {
-                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                        $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                                array('id' => $project_id))));
                 return false;
             }
             $project = $project[0];
@@ -1272,7 +1290,9 @@ class kitIdeaFrontend {
         $project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : - 1;
 
         if ($project_id < 1) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                            array('id' => $project_id))));
             return false;
         }
 
@@ -1284,7 +1304,9 @@ class kitIdeaFrontend {
             return false;
         }
         if (count($project) < 1) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                            array('id' => $project_id))));
             return false;
         }
         $project = $project[0];
@@ -1509,7 +1531,9 @@ class kitIdeaFrontend {
             $project_files_path = 'kit_protected/kit_idea/project/' . $project_id;
             if (! file_exists(WB_PATH . MEDIA_DIRECTORY . '/' . $project_files_path)) {
                 if (! mkdir(WB_PATH . MEDIA_DIRECTORY . '/' . $project_files_path, 0755, true)) {
-                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_mkdir, $project_files_path)));
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                            $this->lang->translate('Error creating the directory <b>{{ directory }}</b>.',
+                                    array('directory' => $project_files_path))));
                     return false;
                 }
             }
@@ -1729,7 +1753,9 @@ class kitIdeaFrontend {
                     return false;
                 }
                 if (count($article) < 1) {
-                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $article_id)));
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                            $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                                    array('id' => $article_id))));
                     return false;
                 }
                 $article = $article[0];
@@ -1842,7 +1868,8 @@ class kitIdeaFrontend {
                                                     'value' => 1
                                                     )
                                             ),
-                                    'captcha' => $captcha),
+                                    'captcha' => $captcha
+                                    ),
                             'fields' => $article_array,
                             'list' => $article_items,
                             'status' => $status_array,
@@ -1899,7 +1926,9 @@ class kitIdeaFrontend {
 
         $project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : - 1;
         if ($project_id < 1) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                            array('id' => $project_id))));
             return false;
         }
         $where = array(dbIdeaProject::field_id => $project_id);
@@ -1909,7 +1938,9 @@ class kitIdeaFrontend {
             return false;
         }
         if (count($project) < 1) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                            array('id' => $project_id))));
             return false;
         }
         $project = $project[0];
@@ -1924,7 +1955,9 @@ class kitIdeaFrontend {
                 return false;
             }
             if (count($article) < 1) {
-                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $article_id)));
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                        $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                                array('id' => $article_id))));
                 return false;
             }
             $article = $article[0];
@@ -2140,7 +2173,9 @@ class kitIdeaFrontend {
 
         $project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : - 1;
         if ($project_id < 1) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                            array('id' => $project_id))));
             return false;
         }
         // get sections in the correct sort order
@@ -2164,7 +2199,9 @@ class kitIdeaFrontend {
             return false;
         }
         if (count($sections) < 1) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                            array('id' => $project_id))));
             return false;
         }
 
@@ -2211,29 +2248,54 @@ class kitIdeaFrontend {
             }
         }
 
-        $data = array('head' => idea_head_section_edit,
-        'intro' => $this->isMessage() ? $this->getMessage() : idea_intro_section_edit,
-        'is_message' => $this->isMessage() ? 1 : 0,
-        'page_link' => $this->page_link,
-        'form' => array('name' => 'section_edit',
-        'btn' => array('ok' => tool_btn_ok, 'abort' => tool_btn_abort)),
-        'sections' => array(
-        'navigation' => array('tabs' => $section_array,
-        'hint' => idea_hint_section_tab_move),
-        'add' => array('label' => idea_label_section_add,
-        'name' => self::REQUEST_SECTION_ADD, 'value' => '',
-        'hint' => idea_hint_section_add),
-        'delete' => array('label' => idea_label_section_delete,
-        'name' => self::REQUEST_SECTION_DELETE, 'values' => $delete_array,
-        'hint' => idea_hint_section_delete)),
-        'main_action' => array('name' => self::REQUEST_MAIN_ACTION,
-        'value' => self::ACTION_PROJECTS),
-        'project_action' => array('name' => self::REQUEST_PROJECT_ACTION,
-        'value' => self::ACTION_SECTION_EDIT_CHECK),
-        'project_id' => array('name' => dbIdeaProject::field_id,
-        'value' => $project_id), 'sorter_table' => $sorter_table,
-        'sorter_active' => $sorter_active, 'sorter_value' => $project_id,
-        'img_url' => $this->img_url);
+        $data = array(
+                'head' => idea_head_section_edit,
+                'intro' => $this->isMessage() ? $this->getMessage() : idea_intro_section_edit,
+                'is_message' => $this->isMessage() ? 1 : 0,
+                'page_link' => $this->page_link,
+                'form' => array(
+                        'name' => 'section_edit',
+                        'btn' => array(
+                                'ok' => $this->lang->translate('OK'),
+                                'abort' => $this->lang->translate('Abort')
+                                )
+                        ),
+                'sections' => array(
+                        'navigation' => array(
+                                'tabs' => $section_array,
+                                'hint' => idea_hint_section_tab_move
+                                ),
+                        'add' => array(
+                                'label' => idea_label_section_add,
+                                'name' => self::REQUEST_SECTION_ADD,
+                                'value' => '',
+                                'hint' => idea_hint_section_add
+                                ),
+                        'delete' => array(
+                                'label' => idea_label_section_delete,
+                                'name' => self::REQUEST_SECTION_DELETE,
+                                'values' => $delete_array,
+                                'hint' => idea_hint_section_delete
+                                )
+                        ),
+                'main_action' => array(
+                        'name' => self::REQUEST_MAIN_ACTION,
+                        'value' => self::ACTION_PROJECTS
+                        ),
+                'project_action' => array(
+                        'name' => self::REQUEST_PROJECT_ACTION,
+                        'value' => self::ACTION_SECTION_EDIT_CHECK
+                        ),
+                'project_id' => array(
+                        'name' => dbIdeaProject::field_id,
+                        'value' => $project_id
+                        ),
+                'sorter_table' => $sorter_table,
+                'sorter_active' => $sorter_active,
+                'sorter_value' => $project_id,
+                'img_url' => $this->img_url
+                );
+
         return $this->getTemplate('project.sections.lte', $data);
     } // projectSectionEdit()
 
@@ -2251,7 +2313,9 @@ class kitIdeaFrontend {
 
         $project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : - 1;
         if ($project_id < 1) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                            array('id' => $project_id))));
             return false;
         }
         $where = array(dbIdeaProject::field_id => $project_id);
@@ -2261,7 +2325,9 @@ class kitIdeaFrontend {
             return false;
         }
         if (count($project) < 1) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                            array('id' => $project_id))));
             return false;
         }
         $project = $project[0];
@@ -2342,7 +2408,9 @@ class kitIdeaFrontend {
                     return false;
                 }
                 if (count($article) < 1) {
-                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $identifier)));
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                            $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                                    array('id' => $identifier))));
                     return false;
                 }
                 if (! $dbIdeaProjectSections->sqlDeleteRecord($where)) {
@@ -2360,7 +2428,9 @@ class kitIdeaFrontend {
                     return false;
                 }
                 if (count($article) < 1) {
-                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $identifier)));
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                            $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                                    array('id' => $identifier))));
                     return false;
                 }
                 $message .= sprintf(idea_msg_section_not_empty, $article[0][dbIdeaProjectSections::field_text]);

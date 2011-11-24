@@ -340,8 +340,8 @@ class calcTable {
                     // add value of a cell to the $result
                     $val = ($cell_array[$cell]);
                     $val = str_replace(' ', '', $val);
-                    $val = str_replace(idea_cfg_thousand_separator, '', $val);
-                    $val = str_replace(idea_cfg_decimal_separator, '.', $val);
+                    $val = str_replace(cfg_thousand_separator, '', $val);
+                    $val = str_replace(cfg_decimal_separator, '.', $val);
                     $result += (float) $val;
                 }
             }
@@ -368,8 +368,8 @@ class calcTable {
                                 // add cell value to $result
                                 $val = ($cell_array[$ce]);
                                 $val = str_replace(' ', '', $val);
-                                $val = str_replace(idea_cfg_thousand_separator, '', $val);
-                                $val = str_replace(idea_cfg_decimal_separator, '.', $val);
+                                $val = str_replace(cfg_thousand_separator, '', $val);
+                                $val = str_replace(cfg_decimal_separator, '.', $val);
                                 $result += (float) $val;
                             }
                         }
@@ -394,8 +394,8 @@ class calcTable {
                                 // add cell value to $result
                                 $val = ($cell_array[$ce]);
                                 $val = str_replace(' ', '', $val);
-                                $val = str_replace(idea_cfg_thousand_separator, '', $val);
-                                $val = str_replace(idea_cfg_decimal_separator, '.', $val);
+                                $val = str_replace(cfg_thousand_separator, '', $val);
+                                $val = str_replace(cfg_decimal_separator, '.', $val);
                                 $result += (float) $val;
                             }
                         }
@@ -433,8 +433,8 @@ class calcTable {
                             // add cell value to $result
                             $val = ($cell_array[$ce]);
                             $val = str_replace(' ', '', $val);
-                            $val = str_replace(idea_cfg_thousand_separator, '', $val);
-                            $val = str_replace(idea_cfg_decimal_separator, '.', $val);
+                            $val = str_replace(cfg_thousand_separator, '', $val);
+                            $val = str_replace(cfg_decimal_separator, '.', $val);
                             $result += (float) $val;
                         }
                     }
@@ -458,8 +458,8 @@ class calcTable {
                             // add cell value to $result
                             $val = ($cell_array[$ce]);
                             $val = str_replace(' ', '', $val);
-                            $val = str_replace(idea_cfg_thousand_separator, '', $val);
-                            $val = str_replace(idea_cfg_decimal_separator, '.', $val);
+                            $val = str_replace(cfg_thousand_separator, '', $val);
+                            $val = str_replace(cfg_decimal_separator, '.', $val);
                             $result += (float) $val;
                         }
                     }
@@ -477,12 +477,12 @@ class calcTable {
                 */
                 // assume that the value is numeric
                 $val = str_replace(' ', '', $cell);
-                $val = str_replace(idea_cfg_thousand_separator, '', $val);
-                $val = str_replace(idea_cfg_decimal_separator, '.', $val);
+                $val = str_replace(cfg_thousand_separator, '', $val);
+                $val = str_replace(cfg_decimal_separator, '.', $val);
                 $result += (float) $val;
             }
         } // foreach
-        $content = str_replace($command, number_format($result, $decimals, idea_cfg_decimal_separator, idea_cfg_thousand_separator), $content);
+        $content = str_replace($command, number_format($result, $decimals, cfg_decimal_separator, cfg_thousand_separator), $content);
         return true;
 	} // calculateSum
 
@@ -543,20 +543,20 @@ class calcTable {
 	                // add value of a cell to the $result
 	                $val = ($cell_array[$cell]);
 	                $val = str_replace(' ', '', $val);
-	                $val = str_replace(idea_cfg_thousand_separator, '', $val);
-	                $val = str_replace(idea_cfg_decimal_separator, '.', $val);
+	                $val = str_replace(cfg_thousand_separator, '', $val);
+	                $val = str_replace(cfg_decimal_separator, '.', $val);
 	                $result *= (float) $val;
 	            }
 	        }
 	        else {
 	            // assume that the value is numeric
 	            $val = str_replace(' ', '', $cell);
-	            $val = str_replace(idea_cfg_thousand_separator, '', $val);
-	            $val = str_replace(idea_cfg_decimal_separator, '.', $val);
+	            $val = str_replace(cfg_thousand_separator, '', $val);
+	            $val = str_replace(cfg_decimal_separator, '.', $val);
 	            $result *= (float) $val;
 	        }
 	    } // foreach
-	    $content = str_replace($command, number_format($result, $decimals, idea_cfg_decimal_separator, idea_cfg_thousand_separator), $content);
+	    $content = str_replace($command, number_format($result, $decimals, cfg_decimal_separator, cfg_thousand_separator), $content);
         return true;
 	} // calculateMul()
 

@@ -70,7 +70,7 @@ class kitIdeaBackend {
 		$this->page_link = ADMIN_URL.'/admintools/tool.php?tool=kit_idea';
 		$this->template_path = WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/templates/' ;
 		$this->img_url = WB_URL. '/modules/'.basename(dirname(__FILE__)).'/images/';
-		date_default_timezone_set(tool_cfg_time_zone);
+		date_default_timezone_set(cfg_time_zone);
 		$this->media_path = WB_PATH.MEDIA_DIRECTORY.'/'.$dbIdeaCfg->getValue(dbIdeaCfg::cfgMediaDir).'/';
 		$this->media_url = str_replace(WB_PATH, WB_URL, $this->media_path);
 		$this->lang = $I18n;
@@ -164,7 +164,9 @@ class kitIdeaBackend {
   	try {
   		$result = $parser->get($this->template_path.$template, $template_data);
   	} catch (Exception $e) {
-  		$this->setError(sprintf(tool_error_template_error, $template, $e->getMessage()));
+  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+  		        $this->lang->translate('Error executing the template <b>{{ template }}</b>: {{ error }}',
+  		        array('template' => $template, 'error' => $e->getMessage()))));
   		return false;
   	}
   	return $result;
@@ -325,7 +327,7 @@ class kitIdeaBackend {
                 'items_name' => self::request_items,
                 'items_value' => implode(",", $count),
                 'head' => $this->lang->translate('Settings'),
-                'intro' => $this->isMessage() ? $this->getMessage() : sprintf(tool_intro_cfg, 'kitIdea'),
+                'intro' => $this->isMessage() ? $this->getMessage() : $this->lang->translate('Edit the settings for kitIdea.'),
                 'is_message' => $this->isMessage() ? 1 : 0,
                 'items' => $items,
                 'btn_ok' => $this->lang->translate('OK'),
@@ -374,7 +376,8 @@ class kitIdeaBackend {
 							}
 							else {
 								// Datensatz wurde aktualisiert
-								$message .= sprintf(tool_msg_cfg_id_updated, $config[dbIdeaCfg::field_name]);
+								$message .= $this->lang->translate('<p>The setting for <b>{{ name }}</b> was changed.</p>',
+								        array('name' => $config[dbIdeaCfg::field_name]));
 							}
 					}
 					unset($_REQUEST[dbIdeaCfg::field_value.'_'.$id]);
@@ -569,11 +572,6 @@ class kitIdeaBackend {
 								array('value'	=> dbIdeaProjectGroups::article_move,
 											'text' => constant('idea_label_access_article_move'),
 											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_move)),
-							    array(
-							        'value' => dbIdeaProjectGroups::article_move_section,
-							        'text' => constant('idea_label_access_article_move_section'),
-							        'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_move_section)
-							        ),
 								array('value'	=> dbIdeaProjectGroups::article_move_section,
 											'text' => constant('idea_label_access_article_move_section'),
 											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_move_section)),
@@ -892,7 +890,7 @@ class kitIdeaBackend {
 				$items[$user[dbIdeaProjectUsers::field_id]] = array(
 					dbIdeaProjectUsers::field_id		=> $user[dbIdeaProjectUsers::field_id],
 					dbIdeaProjectUsers::field_status	=> $dbIdeaProjectUsers->status_array_short[$user[dbIdeaProjectUsers::field_status]],
-					dbIdeaProjectUsers::field_timestamp => date(idea_cfg_datetime_str, strtotime($user[dbIdeaProjectUsers::field_timestamp])),
+					dbIdeaProjectUsers::field_timestamp => date(cfg_datetime_str, strtotime($user[dbIdeaProjectUsers::field_timestamp])),
 					'access_group'						=> $access_group,
 					'contact'							=> $contact,
 					'kit_id'							=> $user[dbIdeaProjectUsers::field_kit_id],

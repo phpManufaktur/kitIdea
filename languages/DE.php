@@ -28,7 +28,7 @@ if (defined('WB_PATH')) {
 // end include LEPTON class.secure.php
 
 // Module description
-$module_description 	= 'kitIdea ermöglicht das Formulieren, Teilen und gemeinsame Ausarbeiten von Ideen.';
+$module_description = 'kitIdea ermöglicht das Formulieren, Teilen und gemeinsame Ausarbeiten von Ideen.';
 // name of the person(s) who translated and edited this language file
 $module_translation_by = 'phpManufaktur by Ralf Hertsch';
 
@@ -43,6 +43,12 @@ $LANG = array(
             => 'Gelöscht',
         'Description'
             => 'Beschreibung',
+        'Edit the settings for kitIdea.'
+            => 'Bearbeiten Sie die Einstellungen für kitIdea.',
+        'Error creating the directory <b>{{ directory }}</b>.'
+            => 'Das Verzeichnis <b>{{ directory }}</b> konnte nicht angelegt werden.',
+        'Error executing the template <b>{{ template }}</b>: {{ error }}'
+            => 'Fehler bei der Ausführung des Template <b>{{ template }}</b>: {{ error }}',
         'Invalid project ID: {{ id }}'
             => 'Ungültige Projekt ID: {{ id }}',
         'Locked'
@@ -71,23 +77,18 @@ $LANG = array(
             => '<p>Der Artikel "<b>{{ title }}</b>" wurde geändert: <br />{{ abstract }}.</p>',
         '<p>The article "<b>{{ title }}</b>" was successfully created.</p>'
             => '<p>Der Artikel "<b>{{ title }}</b>" wurde angelegt.</p>',
+        '<p>The email address <b>{{ email }}</b> is not valid!</p>'
+            => '<p>Die E-Mail Adresse <b>{{ email }}</b> ist nicht gültig!</p>',
+        'The record with the <b>ID {{ id }}</b> does not exists!'
+            => 'Der Datensatz mit der <b>ID {{ id }}</b> existiert nicht!',
+        '<p>The setting for <b>{{ name }}</b> was changed.</p>'
+            => '<p>Die Einstellung für <b>{{ name }}</b> wurde geändert.</p>',
+        'There is no record for the configuration of <b>{{ name }}</b>!'
+            => 'Zu dem Bezeichner <b>{{ name }}</b> wurde kein Konfigurationsdatensatz gefunden!',
         'Value'
             => 'Wert',
 
         );
-
-define('idea_cfg_currency',						'%s €');
-define('idea_cfg_date_separator',				'.');
-define('idea_cfg_date_str',						'd.m.Y');
-define('idea_cfg_datetime_str',					'd.m.Y H:i');
-define('idea_cfg_day_names',					"Sonntag, Montag, Dienstag, Mittwoch, Donnerstag, Freitag, Samstag");
-define('idea_cfg_decimal_separator',          	',');
-define('idea_cfg_month_names',					"Januar,Februar,März,April,Mai,Juni,Juli,August,September,Oktober,November,Dezember");
-define('idea_cfg_thousand_separator',			'.');
-define('idea_cfg_time_long_str',				'H:i:s');
-define('idea_cfg_time_str',						'H:i');
-define('idea_cfg_time_zone',					'Europe/Berlin');
-define('idea_cfg_title',						'Herr,Frau');
 
 define('idea_error_access_not_auth',			'<p>Dieser Zugriff ist nicht autorisiert. Bitte melden Sie sich zunächst an!</p><p><b>Hinweis:</b> <i>Sie erhalten diese Meldung eventuell auf dann, wenn Sie längere Zeit inaktiv waren und Ihre Sitzung automatisch beendet wurde.</i></p>');
 define('idea_error_auth_wrong_category',		'<p>Ihr Benutzerkonto gestattet Ihnen leider keinen Zugriff auf die Verwaltung von kitIdea.</p><p>Bitte wenden Sie sich an den Service, dieser kann Sie für kitIdea freischalten!</p>');

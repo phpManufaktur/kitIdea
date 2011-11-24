@@ -500,7 +500,9 @@ class ideaCronjob {
                 return false;
             }
             if (count($project) < 1) {
-                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $project_id)));
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                        $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                                array('id' => $project_id))));
                 return false;
             }
             $project = $project[0];

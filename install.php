@@ -27,22 +27,34 @@ if (defined('WB_PATH')) {
 }
 // end include LEPTON class.secure.php
 
-// include GENERAL language file
-if(!file_exists(WB_PATH .'/modules/kit_tools/languages/' .LANGUAGE .'.php')) {
-	require_once(WB_PATH .'/modules/kit_tools/languages/DE.php'); // Vorgabe: DE verwenden
+// use LEPTON 2.x I18n for access to language files
+if (! class_exists('LEPTON_Helper_I18n')) require_once WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/framework/LEPTON/Helper/I18n.php';
+global $I18n;
+if (!is_object($I18n)) {
+    $I18n = new LEPTON_Helper_I18n();
 }
 else {
-	require_once(WB_PATH .'/modules/kit_tools/languages/' .LANGUAGE .'.php');
+    $I18n->addFile('DE.php', WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/languages/');
 }
 
-// include language file for kitIdea
+// load language depending onfiguration
+if (!file_exists(WB_PATH.'/modules/' . basename(dirname(__FILE__)) . '/languages/' . LANGUAGE . '.cfg.php')) {
+    require_once(WB_PATH .'/modules/'.basename(dirname(__FILE__)).'/languages/DE.cfg.php');
+} else {
+    require_once(WB_PATH .'/modules/'.basename(dirname(__FILE__)).'/languages/' .LANGUAGE .'.cfg.php');
+}
+if (! file_exists(WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/languages/' . LANGUAGE . '.php')) {
+    if (! defined('KIT_FORM_LANGUAGE')) define('KIT_IDEA_LANGUAGE', 'DE'); // important: language flag is used by template selection
+} else {
+    if (! defined('KIT_FORM_LANGUAGE')) define('KIT_IDEA_LANGUAGE', LANGUAGE);
+}
+
+// ACHTUNG: EINBINDUNG NUR NOCH VORLAUEFIG BIS I18n VOLLSTAENDIG !!!
 if(!file_exists(WB_PATH .'/modules/'.basename(dirname(__FILE__)).'/languages/' .LANGUAGE .'.php')) {
 	require_once(WB_PATH .'/modules/'.basename(dirname(__FILE__)).'/languages/DE.php'); // Vorgabe: DE verwenden
-	if (!defined('KIT_IDEA_LANGUAGE')) define('KIT_IDEA_LANGUAGE', 'DE'); // die Konstante gibt an in welcher Sprache kitIdea aktuell arbeitet
 }
 else {
 	require_once(WB_PATH .'/modules/'.basename(dirname(__FILE__)).'/languages/' .LANGUAGE .'.php');
-	if (!defined('KIT_IDEA_LANGUAGE')) define('KIT_IDEA_LANGUAGE', LANGUAGE); // die Konstante gibt an in welcher Sprache kitIdea aktuell arbeitet
 }
 
 require_once(WB_PATH.'/modules/kit_tools/class.droplets.php');
@@ -103,10 +115,10 @@ $droplets = new checkDroplets();
 $droplets->droplet_path = WB_PATH.'/modules/kit_idea/droplets/';
 
 if ($droplets->insertDropletsIntoTable()) {
-  $message .= sprintf(tool_msg_install_droplets_success, 'kitIdea');
+  $message .= 'The droplets for kitIdea are successfully installed. Please check the documentation for information about the usage!';
 }
 else {
-  $message .= sprintf(tool_msg_install_droplets_failed, 'kitIdea', $droplets->getError());
+  $message .= sprintf('Error installing the droplets for kitIdea: %s', $droplets->getError());
 }
 if ($message != "") {
   echo '<script language="javascript">alert ("'.$message.'");</script>';
