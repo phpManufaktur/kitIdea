@@ -53,13 +53,13 @@ class kitIdeaBackend {
             self::action_about => idea_tab_about
             );
 
-	private $page_link 								= '';
-	private $img_url									= '';
-	private $template_path						= '';
-	private $error										= '';
-	private $message									= '';
-	private $media_path								= '';
-	private $media_url								= '';
+	private $page_link = '';
+	private $img_url = '';
+	private $template_path = '';
+	private $error = '';
+	private $message = '';
+	private $media_path	= '';
+	private $media_url = '';
 
 	protected $lang = NULL;
 
@@ -400,12 +400,14 @@ class kitIdeaBackend {
 
 		$group_id = (isset($_REQUEST[dbIdeaProjectGroups::field_id])) ? $_REQUEST[dbIdeaProjectGroups::field_id] : -1;
 
-		$SQL = sprintf( "SELECT %s, %s FROM %s WHERE %s != '%s'",
-										dbIdeaProjectGroups::field_name,
-										dbIdeaProjectGroups::field_id,
-										$dbIdeaProjectGroups->getTableName(),
-										dbIdeaProjectGroups::field_status,
-										dbIdeaProjectGroups::status_deleted);
+		$SQL = sprintf(
+		        "SELECT %s, %s FROM %s WHERE %s != '%s'",
+		        dbIdeaProjectGroups::field_name,
+				dbIdeaProjectGroups::field_id,
+				$dbIdeaProjectGroups->getTableName(),
+				dbIdeaProjectGroups::field_status,
+				dbIdeaProjectGroups::status_deleted
+		        );
 		$groups = array();
 	  if (!$dbIdeaProjectGroups->sqlExec($SQL, $groups)) {
 			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectGroups->getError()));
@@ -415,32 +417,35 @@ class kitIdeaBackend {
 		// create array for selection of existing groups
 		$select_option = array();
 		$select_option[] = array(
-			'text'			=> idea_str_please_select_group,
-			'value'			=> -1,
-			'selected'	=> ($group_id == -1) ? 1 : 0
+		        'text' => $this->lang->translate('- please select a group for editing or create a new group -'),
+		        'value'	=> -1,
+		        'selected' => ($group_id == -1) ? 1 : 0
 		);
 		foreach ($groups as $group) {
 			$select_option[] = array(
-				'text'			=> $group[dbIdeaProjectGroups::field_name],
-				'value'			=> $group[dbIdeaProjectGroups::field_id],
+				'text' => $group[dbIdeaProjectGroups::field_name],
+				'value'	=> $group[dbIdeaProjectGroups::field_id],
 				'selected'	=> ($group[dbIdeaProjectGroups::field_id] == $group_id) ? 1 : 0
 			);
 		}
 		$select_group = array(
-			'label'				=> idea_label_project_group_select,
-			'name'				=> dbIdeaProjectGroups::field_id,
-			'id'					=> dbIdeaProjectGroups::field_id,
-			'options'			=> $select_option,
-			'hint'				=> idea_hint_project_group_select,
-			'onchange'		=> sprintf(	'javascript:execOnChange(\'%s\',\'%s\');',
-																sprintf('%s&amp;%s=%s%s&amp;%s=',
-																				$this->page_link,
-																				self::request_action,
-																				self::action_group_edit,
-																				(defined('LEPTON_VERSION') && isset($_GET['leptoken'])) ? sprintf('&amp;leptoken=%s', $_GET['leptoken']) : '',
-																				dbIdeaProjectGroups::field_id),
-																dbIdeaProjectGroups::field_id)
-		);
+		        'label'	=> $this->lang->translate('Select project group'),
+		        'name' => dbIdeaProjectGroups::field_id,
+		        'id' => dbIdeaProjectGroups::field_id,
+		        'options' => $select_option,
+		        'hint'	=> $this->lang->translate('Select a existing group for editing'),
+		        'onchange' => sprintf(
+		                'javascript:execOnChange(\'%s\',\'%s\');',
+		                sprintf('%s&amp;%s=%s%s&amp;%s=',
+		                        $this->page_link,
+								self::request_action,
+								self::action_group_edit,
+								(defined('LEPTON_VERSION') && isset($_GET['leptoken'])) ? sprintf('&amp;leptoken=%s', $_GET['leptoken']) : '',
+								dbIdeaProjectGroups::field_id
+		                        ),
+		                dbIdeaProjectGroups::field_id
+		                )
+		        );
 
 		// create array for editing existing or new group
 		if ($group_id > 0) {
@@ -492,28 +497,30 @@ class kitIdeaBackend {
 		$group_array = array();
 		foreach ($group as $key => $value) {
 			$group_array[$key] = array(
-				'label'			=> constant(sprintf('idea_label_%s', $key)),
-				'hint'			=> constant(sprintf('idea_hint_%s', $key)),
-				'value'			=> $value,
-				'name'			=> $key
-			);
+			        'label'	=> constant(sprintf('idea_label_%s', $key)),
+			        'hint' => constant(sprintf('idea_hint_%s', $key)),
+			        'value'	=> $value,
+			        'name' => $key
+			        );
 			switch ($key):
-				case dbIdeaProjectGroups::field_status:
-					// get status array
-					$group_array[$key]['options'] = $dbIdeaProjectGroups->status_array;
-					break;
-				case dbIdeaProjectGroups::field_access_default:
-					// get default access groups
-					$grps = array(dbIdeaProjectGroups::field_access_rights_1 => $group[dbIdeaProjectGroups::field_access_group_1],
-												dbIdeaProjectGroups::field_access_rights_2 => $group[dbIdeaProjectGroups::field_access_group_2],
-												dbIdeaProjectGroups::field_access_rights_3 => $group[dbIdeaProjectGroups::field_access_group_3],
-												dbIdeaProjectGroups::field_access_rights_4 => $group[dbIdeaProjectGroups::field_access_group_4],
-												dbIdeaProjectGroups::field_access_rights_5 => $group[dbIdeaProjectGroups::field_access_group_5]);
-					$options = array();
-					foreach ($grps as $val => $text) {
-						$options[] = array(
-							'value'		=> $val,
-							'text'		=> $text
+			case dbIdeaProjectGroups::field_status:
+			    // get status array
+				$group_array[$key]['options'] = $dbIdeaProjectGroups->status_array;
+				break;
+			case dbIdeaProjectGroups::field_access_default:
+				// get default access groups
+				$grps = array(
+				    dbIdeaProjectGroups::field_access_rights_1 => $group[dbIdeaProjectGroups::field_access_group_1],
+					dbIdeaProjectGroups::field_access_rights_2 => $group[dbIdeaProjectGroups::field_access_group_2],
+					dbIdeaProjectGroups::field_access_rights_3 => $group[dbIdeaProjectGroups::field_access_group_3],
+					dbIdeaProjectGroups::field_access_rights_4 => $group[dbIdeaProjectGroups::field_access_group_4],
+					dbIdeaProjectGroups::field_access_rights_5 => $group[dbIdeaProjectGroups::field_access_group_5]
+					);
+				$options = array();
+				foreach ($grps as $val => $text) {
+					$options[] = array(
+					        'value'	=> $val,
+							'text' => $text
 						);
 					}
 					$group_array[$key]['options'] = $options;
@@ -524,121 +531,178 @@ class kitIdeaBackend {
 				case dbIdeaProjectGroups::field_access_rights_4:
 				case dbIdeaProjectGroups::field_access_rights_5:
 					$access_groups = array(
-					    'project'		=> array(
-							'label'		=> idea_label_projects,
-							'options'	=> array(
-								array('value'	=> dbIdeaProjectGroups::project_view,
-											'text' => constant('idea_label_access_project_view'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_view)),
-								array('value'	=> dbIdeaProjectGroups::project_create,
-											'text' => constant('idea_label_access_project_create'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_create)),
-								array('value'	=> dbIdeaProjectGroups::project_edit,
-											'text' => constant('idea_label_access_project_edit'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_edit)),
-								array('value'	=> dbIdeaProjectGroups::project_move,
-											'text' => constant('idea_label_access_project_move'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_move)),
-								array('value'	=> dbIdeaProjectGroups::project_lock,
-											'text' => constant('idea_label_access_project_lock'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_lock)),
+					    'project' => array(
+    					    'label'	=> idea_label_projects,
+    						'options' => array(
+    						    array(
+    						        'value' => dbIdeaProjectGroups::project_view,
+    								'text' => constant('idea_label_access_project_view'),
+    								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_view)
+    								),
+    							array(
+    							    'value'	=> dbIdeaProjectGroups::project_create,
+    								'text' => constant('idea_label_access_project_create'),
+    								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_create)
+    								),
+    							array(
+    							    'value'	=> dbIdeaProjectGroups::project_edit,
+    								'text' => constant('idea_label_access_project_edit'),
+    								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_edit)
+    								),
+    							array(
+    							    'value'	=> dbIdeaProjectGroups::project_move,
+    								'text' => constant('idea_label_access_project_move'),
+    								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_move)
+    								),
+    							array(
+    							    'value' => dbIdeaProjectGroups::project_lock,
+    								'text' => constant('idea_label_access_project_lock'),
+    								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_lock)
+    								),
+    							array(
+    								'value'	=> dbIdeaProjectGroups::project_delete,
+    								'text' => constant('idea_label_access_project_delete'),
+    								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_delete)
+    								),
+    						    array(
+    						        'value' => dbIdeaProjectGroups::project_view_protocol,
+    						        'text' => $this->lang->translate('Read protocol'),
+    						        'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_view_protocol)
+    						        )
+    							),
+    						),
+    					'articles' => array(
+							'label'	=> idea_label_articles,
+							'options' => array(
+							    array(
+							        'value' => dbIdeaProjectGroups::article_view,
+									'text' => constant('idea_label_access_article_view'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_view)
+									),
 								array(
-								'value'	=> dbIdeaProjectGroups::project_delete,
-											'text' => constant('idea_label_access_project_delete'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_delete)),
-						        array(
-						            'value' => dbIdeaProjectGroups::project_view_protocol,
-						            'text' => $this->lang->translate('Read protocol'),
-						            'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_view_protocol)
-						        )
-							),
-						),
-						'articles'	=> array(
-							'label'		=> idea_label_articles,
-							'options'	=> array(
+								    'value'	=> dbIdeaProjectGroups::article_create,
+									'text' => constant('idea_label_access_article_create'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_create)
+									),
 								array(
-								'value' => dbIdeaProjectGroups::article_view,
-											'text' => constant('idea_label_access_article_view'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_view)),
-								array('value'	=> dbIdeaProjectGroups::article_create,
-											'text' => constant('idea_label_access_article_create'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_create)),
-								array('value'	=> dbIdeaProjectGroups::article_edit,
-											'text' => constant('idea_label_access_article_edit'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_edit)),
-								array('value'	=> dbIdeaProjectGroups::article_edit_html,
-											'text' => constant('idea_label_access_article_edit_html'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_edit_html)),
-								array('value'	=> dbIdeaProjectGroups::article_move,
-											'text' => constant('idea_label_access_article_move'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_move)),
-								array('value'	=> dbIdeaProjectGroups::article_move_section,
-											'text' => constant('idea_label_access_article_move_section'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_move_section)),
-								array('value'	=> dbIdeaProjectGroups::article_lock,
-											'text' => constant('idea_label_access_article_lock'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_lock)),
-								array('value'	=> dbIdeaProjectGroups::article_delete,
-											'text' => constant('idea_label_access_article_delete'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_delete))
+								    'value' => dbIdeaProjectGroups::article_edit,
+									'text' => constant('idea_label_access_article_edit'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_edit)
+									),
+								array(
+								    'value'	=> dbIdeaProjectGroups::article_edit_html,
+									'text' => constant('idea_label_access_article_edit_html'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_edit_html)
+									),
+								array(
+								    'value'	=> dbIdeaProjectGroups::article_move,
+									'text' => constant('idea_label_access_article_move'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_move)
+									),
+								array(
+								    'value'	=> dbIdeaProjectGroups::article_move_section,
+									'text' => constant('idea_label_access_article_move_section'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_move_section)
+									),
+								array(
+								    'value'	=> dbIdeaProjectGroups::article_lock,
+									'text' => constant('idea_label_access_article_lock'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_lock)
+									),
+								array(
+								    'value'	=> dbIdeaProjectGroups::article_delete,
+									'text' => constant('idea_label_access_article_delete'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_delete)
+									),
+								array(
+								    'value' => dbIdeaProjectGroups::article_revision,
+								    'text' => $this->lang->translate('Restore revisions'),
+								    'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::article_revision)
+								    )
+								),
 							),
-						),
 						'sections'	=> array(
-							'label'		=> idea_label_sections,
-							'options'	=> array(
-								array('value'	=> dbIdeaProjectGroups::section_view,
-											'text' => constant('idea_label_access_section_view'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::section_view)),
-								array('value'	=> dbIdeaProjectGroups::section_create,
-											'text' => constant('idea_label_access_section_create'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::section_create)),
-								array('value'	=> dbIdeaProjectGroups::section_edit,
-											'text' => constant('idea_label_access_section_edit'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::section_edit)),
-								array('value'	=> dbIdeaProjectGroups::section_move,
-											'text' => constant('idea_label_access_section_move'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::section_move)),
-								array('value'	=> dbIdeaProjectGroups::section_delete,
-											'text' => constant('idea_label_access_section_delete'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::section_delete))
+							'label'	=> idea_label_sections,
+							'options' => array(
+								array(
+								    'value'	=> dbIdeaProjectGroups::section_view,
+									'text' => constant('idea_label_access_section_view'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::section_view)
+									),
+								array(
+								    'value'	=> dbIdeaProjectGroups::section_create,
+									'text' => constant('idea_label_access_section_create'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::section_create)
+									),
+								array(
+								    'value'	=> dbIdeaProjectGroups::section_edit,
+									'text' => constant('idea_label_access_section_edit'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::section_edit)
+									),
+								array(
+								    'value' => dbIdeaProjectGroups::section_move,
+									'text' => constant('idea_label_access_section_move'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::section_move)
+									),
+								array(
+								    'value'	=> dbIdeaProjectGroups::section_delete,
+									'text' => constant('idea_label_access_section_delete'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::section_delete)
+									)
+								),
 							),
-						),
 						'files'	=> array(
-							'label'		=> idea_label_files,
-							'options'	=> array(
-								array('value'	=> dbIdeaProjectGroups::file_download,
-											'text' => constant('idea_label_access_file_download'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::file_download)),
-								array('value'	=> dbIdeaProjectGroups::file_upload,
-											'text' => constant('idea_label_access_file_upload'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::file_upload)),
-								array('value'	=> dbIdeaProjectGroups::file_delete_file,
-											'text' => constant('idea_label_access_file_delete_file'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::file_delete_file)),
+							'label'	=> idea_label_files,
+							'options' => array(
+								array(
+								    'value'	=> dbIdeaProjectGroups::file_download,
+									'text' => constant('idea_label_access_file_download'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::file_download)
+									),
+								array(
+								    'value'	=> dbIdeaProjectGroups::file_upload,
+									'text' => constant('idea_label_access_file_upload'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::file_upload)
+									),
+								array(
+								    'value'	=> dbIdeaProjectGroups::file_delete_file,
+									'text' => constant('idea_label_access_file_delete_file'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::file_delete_file)
+									),
 								/*
-								array('value'	=> dbIdeaProjectGroups::file_rename_file,
-											'text' => constant('idea_label_access_file_rename_file'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::file_rename_file)),
-							  */
-								array('value'	=> dbIdeaProjectGroups::file_create_dir,
-											'text' => constant('idea_label_access_file_create_dir'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::file_create_dir)),
+								 * @todo missing rename files function in kitDirList
+								array(
+								    'value'	=> dbIdeaProjectGroups::file_rename_file,
+									'text' => constant('idea_label_access_file_rename_file'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::file_rename_file)
+									),
+								*/
+								array(
+								    'value'	=> dbIdeaProjectGroups::file_create_dir,
+									'text' => constant('idea_label_access_file_create_dir'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::file_create_dir)
+									),
 								/*
-								array('value'	=> dbIdeaProjectGroups::file_rename_dir,
-											'text' => constant('idea_label_access_file_rename_dir'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::file_rename_dir)),
+								 * @todo missing rename directories in kitDirList
+								array(
+								    'value'	=> dbIdeaProjectGroups::file_rename_dir,
+									'text' => constant('idea_label_access_file_rename_dir'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::file_rename_dir)
+									),
 								array('value'	=> dbIdeaProjectGroups::file_delete_dir,
 											'text' => constant('idea_label_access_file_delete_dir'),
 											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::file_delete_dir))
 								*/
+								),
 							),
-						),
-						'admins'	=> array(
-							'label'		=> idea_label_admins,
-							'options'	=> array(
-								array('value'	=> dbIdeaProjectGroups::admin_change_rights,
-											'text' => constant('idea_label_access_admin_change_rights'),
-											'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::admin_change_rights))
+						'admins' => array(
+							'label'	=> idea_label_admins,
+							'options' => array(
+								array(
+								    'value'	=> dbIdeaProjectGroups::admin_change_rights,
+									'text' => constant('idea_label_access_admin_change_rights'),
+									'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::admin_change_rights)
+									)
 							),
 						)
 					);
@@ -649,16 +713,22 @@ class kitIdeaBackend {
 
 		$data = array(
 			'form' => array(
-				'name'				=> 'group_edit',
-				'action'			=> $this->page_link,
-				'head'				=> idea_head_project_group_edit,
-				'is_message'	=> ($this->isMessage()) ? 1 : 0,
-				'intro'				=> ($this->isMessage()) ? $this->getMessage() : idea_intro_project_group_edit,
-				'btn'					=> array('ok' => kit_btn_ok, 'abort' => kit_btn_abort)
+				'name'	=> 'group_edit',
+				'action' => $this->page_link,
+				'head' => idea_head_project_group_edit,
+				'is_message' => ($this->isMessage()) ? 1 : 0,
+				'intro'	=> ($this->isMessage()) ? $this->getMessage() : idea_intro_project_group_edit,
+				'btn' => array(
+				        'ok' => $this->lang->translate('OK'),
+				        'abort' => $this->lang->translate('Abort')
+				        )
 			),
-			'action'				=> array('name' => self::request_action, 'value' => self::action_group_edit_check),
-			'select_group'	=> $select_group,
-			'group'					=> $group_array
+			'action' => array(
+			        'name' => self::request_action,
+			        'value' => self::action_group_edit_check
+			        ),
+			'select_group' => $select_group,
+			'group'	=> $group_array
 		);
 		return $this->getTemplate('backend.group.edit.lte', $data);
 	} // dlgGroups()
@@ -806,7 +876,7 @@ class kitIdeaBackend {
 			);
 		}
 		$select_group = array(
-			'label'			=> idea_label_project_group_select,
+			'label'			=> $this->lang->translate('Select project group'), //idea_label_project_group_select,
 			'name'			=> dbIdeaProjectGroups::field_id,
 			'id'			=> dbIdeaProjectGroups::field_id,
 			'options'		=> $select_option,
@@ -1017,7 +1087,7 @@ class kitIdeaBackend {
 
 		// create PROJECT GROUP selection
 		$select_group = array(
-			'label'	=> idea_label_project_group_select,
+			'label'	=> $this->lang->translate('Select project group'), //idea_label_project_group_select,
 			'name' => dbIdeaProjectGroups::field_id,
 			'id' => dbIdeaProjectGroups::field_id,
 			'options' => $group_select_option,
@@ -1135,7 +1205,12 @@ class kitIdeaBackend {
 				                'value' => dbIdeaProjectGroups::article_delete,
 								'text' => constant('idea_label_access_article_delete'),
 								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_delete)
-				                )
+				                ),
+				        array(
+				                'value' => dbIdeaProjectGroups::article_revision,
+				                'text' => $this->lang->translate('Restore revisions'),
+				                'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::article_revision)
+				        )
 				),
 			),
 			'sections'	=> array(

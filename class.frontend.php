@@ -59,6 +59,7 @@ class kitIdeaFrontend {
     const REQUEST_SECTION_ADD = 'seca';
     const REQUEST_SECTION_DELETE = 'secd';
     const REQUEST_COMMAND = 'kic'; // DONT CHANGE, also defined in class.cronjob.php!
+    const REQUEST_REVISION_RESTORE = 'rr';
 
     const ACTION_ACCOUNT = 'acc';
     const ACTION_DEFAULT = 'def';
@@ -1659,6 +1660,7 @@ class kitIdeaFrontend {
              * Prepare Data for all "non files" sections!
              */
             $article_id = isset($_REQUEST[dbIdeaProjectArticles::field_id]) ? $_REQUEST[dbIdeaProjectArticles::field_id] : - 1;
+            $select_revision = isset($_REQUEST[dbIdeaRevisionArchive::field_archived_revision]) ? $_REQUEST[dbIdeaRevisionArchive::field_archived_revision] : -1;
 
             // get sections in the correct sort order
             $where = array(
@@ -1718,8 +1720,10 @@ class kitIdeaFrontend {
                             $this->setMessage($calcTable->getMessage());
                         }
                     }
-                    $fields[$name] = array('name' => $name,
-                    'value' => $item[$name]);
+                    $fields[$name] = array(
+                            'name' => $name,
+                            'value' => $item[$name]
+                            );
                 }
                 $article_items[$item[dbIdeaProjectArticles::field_id]] = array(
                     'fields' => $fields,
@@ -1745,21 +1749,45 @@ class kitIdeaFrontend {
             $content = '';
             if ($article_id > 0) {
                 // load the specific article into the WYSIWYG editor
-                $where = array(
-                dbIdeaProjectArticles::field_id => $article_id);
-                $article = array();
-                if (! $dbIdeaProjectArticles->sqlSelectRecord($where, $article)) {
-                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
-                    return false;
+                if ($select_revision > 0) {
+                    // select a specific revision of the article
+                    $where = array(
+                            dbIdeaRevisionArchive::field_archived_id => $article_id,
+                            dbIdeaRevisionArchive::field_archived_type => dbIdeaRevisionArchive::archive_type_article,
+                            dbIdeaRevisionArchive::field_archived_revision => $select_revision
+                            );
+                    $revision = array();
+                    if (!$dbIdeaRevisionArchive->sqlSelectRecord($where, $revision)) {
+                        $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaRevisionArchive->getError()));
+                        return false;
+                    }
+                    if (count($revision) < 1) {
+                        $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                                $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                                        array('id' => $select_revision))));
+                        return false;
+                    }
+                    $article = unserialize($revision[0][dbIdeaRevisionArchive::field_archived_record]);
+                    $content = $article[dbIdeaProjectArticles::field_content_html];
                 }
-                if (count($article) < 1) {
-                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
-                            $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
-                                    array('id' => $article_id))));
-                    return false;
+                else {
+                    $where = array(
+                            dbIdeaProjectArticles::field_id => $article_id
+                            );
+                    $article = array();
+                    if (! $dbIdeaProjectArticles->sqlSelectRecord($where, $article)) {
+                        $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
+                        return false;
+                    }
+                    if (count($article) < 1) {
+                        $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                                $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                                        array('id' => $article_id))));
+                        return false;
+                    }
+                    $article = $article[0];
+                    $content = $article[dbIdeaProjectArticles::field_content_html];
                 }
-                $article = $article[0];
-                $content = $article[dbIdeaProjectArticles::field_content_html];
             } else {
                 $article = $dbIdeaProjectArticles->getFields();
                 $article[dbIdeaProjectArticles::field_id] = - 1;
@@ -1829,6 +1857,67 @@ class kitIdeaFrontend {
                     'value' => $section_identifier, 'items' => $items
                     );
 
+            // create the REVISION Restore array
+            if (($article_id > 0) && ($is_authenticated &&
+                    $dbIdeaProjectGroups->checkPermissions($_SESSION[self::SESSION_USER_ACCESS], dbIdeaProjectGroups::article_revision))) {
+                $SQL = sprintf("SELECT * FROM %s WHERE %s='%s' AND %s='%s' ORDER BY %s DESC",
+                        $dbIdeaRevisionArchive->getTableName(),
+                        dbIdeaRevisionArchive::field_archived_id,
+                        $article_id,
+                        dbIdeaRevisionArchive::field_archived_type,
+                        dbIdeaRevisionArchive::archive_type_article,
+                        dbIdeaRevisionArchive::field_timestamp
+                        );
+                $revisions = array();
+                if (!$dbIdeaRevisionArchive->sqlExec($SQL, $revisions)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaRevisionArchive->getError()));
+                    return false;
+                }
+
+                $items = array();
+                $items[] = array(
+                        'value' => -1,
+                        'text' => $this->lang->translate('- please select -'),
+                        'selected' => ($article[dbIdeaProjectArticles::field_revision] == $select_revision) ? 1 : 0
+                        );
+                foreach ($revisions as $revision) {
+                    $record = unserialize($revision[dbIdeaRevisionArchive::field_archived_record]);
+                    if (!isset($record[dbIdeaProjectArticles::field_author])) {
+                        $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                                $this->lang->translate('Missing field <b>{{ field }}</b>!',
+                                        array('field' => dbIdeaProjectArticles::field_author))));
+                        return false;
+                    }
+                    $items[] = array(
+                            'value' => $revision[dbIdeaRevisionArchive::field_archived_revision],
+                            'text' => sprintf('[%03d] %s - %s',
+                                    $revision[dbIdeaRevisionArchive::field_archived_revision],
+                                    date(cfg_datetime_str, strtotime($revision[dbIdeaRevisionArchive::field_timestamp])),
+                                    $record[dbIdeaProjectArticles::field_author]
+                                    ),
+                            'selected' => ($record[dbIdeaProjectArticles::field_revision] == $select_revision) ? 1 : 0
+                            );
+                }
+                $revision_array = array(
+                        'active' => 1,
+                        'id' => $select_revision,
+                        'select' => array(
+                                'label' => $this->lang->translate('Revision'),
+                                'name' => dbIdeaRevisionArchive::field_archived_revision,
+                                'values' => $items
+                                ),
+                        'restore' => array(
+                                'label' => $this->lang->translate('restore'),
+                                'name' => self::REQUEST_REVISION_RESTORE,
+                                'value' => 1
+                                )
+                        );
+            } else {
+                $revision_array = array(
+                        'active' => 0
+                        );
+            }
+
             // get captcha
             ob_start();
             call_captcha();
@@ -1874,6 +1963,7 @@ class kitIdeaFrontend {
                             'list' => $article_items,
                             'status' => $status_array,
                             'move' => $move_array,
+                            'revision' => $revision_array
                             ),
                     'form' => array(
                             'name' => 'article_edit',
@@ -2068,11 +2158,25 @@ class kitIdeaFrontend {
         $abstract = isset($_REQUEST[dbIdeaProjectArticles::field_abstract]) ? $_REQUEST[dbIdeaProjectArticles::field_abstract] : '';
         $minor_change = isset($_REQUEST[dbIdeaProjectArticles::field_change]) ? 1 : 0;
         $use_abstract = $dbIdeaCfg->getValue(dbIdeaCfg::cfgArticleUseAbstract);
+        $select_revision = isset($_REQUEST[dbIdeaRevisionArchive::field_archived_revision]) ? $_REQUEST[dbIdeaRevisionArchive::field_archived_revision] : -1;
+        $restore_revision = isset($_REQUEST[self::REQUEST_REVISION_RESTORE]) ? 1 : 0;
 
-        if ($checked && $changed && ($article_id > 0) && $use_abstract) {
-            if (empty($abstract)) {
-                $checked = false;
-                $message .= $this->lang->translate('<p>Please enter an abstract to describe the changes you want to submit.</p>');
+        if (empty($abstract) && (($select_revision > 0) && ($restore_revision == 1))) {
+            $abstract = $this->lang->translate('Restored arcticle revision <b>{{ revision }}</b>.', array('revision' => $select_revision));
+        }
+
+        if (($select_revision > 0) && ($restore_revision == 0)) {
+            $changed = false;
+            $message .= $this->lang->translate('<p>Load Revision <b>{{ revision }}</b> of article <b>{{ article }}</b>.</p>',
+                    array('revision' => $select_revision, 'article' => $article_id));
+        }
+
+        if ($checked && $changed && ($article_id > 0)) {
+            if ($use_abstract) {
+                if (empty($abstract)) {
+                    $checked = false;
+                    $message .= $this->lang->translate('<p>Please enter an abstract to describe the changes you want to submit.</p>');
+                }
             }
         }
 
@@ -2088,7 +2192,6 @@ class kitIdeaFrontend {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
                     return false;
                 }
-                //$message .= sprintf(idea_msg_article_inserted, $article_id);
                 $message .= $this->lang->translate('<p>The article "<b>{{ title }}</b>" was successfully created.</p>', array('title' => $article[dbIdeaProjectArticles::field_title]));
                 $data = array(
                         dbIdeaStatusChange::FIELD_ARTICLE_ID => $article_id,
@@ -2115,6 +2218,21 @@ class kitIdeaFrontend {
                     return false;
                 }
                 // add a new revision
+                $SQL = sprintf("SELECT %s FROM %s WHERE %s='%s' AND %s='%s' ORDER BY %s DESC LIMIT 1",
+                        dbIdeaRevisionArchive::field_archived_revision,
+                        $dbIdeaRevisionArchive->getTableName(),
+                        dbIdeaRevisionArchive::field_archived_id,
+                        $article_id,
+                        dbIdeaRevisionArchive::field_archived_type,
+                        dbIdeaRevisionArchive::archive_type_article,
+                        dbIdeaRevisionArchive::field_archived_revision
+                        );
+                $rev = array();
+                if (!$dbIdeaRevisionArchive->sqlExec($SQL, $rev)) {
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaRevisionArchive->getError()));
+                    return false;
+                }
+                $next_revision = $rev[0][dbIdeaRevisionArchive::field_archived_revision]+1;
                 $where = array(
                         dbIdeaProjectArticles::field_id => $article_id
                         );
@@ -2122,7 +2240,7 @@ class kitIdeaFrontend {
                 $article[dbIdeaProjectArticles::field_content_html] = stripslashes($article[dbIdeaProjectArticles::field_content_html]);
                 $article[dbIdeaProjectArticles::field_content_text] = strip_tags($article[dbIdeaProjectArticles::field_content_html]);
                 $article[dbIdeaProjectArticles::field_kit_contact_id] = isset($_SESSION[kitContactInterface::session_kit_contact_id]) ? $_SESSION[kitContactInterface::session_kit_contact_id] : - 1;
-                $article[dbIdeaProjectArticles::field_revision] = $article[dbIdeaProjectArticles::field_revision] + 1;
+                $article[dbIdeaProjectArticles::field_revision] = $next_revision; //$article[dbIdeaProjectArticles::field_revision] + 1;
                 if (! $dbIdeaProjectArticles->sqlUpdateRecord($article, $where)) {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectArticles->getError()));
                     return false;

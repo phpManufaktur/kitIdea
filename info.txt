@@ -4,9 +4,10 @@ Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
 Release 0.21
-
+2011-11-25
 fixed: missing command parameter in class.cronjob.php disturb links in reports
 fixed: duplicate entry for moving articles in group permissions
+added: select and restore articles by revisons - need group permission.
 
 Release 0.20
 2011-11-23

@@ -61,6 +61,26 @@
         {/if}
         <tr><td colspan="6">&nbsp;</td></tr>
       {/if}
+      {if $article.revision.active == 1}
+        <tr>
+          <td>&nbsp;</td>
+          <td>{$article.revision.select.label}</td>
+          <td colspan="2">
+            <select name="{$article.revision.select.name}">
+              {foreach $article.revision.select.values option}
+              <option value="{$option.value}"{if $option.selected == 1} selected="selected"{/if}>{$option.text}</option>
+              {/foreach}
+            </select>
+          </td>
+          <td colspan="2">
+            {if $article.revision.id > 0}
+            <input type="checkbox" name="{$article.revision.restore.name}" value="{$article.revision.restore.value}" />
+            &nbsp;{$article.revision.restore.label}
+            {/if}
+          </td>
+        </tr>
+        <tr><td colspan="6">&nbsp;</td></tr>
+      {/if}
       <tr>
         <td>&nbsp;</td>
         <td>{if $access.article.move_section == 1}{$article.move.label}{else}&nbsp;{/if}</td>

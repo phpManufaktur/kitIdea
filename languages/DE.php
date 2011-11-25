@@ -33,6 +33,10 @@ $module_description = 'kitIdea ermöglicht das Formulieren, Teilen und gemeinsam
 $module_translation_by = 'phpManufaktur by Ralf Hertsch';
 
 $LANG = array(
+        '- please select -'
+            => '- bitte auswählen -',
+        '- please select a group for editing or create a new group -'
+            => 'Gruppe zum Bearbeiten auswählen oder neue Gruppe erstellen -',
         'Abort'
             => 'Abbruch',
         'Abstract'
@@ -51,10 +55,16 @@ $LANG = array(
             => 'Fehler bei der Ausführung des Template <b>{{ template }}</b>: {{ error }}',
         'Invalid project ID: {{ id }}'
             => 'Ungültige Projekt ID: {{ id }}',
+        'Revision'
+            => 'Revision',
+        '<p>Load Revision <b>{{ revision }}</b> of article <b>{{ article }}</b>.</p>'
+            => 'Revision <b>{{ revision }}</b> des Artikel <b>{{ article }}</b> geladen!</p>',
         'Locked'
             => 'Gesperrt',
         'this is only a minor change'
             => 'dies ist eine geringfügige Änderung',
+        'Missing field <b>{{ field }}</b>!'
+            => 'Das Datenfeld <b>{{ field }}</b> fehlt!',
         'Move'
             => 'Verschieben',
         'Name'
@@ -67,6 +77,16 @@ $LANG = array(
             => 'Protokoll',
         'Read protocol'
             => 'Protokoll lesen',
+        'restore'
+            => 'wiederherstellen',
+        'Restore revisions'
+            => 'Revisionen wiederherstellen',
+        'Restored arcticle revision <b>{{ revision }}</b>.'
+            => 'Der Artikel mit der Revision <b>{{ revision }}</b> wurde wiederhergestellt.',
+        'Select a existing group for editing'
+            => 'Wählen Sie eine existierende Gruppe zum Bearbeiten aus',
+        'Select project group'
+            => 'Projektgruppe auswählen',
         'Settings'
             => 'Einstellungen',
         'Status'
@@ -173,7 +193,7 @@ define('idea_hint_project_author',				'');
 define('idea_hint_project_desc_long',			'Ausführliche Beschreibung, Einführung');
 define('idea_hint_project_desc_short',			'Kurze Beschreibung des Projektes für die Übersicht');
 define('idea_hint_project_group',				'');
-define('idea_hint_project_group_select',		'Wählen Sie eine existierende Gruppe zum Bearbeiten aus');
+//define('idea_hint_project_group_select',		'Wählen Sie eine existierende Gruppe zum Bearbeiten aus');
 define('idea_hint_project_id',					'');
 define('idea_hint_project_keywords',			'Schlüsselbegriffe die dieses Projekt beschreiben');
 define('idea_hint_project_kit_categories',		'');
@@ -290,7 +310,7 @@ define('idea_label_project_author',				'Autor');
 define('idea_label_project_desc_long',			'Beschreibung');
 define('idea_label_project_desc_short',			'Kurzbeschreibung');
 define('idea_label_project_group',				'Projektgruppe');
-define('idea_label_project_group_select',		'Projektgruppe auswählen');
+//define('idea_label_project_group_select',		'Projektgruppe auswählen');
 define('idea_label_project_id',					'Projekt ID');
 define('idea_label_project_keywords',			'Schlüsselbegriffe');
 define('idea_label_project_kit_categories',		'KIT Kategorie (Intern)');
@@ -348,7 +368,7 @@ define('idea_str_email_daily',                  'tägliche Zusammenfassung');
 define('idea_str_email_weekly',                 'wöchentliche Zusammenfassung');
 define('idea_str_email_monthly',                'monatliche Zusammenfassung');
 define('idea_str_please_select',				'- bitte auswählen -');
-define('idea_str_please_select_group',			'- Gruppe zum Bearbeiten auswählen oder neue Gruppe erstellen -');
+//define('idea_str_please_select_group',			'- Gruppe zum Bearbeiten auswählen oder neue Gruppe erstellen -');
 define('idea_str_status_active',				'Aktiv');
 define('idea_str_status_deleted',				'Gelöscht');
 define('idea_str_status_locked',				'Gesperrt');

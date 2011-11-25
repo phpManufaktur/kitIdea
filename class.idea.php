@@ -303,7 +303,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
     const project_move = 33554432;
     const project_lock = 8;
     const project_delete = 16;
-    const project_view_protocol = 134217728; // last added
+    const project_view_protocol = 134217728;
 
     // rights: articles
     const article_view = 32;
@@ -314,6 +314,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
     const article_move_section = 67108864;
     const article_lock = 1024;
     const article_delete = 2048;
+    const article_revision = 268435456; // last added
 
     // rights: sections
     const section_view = 4096;
@@ -719,28 +720,28 @@ class dbIdeaCfg extends dbConnectLE {
                     'idea_label_cfg_access_grp_default_1',
                     self::cfgAccessGrpDefault_1,
                     self::type_integer,
-                    '135201',
+                    '134352929',
                     'idea_hint_cfg_access_grp_default'
                     ),
             array(
                     'idea_label_cfg_access_grp_default_2',
                     self::cfgAccessGrpDefault_2,
                     self::type_integer,
-                    '398049',
+                    '137237665',
                     'idea_hint_cfg_access_grp_default'
                     ),
             array(
                     'idea_label_cfg_access_grp_default_3',
                     self::cfgAccessGrpDefault_3,
                     self::type_integer,
-                    '7796711',
+                    '170850279',
                     'idea_hint_cfg_access_grp_default'
                     ),
             array(
                     'idea_label_cfg_access_grp_default_4',
                     self::cfgAccessGrpDefault_4,
                     self::type_integer,
-                    '16777215',
+                    '506462207',
                     'idea_hint_cfg_access_grp_default'
                     ),
             array(
@@ -831,11 +832,11 @@ class dbIdeaCfg extends dbConnectLE {
                 }
             }
         }
+        date_default_timezone_set(cfg_time_zone);
         // Default Werte garantieren
         if ($this->sqlTableExists()) {
             $this->checkConfig();
         }
-        date_default_timezone_set(cfg_time_zone);
     } // __construct()
 
 
