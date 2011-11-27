@@ -37,7 +37,7 @@
             <div class="idea_project_overview">
               <h2>{$project.title}</h2>
               <div class="idea_overview_description">{$project.desc_short}</div>
-              <div class="idea_overview_commands">[ <a href="{$project.detail_url}">Projekt öffnen</a> ]</div>
+              <div class="idea_overview_commands">[ <a href="{$project.detail.link}">{$project.detail.text}</a> ]</div>
             </div>
           </td>
           {if $access.project.move == 1}<td class="sortable_row"></td>{/if}
@@ -54,7 +54,7 @@
   {/if}
   <div class="idea_overview_footer">
     {if $access.project.create == 1}
-    <p style="text-align: right;">[ <a href="{$projects.action.create_url}">Projekt anlegen</a> ]</p> 
+    <p style="text-align: right;">[ <a href="{$projects.action.create.link}">{$projects.action.create.text}</a> ]</p> 
     {/if}
   </div>
 </div>

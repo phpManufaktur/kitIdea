@@ -14,79 +14,86 @@
  *
  * Use {dump()} to get a list of all in this template available variables!
  *}
-<div class="idea_frontend">
-  {* the top area shows the title and the full description of the project! *}
-  <div class="idea_project_description">
-    <h2>{$project.fields.project_title.value}</h2>
-    <div class="idea_project_content">{$project.fields.project_desc_long.value}</div>
-    <div class="idea_project_author">{$project.fields.project_author.value}, {date_format($project.fields.project_timestamp.value, '%d.%m.%Y - %H:%M:%S')} - Rev. {$project.fields.project_revision.value}</div>
-    {if $access.project.edit == 1}<div class="idea_project_commands"><a href="{$project.edit.url}">[ {$project.edit.text} ]</a></div>{/if}
-  </div>
-  {* the second area shows the navigation pane for the project sections *}
-  <div class="idea_project_navigation">
-    <ul class="project_sections">
-      {foreach $project.sections.navigation navigation}
-      {if $navigation.active == 1}
-      <li class="selected"><a href="{$navigation.link}">{$navigation.text}</a></li>
-      {else}
-      <li><a href="{$navigation.link}">{$navigation.text}</a></li>
-      {/if}
-      {/foreach}
-    </ul>
-    {if $access.section.edit == 1}<div class="project_navigation_commands">[ <a href="{$project.sections.edit.url}">{$project.sections.edit.text}</a> ]</div>{/if}
-  </div>
-  {* show introduction or message to the last action *}
-  {if $project.sections.active == 'secFiles'}
-    <div class="{if $is_message == 1}message{else}intro{/if}">{$intro}</div>
-    {$kit_dirlist}
-  {elseif $project.sections.active == 'secProtocol'}
-    {foreach $protocol item}
-    <div class="protocol_item">
-      <div class="protocol_item_info">{$item.info}</div>
-      <div class="protocol_item_author">{$item.author.name} - {date_format($item.date '%d.%m.%Y - %R')}</div>
-    </div>
-    {/foreach}
-  {elseif $project.sections.active == 'secAbout'}
-    {include('../../backend.about.lte')}
-  {else}
-    <div class="{if $is_message == 1}message{else}intro{/if}">{$intro}</div>
-    <div class="idea_articles_list">
-      {* show the articles for this section *}
-      {* sorter fields are needed by the table sorter below *}
-      {if $access.article.move == 1}
-      <input id="sorter_table" type="hidden" name="sorter_table" value="{$sorter_table}" />
-      <input id="sorter_value" type="hidden" name="sorter_value" value="{$sorter_value}" />
-      <input id="sorter_item" type="hidden" name="sorter_item" value="{$sorter_item}" />
-      <input id="sorter_active" type="hidden" name="sorter_active" value="{$sorter_active}" />
-      {/if}
-      <div{if $access.article.move == 1} id="sorter"{/if}>
-        {* <div id="response"></div> remove comment to get jQuery responses for the sorter! *}
-        <table width="100%">
-          <colgroup>
-            <col width="*" />
-            {if $access.article.move == 1}<col width="30" />{/if}
-          </colgroup>
-          <tbody>
-          {foreach $article.list item}
-          <tr{if $access.article.move == 1} id="rowID_{$item.fields.article_id.value}{/if}">
-            <td>
-              <div class="idea_article">
-                <h3>{$item.fields.article_title.value}</h3>
-                {$item.fields.article_content_html.value}
-                <div class="idea_article_author">{$item.fields.article_author.value}, {date_format($item.fields.article_timestamp.value, '%d.%m.%Y - %H:%M:%S')} - Rev. {$item.fields.article_revision.value}</div>
-                {if $access.article.edit == 1}<div class="idea_article_commands">[ <a href="{$item.links.edit.url}">{$item.links.edit.text}</a> ]</div>{/if}
-              </div>
-            </td>
-            {if $access.article.move == 1}<td class="sortable_row"></td>{/if}
-          </tr>
-          {/foreach}
-          </tbody>
-        </table>
-      <div>
-    </div>
-    {* include the WYSIWYG editor to create and edit articles only if the access is granted *}
-    {if ($access.article.create == 1) || (($access.article.edit == 1) && ($article.fields.article_id.value > 0))}
-    {include('project.article.edit.lte')}
+{* the top area shows the title and the full description of the project! *}
+<div class="idea_project_description">
+  <h2>{$project.fields.project_title.value}</h2>
+  <div class="idea_project_content">{$project.fields.project_desc_long.value}</div>
+  <div class="idea_project_author">{$project.fields.project_author.value}, {date_format($project.fields.project_timestamp.value, '%d.%m.%Y - %H:%M:%S')} - Rev. {$project.fields.project_revision.value}</div>
+  {if $access.project.edit == 1}<div class="idea_project_commands"><a href="{$project.edit.url}">[ {$project.edit.text} ]</a></div>{/if}
+</div><!-- /idea_project_description -->
+{* the second area shows the navigation pane for the project sections *}
+<div class="idea_project_navigation">
+  <ul class="project_sections">
+    {foreach $project.sections.navigation navigation}
+    {if $navigation.active == 1}
+    <li class="selected"><a href="{$navigation.link}">{$navigation.text}</a></li>
+    {else}
+    <li><a href="{$navigation.link}">{$navigation.text}</a></li>
     {/if}
+    {/foreach}
+  </ul>
+  {if $access.section.edit == 1}<div class="project_navigation_commands">[ <a href="{$project.sections.edit.url}">{$project.sections.edit.text}</a> ]</div>{/if}
+</div><!-- /idea_project_navigation -->
+{* show introduction or message to the last action *}
+{if $project.sections.active == 'secFiles'}
+  {$kit_dirlist}
+{elseif $project.sections.active == 'secProtocol'}
+  {foreach $protocol item}
+  <div class="protocol_item">
+    <div class="protocol_item_info">{$item.info}</div>
+    <div class="protocol_item_author">{$item.author.name} - {date_format($item.date '%d.%m.%Y - %R')}</div>
+  </div>
+  {/foreach}
+{elseif $project.sections.active == 'secAbout'}
+  {include('../../backend.about.lte')}
+{else}
+  {if $access.authenticated == 1}
+  <div class="{if $is_message == 1}message{else}intro{/if}">{$intro}</div>
+  {elseif $is_message == 1}
+  <div class="message">{$intro}</div>
   {/if}
-</div>
+  <div class="idea_articles_list">
+    {* show the articles for this section *}
+    {* sorter fields are needed by the table sorter below *}
+    {if $access.article.move == 1}
+
+    <input id="sorter_table" type="hidden" name="sorter_table" value="{$sorter_table}" />
+    <input id="sorter_value" type="hidden" name="sorter_value" value="{$sorter_value}" />
+    <input id="sorter_item" type="hidden" name="sorter_item" value="{$sorter_item}" />
+    <input id="sorter_active" type="hidden" name="sorter_active" value="{$sorter_active}" />
+
+    {/if}
+    <div{if $access.article.move == 1} id="sorter"{/if}>
+      {* <div id="response"></div> remove comment to get jQuery responses for the sorter! *}
+
+      <table width="100%">
+        <colgroup>
+          <col width="*" />
+          {if $access.article.move == 1}<col width="30" />{/if}
+        </colgroup>
+        <tbody>
+        {foreach $article.list item}
+        <tr{if $access.article.move == 1} id="rowID_{$item.fields.article_id.value}"{/if}>
+          <td>
+
+            <div class="idea_article">
+              <h3>{$item.fields.article_title.value}</h3>
+              {$item.fields.article_content_html.value}
+              <div class="idea_article_author">{$item.fields.article_author.value}, {date_format($item.fields.article_timestamp.value, '%d.%m.%Y - %H:%M:%S')} - Rev. {$item.fields.article_revision.value}</div>
+              {if $access.article.edit == 1}<div class="idea_article_commands">[ <a href="{$item.links.edit.url}">{$item.links.edit.text}</a> ]</div>{/if}
+            </div><!-- /idea_article -->
+
+          </td>
+          {if $access.article.move == 1}<td class="sortable_row"></td>{/if}
+        </tr>
+        {/foreach}
+        </tbody>
+      </table>
+
+    </div><!-- /sorter -->
+  </div><!-- /idea_articles_list -->
+  {* include the WYSIWYG editor to create and edit articles only if the access is granted *}
+  {if ($access.article.create == 1) || (($access.article.edit == 1) && ($article.fields.article_id.value > 0))}
+  {include('project.article.edit.lte')}
+  {/if}
+{/if}

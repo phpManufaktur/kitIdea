@@ -42,9 +42,11 @@ class calcTable {
     private $process_commands = array();
     private $error = '';
     private $message = '';
+    protected $lang = null;
 
 	public function __construct() {
-
+	    global $I18n;
+	    $this->lang = $I18n;
 	} // __construct()
 
     /**
@@ -186,7 +188,8 @@ class calcTable {
 	            }
 	        }
 	    }
-	    $this->setMessage(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_calc_cmd_split_fail, $command_string)));
+	    $this->setMessage($this->lang->translate('<p>The calculation command <b>{{ command }}</b> is not valid, please check your input!</p>',
+	            array('command' => $command_string)));
 	    return false;
 	} // splitCommand()
 
@@ -233,9 +236,17 @@ class calcTable {
 	        case 'mul':
 	            // calculate mutliplication
 	            return $this->calculateMul($cell_ID, $values, &$content, $cell_array, $command, $result);
+	        case 'sub':
+	            // calculate substraction
+	            return $this->calculateSub($cell_ID, $values, &$content, $cell_array, $command, $result);
+	        case 'div':
+	            // calculate substraction
+	            return $this->calculateDiv($cell_ID, $values, &$content, $cell_array, $command, $result);
 	        default:
 	            // unknown command
-	            $this->setMessage(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_calc_cmd_unknown_cmd, $calculateCommand)));
+	            $this->setMessage(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+	                    $this->lang->translate('<p>The calculation command <b>{{ command }}</b> is unknown!</p>',
+	                            array('command' => $calculateCommand))));
 	            return false;
 	    }
 	} // execCalculation()
@@ -250,7 +261,9 @@ class calcTable {
 	    if (preg_match_all('/([0-9]{1,3})/si', $cell_ID, $row)) {
 	        return $row[1][0];
 	    }
-	    $this->setMessage(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_calc_cell_id_row_invalid, $cell_ID)));
+	    $this->setMessage(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+	            $this->lang->translate('<p>Can\'t get the row number of the cell name <b>{{ cell_name }}</b>!</p>',
+	                    array('cell_name' => $cell_ID))));
 	    return false;
 	} // getCellIDRow()
 
@@ -264,7 +277,9 @@ class calcTable {
 	    if (preg_match_all('/([a-z]{1,2})/si', $cell_ID, $col)) {
 	        return $col[1][0];
 	    }
-	    $this->setMessage(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_calc_cell_id_col_invalid, $cell_ID)));
+	    $this->setMessage(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+	            $this->lang->translate('<p>Can\'t get the column of the cell name <b>{{ cell_name }}</b>!.</p>',
+	                    array('cell_name' => $cell_ID))));
 	    return false;
 	} // getCellIDColumn()
 
@@ -278,7 +293,9 @@ class calcTable {
 	    if (false !== ($x = stripos($this->cell_typo, $column_char))) {
 	        return $x+1;
 	    }
-	    $this->setMessage(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_calc_col_char_invalid, $column_char)));
+	    $this->setMessage(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+	            $this->lang->translate('<p>The column name <b>{{ column_name }}</b> is invalid, please check your input!</p>',
+	                    array('column_name' => $column_char))));
 	    return false;
 	} // getColumnNumber()
 
@@ -401,7 +418,9 @@ class calcTable {
                         }
                         break;
                     default:
-                        $this->setMessage(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_calc_cmd_unknown_cmd, $values)));
+                        $this->setMessage(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                                $this->lang->translate('<p>The calculation command <b>{{ command }}</b> is not valid, please check your input!</p>',
+                                        array('command' => $values))));
                         return false;
                 }
             }
@@ -466,15 +485,13 @@ class calcTable {
                 }
                 else {
                     // invalid identifiers ...
-                    $this->setMessage(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_calc_cell_area_invalid, $cell)));
+                    $this->setMessage(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                            $this->lang->translate('<p>The cell area <b>{{ cell_area }}</b> is invalid, please check your input!</p>',
+                                    array('cell_area' => $cell))));
                     return false;
                 }
             }
             else {
-                /*
-                $this->setMessage(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_calc_values_invalid, $cell)));
-                return false;
-                */
                 // assume that the value is numeric
                 $val = str_replace(' ', '', $cell);
                 $val = str_replace(cfg_thousand_separator, '', $val);
@@ -559,5 +576,154 @@ class calcTable {
 	    $content = str_replace($command, number_format($result, $decimals, cfg_decimal_separator, cfg_thousand_separator), $content);
         return true;
 	} // calculateMul()
+
+	/**
+	 * Calculate a SUBSTRACTION in the table
+	 * Possible commands:
+	 *   {=sub(a1;a3)} - substract cell a1-a2
+	 *   {=sub(a1;5,3)} - substract cell a1-5.3
+	 * The additional param dec:x allows to specify the number of decimals:
+	 *   {=sub(a1;5,3;dec:2)} - format the result as float width two decimals
+	 *
+	 * @param string $cell_ID - cell identifier (a1, c3 ...)
+	 * @param string $values - cell values
+	 * @param string reference $content - the complete WYSIWYG content
+	 * @param array $cell_array - array of all cells
+	 * @param string $command - command to execute
+	 * @param mixed reference $result - result of the calculation
+	 */
+	private function calculateSub($cell_ID, $values, &$content, $cell_array, $command, &$result) {
+	    // explode $values
+	    $value_array = explode(';', $values);
+	    $decimals = 0; // setting decimals to zero == integer
+	    $id = '';
+	    if (count($value_array) > 1) {
+	        // check for formatting commands
+	        foreach ($value_array as $key => $cell) {
+	            if (preg_match_all('/dec:([0-9]{1,2})/si', $cell, $formatter) > 0) {
+	                // set decimal value
+	                $decimals = trim($formatter[1][0]);
+	                unset($value_array[$key]);
+	            }
+	            elseif (preg_match_all('/id:([a-z,0-9,_,-]{1,32})/si', $cell, $ids) > 0) {
+	                // unique ID i.e. for 'row' or 'cell' command - don't process!
+	                $id = trim($ids[1][0]);
+	                unset($value_array[$key]);
+	            }
+	        }
+	    }
+	    $result = null;
+
+	    foreach ($value_array as $cell) {
+	        if (isset($cell_array[$cell])) {
+	            // ok - access to a cell
+	            if (key_exists($cell, $this->process_commands)) {
+	                // this cell contains a calculation command!
+	                $cmd = '';
+	                $vals = '';
+	                if (!$this->splitCommand($this->process_commands[$cell], $cmd, $vals)) {
+	                    return false;
+	                }
+	                $res = '';
+	                if (!$this->execCalculation($cell, $cmd, $vals, $content, $cell_array, $this->process_commands[$cell], $res)) {
+	                    return false;
+	                }
+                    $result = ($result !== null) ? $result - $res : $res;
+	            }
+	            else {
+	                // add value of a cell to the $result
+	                $val = ($cell_array[$cell]);
+	                $val = str_replace(' ', '', $val);
+	                $val = str_replace(cfg_thousand_separator, '', $val);
+	                $val = str_replace(cfg_decimal_separator, '.', $val);
+	                $result = ($result !== null) ? $result - $val : $val;
+	            }
+	        }
+	        else {
+	            // assume that the value is numeric
+	            $val = str_replace(' ', '', $cell);
+	            $val = str_replace(cfg_thousand_separator, '', $val);
+	            $val = str_replace(cfg_decimal_separator, '.', $val);
+                $result = ($result !== null) ? $result - $val : $val;
+	        }
+	    } // foreach
+	    $content = str_replace($command, number_format($result, $decimals, cfg_decimal_separator, cfg_thousand_separator), $content);
+	    return true;
+	} // calculateSub()
+
+
+	/**
+	 * Calculate a DIVISION in the table
+	 * Possible commands:
+	 *   {=div(a1;a3)} - divide cell a1/a2
+	 *   {=div(a1;5,3)} - divide cell a1/5.3
+	 * The additional param dec:x allows to specify the number of decimals:
+	 *   {=sub(a1;5,3;dec:2)} - format the result as float width two decimals
+	 *
+	 * @param string $cell_ID - cell identifier (a1, c3 ...)
+	 * @param string $values - cell values
+	 * @param string reference $content - the complete WYSIWYG content
+	 * @param array $cell_array - array of all cells
+	 * @param string $command - command to execute
+	 * @param mixed reference $result - result of the calculation
+	 */
+	private function calculateDiv($cell_ID, $values, &$content, $cell_array, $command, &$result) {
+	    // explode $values
+	    $value_array = explode(';', $values);
+	    $decimals = 0; // setting decimals to zero == integer
+	    $id = '';
+	    if (count($value_array) > 1) {
+	        // check for formatting commands
+	        foreach ($value_array as $key => $cell) {
+	            if (preg_match_all('/dec:([0-9]{1,2})/si', $cell, $formatter) > 0) {
+	                // set decimal value
+	                $decimals = trim($formatter[1][0]);
+	                unset($value_array[$key]);
+	            }
+	            elseif (preg_match_all('/id:([a-z,0-9,_,-]{1,32})/si', $cell, $ids) > 0) {
+	                // unique ID i.e. for 'row' or 'cell' command - don't process!
+	                $id = trim($ids[1][0]);
+	                unset($value_array[$key]);
+	            }
+	        }
+	    }
+	    $result = null;
+
+	    foreach ($value_array as $cell) {
+	        if (isset($cell_array[$cell])) {
+	            // ok - access to a cell
+	            if (key_exists($cell, $this->process_commands)) {
+	                // this cell contains a calculation command!
+	                $cmd = '';
+	                $vals = '';
+	                if (!$this->splitCommand($this->process_commands[$cell], $cmd, $vals)) {
+	                    return false;
+	                }
+	                $res = '';
+	                if (!$this->execCalculation($cell, $cmd, $vals, $content, $cell_array, $this->process_commands[$cell], $res)) {
+	                    return false;
+	                }
+	                $result = ($result !== null) ? $result/(float) $res : $res;
+	            }
+	            else {
+	                // add value of a cell to the $result
+	                $val = ($cell_array[$cell]);
+	                $val = str_replace(' ', '', $val);
+	                $val = str_replace(cfg_thousand_separator, '', $val);
+	                $val = str_replace(cfg_decimal_separator, '.', $val);
+	                $result = ($result !== null) ? $result/(float) $val : $val;
+	            }
+	        }
+	        else {
+	            // assume that the value is numeric
+	            $val = str_replace(' ', '', $cell);
+	            $val = str_replace(cfg_thousand_separator, '', $val);
+	            $val = str_replace(cfg_decimal_separator, '.', $val);
+	            $result = ($result !== null) ? $result/(float) $val : $val;
+	        }
+	    } // foreach
+	    $content = str_replace($command, number_format($result, $decimals, cfg_decimal_separator, cfg_thousand_separator), $content);
+	    return true;
+	} // calculateDiv()
 
 } // calcTable

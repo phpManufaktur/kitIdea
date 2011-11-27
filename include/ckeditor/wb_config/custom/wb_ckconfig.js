@@ -44,9 +44,13 @@ CKEDITOR.editorConfig = function( config )
     config.toolbar_Full	= [['Source','-','Preview','Templates'],['Cut','Copy','Paste','PasteText','PasteFromWord','-','Print','SpellChecker','Scayt'],['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat'],['Maximize','ShowBlocks','-','About'],'/',['Bold','Italic','Underline','Strike','-','Subscript','Superscript'],['NumberedList','BulletedList','-','Outdent','Indent','Blockquote','CreateDiv'],['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],['wbdroplets','wblink','Link','Unlink','Anchor'],['Image','Flash','Table','HorizontalRule','Smiley','SpecialChar'],'/',['Styles','Format','Font','FontSize'],['TextColor','BGColor']];
     config.toolbar_Smart	= [['Source','Preview'],['Cut','Copy','Paste','PasteText','PasteFromWord'],['Image','Flash','Table','HorizontalRule'],['wbdroplets','wblink','Link','Unlink','Anchor'],['Undo','Redo','-','SelectAll','RemoveFormat'],['Maximize','ShowBlocks','-','About'],'/',['Styles','Format','Font','FontSize'],['TextColor','BGColor'],['Bold','Italic','Underline','Strike'],['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],['NumberedList','BulletedList','-','Outdent','Indent','Blockquote','CreateDiv']];
     config.toolbar_Simple    = [['Cut','Copy','Paste','PasteText','PasteFromWord'],['Bold','Italic','-','NumberedList','BulletedList','-','Image','-','Table','-','Link','Unlink']];
+    config.toolbar_User    = [['Cut','Copy','Paste','PasteText','PasteFromWord'],['Format'],['Bold','Italic','Underline','-','NumberedList','BulletedList','-','Image','-','Table','-','Link','Unlink']];
+    config.toolbar_Admin	= [['Source'],['Cut','Copy','Paste','PasteText','PasteFromWord'],['Undo','Redo','-','SelectAll','RemoveFormat'],['Maximize','ShowBlocks'],['Bold','Italic','Underline','Strike','-','Subscript','Superscript'],['NumberedList','BulletedList','-','Outdent','Indent','Blockquote','CreateDiv'],['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],['Link','Unlink'],['Image','Table','SpecialChar'],['Format']];
+    config.toolbar_Author    = [['Cut','Copy','Paste','PasteText','PasteFromWord'],['Format'],['Bold','Italic','Underline','-','NumberedList','BulletedList','-','Image','-','Table','-','Link','Unlink']];
+    config.toolbar_ProjektEM   = [['Cut','Copy','Paste','PasteText','PasteFromWord'],['Format','FontSize'],['Bold','Italic','Underline','-','NumberedList','BulletedList','-','Image','-','Table','-','Link','Unlink']];
     
     // The default toolbar. Default: WB_Full
-    config.toolbar          = 'WB_Full';
+    config.toolbar          = 'Full';
     
     // Explanation: _P: new <p> paragraphs are created; _BR: lines are broken with <br> elements;
     //              _DIV: new <div> blocks are created.

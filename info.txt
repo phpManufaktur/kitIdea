@@ -3,6 +3,18 @@ kitIdea
 Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
+Release 0.22
+2011-11-27
+added: the used toolbar of the WYSIWYG editor now depends on the permission
+  article_edit_html, so admins may get more rights and abilities
+changed: it is now possible to change "project" and "projects" to other terms
+fixed: XHTML error in in /modules/kit_idea/templates/1/DE/project.overview.lte
+added: guests may now download files from protected directories
+added: LEPTON 2.x I18n language support is right now implemented in kitIdea
+changed: separated language depending settings from the language files
+added: support for english language
+added: calculate table cells with SUM, ADD, SUB and DIV (see documentation)
+
 Release 0.21
 2011-11-25
 fixed: missing command parameter in class.cronjob.php disturb links in reports

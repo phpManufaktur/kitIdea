@@ -122,7 +122,7 @@ if (!class_exists('CKEditor_Plus')) {
     	 *	Public var to force the editor to use the given params for width and height
     	 *
     	 */
-    	public $force = false;
+    	public $force = true;
 
     	/**
     	 *	@param	string	Any HTML-Source, pass by reference
@@ -309,12 +309,13 @@ $ckeditor->config['scayt_autoStartup'] = false;
  *
  */
 if (!function_exists('show_wysiwyg_editor')) {
-    function show_wysiwyg_editor($name, $id, $content, $width = '100%', $height = '250px') {
+    function show_wysiwyg_editor($name, $id, $content, $width = '100%', $height = '250px', $toolbar='Simple') {
     	global $ckeditor;
 
     	if ($ckeditor->force)  {
     		$ckeditor->config['height'] = $height;
     		$ckeditor->config['width'] = $width;
+    		$ckeditor->config['toolbar'] = $toolbar;
     	}
     	$ckeditor->reverse_htmlentities($content);
     	echo $ckeditor->to_HTML($name, $content);

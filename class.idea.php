@@ -53,38 +53,25 @@ class dbIdeaProject extends dbConnectLE {
     const status_locked = 2;
     const status_deleted = 4;
 
-    public $status_array = array(
-            array(
-                    'value' => self::status_active,
-                    'text' => idea_str_status_active
-                    ),
-            array(
-                    'value' => self::status_locked,
-                    'text' => idea_str_status_locked
-                    ),
-            array(
-                    'value' => self::status_deleted,
-                    'text' => idea_str_status_deleted
-                    )
-            );
-
     const access_public = 1;
     const access_closed = 2;
 
-    public $access_array = array(
-    array('value' => self::access_public, 'text' => idea_str_access_public),
-    array('value' => self::access_closed, 'text' => idea_str_access_closed));
+    public $status_array;
+    public $access_array;
 
     private $createTables = false;
+    protected $lang = null;
 
     public function __construct($createTables = false) {
+        global $I18n;
+        $this->lang = $I18n;
         $this->createTables = $createTables;
         parent::__construct();
         $this->setTableName('mod_kit_idea_project');
         $this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
         $this->addFieldDefinition(self::field_project_group, "INT(11) NOT NULL DEFAULT '-1'");
         $this->addFieldDefinition(self::field_title, "VARCHAR(128) NOT NULL DEFAULT ''");
-        $this->addFieldDefinition(self::field_desc_short, "VARCHAR(255) NOT NULL DEFAULT ''", false, false, true);
+        $this->addFieldDefinition(self::field_desc_short, "TEXT NOT NULL DEFAULT ''", false, false, true);
         $this->addFieldDefinition(self::field_desc_long, "TEXT NOT NULL DEFAULT ''", false, false, true);
         $this->addFieldDefinition(self::field_keywords, "TEXT NOT NULL DEFAULT ''");
         $this->addFieldDefinition(self::field_access, "TINYINT NOT NULL DEFAULT '" . self::access_public . "'");
@@ -104,6 +91,31 @@ class dbIdeaProject extends dbConnectLE {
             }
         }
         date_default_timezone_set(cfg_time_zone);
+        $this->status_array = array(
+                array(
+                        'value' => self::status_active,
+                        'text' => $this->lang->translate('Active')
+                ),
+                array(
+                        'value' => self::status_locked,
+                        'text' => $this->lang->translate('Locked')
+                ),
+                array(
+                        'value' => self::status_deleted,
+                        'text' => $this->lang->translate('Deleted')
+                )
+        );
+        $this->access_array = array(
+                array(
+                        'value' => self::access_public,
+                        'text' => $this->lang->translate('Public')
+                        ),
+                array(
+                        'value' => self::access_closed,
+                        'text' => $this->lang->translate('Closed')
+                        )
+                );
+
     } // __construct()
 
 
@@ -288,10 +300,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
     const status_locked = 2;
     const status_deleted = 4;
 
-    public $status_array = array(
-    array('value' => self::status_active, 'text' => idea_str_status_active),
-    array('value' => self::status_locked, 'text' => idea_str_status_locked),
-    array('value' => self::status_deleted, 'text' => idea_str_status_deleted));
+    public $status_array;
 
     // rights: general
     const no_access = 0;
@@ -300,6 +309,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
     const project_view = 1;
     const project_create = 2;
     const project_edit = 4;
+    const project_edit_html = 536870912; // last added
     const project_move = 33554432;
     const project_lock = 8;
     const project_delete = 16;
@@ -314,7 +324,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
     const article_move_section = 67108864;
     const article_lock = 1024;
     const article_delete = 2048;
-    const article_revision = 268435456; // last added
+    const article_revision = 268435456;
 
     // rights: sections
     const section_view = 4096;
@@ -343,6 +353,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
                     'view' => self::project_view,
                     'create' => self::project_create,
                     'edit' => self::project_edit,
+                    'edit_html' => self::project_edit_html,
                     'move' => self::project_move,
                     'lock' => self::project_edit,
                     'delete' => self::project_delete,
@@ -377,8 +388,11 @@ class dbIdeaProjectGroups extends dbConnectLE {
             );
 
     private $createTables = false;
+    protected $lang = null;
 
     public function __construct($createTables = false) {
+        global $I18n;
+        $this->lang = $I18n;
         $this->createTables = $createTables;
         parent::__construct();
         $this->setTableName('mod_kit_idea_project_groups');
@@ -386,15 +400,15 @@ class dbIdeaProjectGroups extends dbConnectLE {
         $this->addFieldDefinition(self::field_name, "VARCHAR(80) NOT NULL DEFAULT ''");
         $this->addFieldDefinition(self::field_description, "TEXT NOT NULL DEFAULT ''");
         $this->addFieldDefinition(self::field_status, "TINYINT NOT NULL DEFAULT '" . self::status_active . "'");
-        $this->addFieldDefinition(self::field_access_group_1, "VARCHAR(80) NOT NULL DEFAULT '" . idea_str_access_group_1 . "'");
+        $this->addFieldDefinition(self::field_access_group_1, "VARCHAR(80) NOT NULL DEFAULT '" . $this->lang->translate('access_group_1') . "'");
         $this->addFieldDefinition(self::field_access_rights_1, "INT(11) NOT NULL DEFAULT '-1'");
-        $this->addFieldDefinition(self::field_access_group_2, "VARCHAR(80) NOT NULL DEFAULT '" . idea_str_access_group_2 . "'");
+        $this->addFieldDefinition(self::field_access_group_2, "VARCHAR(80) NOT NULL DEFAULT '" . $this->lang->translate('access_group_2') . "'");
         $this->addFieldDefinition(self::field_access_rights_2, "INT(11) NOT NULL DEFAULT '-1'");
-        $this->addFieldDefinition(self::field_access_group_3, "VARCHAR(80) NOT NULL DEFAULT '" . idea_str_access_group_3 . "'");
+        $this->addFieldDefinition(self::field_access_group_3, "VARCHAR(80) NOT NULL DEFAULT '" . $this->lang->translate('access_group_3') . "'");
         $this->addFieldDefinition(self::field_access_rights_3, "INT(11) NOT NULL DEFAULT '-1'");
-        $this->addFieldDefinition(self::field_access_group_4, "VARCHAR(80) NOT NULL DEFAULT '" . idea_str_access_group_4 . "'");
+        $this->addFieldDefinition(self::field_access_group_4, "VARCHAR(80) NOT NULL DEFAULT '" . $this->lang->translate('access_group_4') . "'");
         $this->addFieldDefinition(self::field_access_rights_4, "INT(11) NOT NULL DEFAULT '-1'");
-        $this->addFieldDefinition(self::field_access_group_5, "VARCHAR(80) NOT NULL DEFAULT '" . idea_str_access_group_5 . "'");
+        $this->addFieldDefinition(self::field_access_group_5, "VARCHAR(80) NOT NULL DEFAULT '" . $this->lang->translate('access_group_5') . "'");
         $this->addFieldDefinition(self::field_access_rights_5, "INT(11) NOT NULL DEFAULT '-1'");
         $this->addFieldDefinition(self::field_access_default, "VARCHAR(30) NOT NULL DEFAULT '" . self::field_access_group_1 . "'");
         $this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
@@ -408,6 +422,21 @@ class dbIdeaProjectGroups extends dbConnectLE {
             }
         }
         date_default_timezone_set(cfg_time_zone);
+        $this->status_array  = array(
+                array(
+                        'value' => self::status_active,
+                        'text' => $this->lang->translate('Active')
+                        ),
+                array(
+                        'value' => self::status_locked,
+                        'text' => $this->lang->translate('Locked')
+                        ),
+                array(
+                        'value' => self::status_deleted,
+                        'text' => $this->lang->translate('Deleted')
+                        )
+                );
+
     } // __construct()
 
 
@@ -475,26 +504,8 @@ class dbIdeaProjectUsers extends dbConnectLE {
     const status_locked = 2;
     const status_deleted = 4;
 
-    public $status_array = array(
-            array(
-                    'value' => self::status_active,
-                    'text' => idea_str_status_active
-                    ),
-            array(
-                    'value' => self::status_locked,
-                    'text' => idea_str_status_locked
-                    ),
-            array(
-                    'value' => self::status_deleted,
-                    'text' => idea_str_status_deleted
-                    )
-            );
-
-    public $status_array_short = array(
-            self::status_active => idea_str_status_active,
-            self::status_locked => idea_str_status_locked,
-            self::status_deleted => idea_str_status_deleted
-            );
+    public $status_array;
+    public $status_array_short;
 
     const EMAIL_UNDEFINED = 0;
     const EMAIL_NO_EMAIL = 1;
@@ -503,33 +514,7 @@ class dbIdeaProjectUsers extends dbConnectLE {
     const EMAIL_WEEKLY = 8;
     const EMAIL_MONTHLY = 16;
 
-    public $email_info_array = array(
-            self::EMAIL_UNDEFINED => array(
-                    'value' => self::EMAIL_UNDEFINED,
-                    'text' => idea_str_email_undefined
-                    ),
-            self::EMAIL_NO_EMAIL => array(
-                    'value' => self::EMAIL_NO_EMAIL,
-                    'text' => idea_str_email_no_email
-                    ),
-            self::EMAIL_IMMEDIATE => array(
-                    'value' => self::EMAIL_IMMEDIATE,
-                    'text' => idea_str_email_immediate
-                    ),
-            self::EMAIL_DAILY => array(
-                    'value' => self::EMAIL_DAILY,
-                    'text' => idea_str_email_daily
-                    ),
-            self::EMAIL_WEEKLY => array(
-                    'value' => self::EMAIL_WEEKLY,
-                    'text' => idea_str_email_weekly
-                    ),
-            self::EMAIL_MONTHLY => array(
-                    'value' => self::EMAIL_MONTHLY,
-                    'text' => idea_str_email_monthly
-                    )
-            );
-
+    public $email_info_array;
     public $email_command_array = array(
             self::EMAIL_UNDEFINED => 'undefined',
             self::EMAIL_NO_EMAIL => 'no_email',
@@ -540,8 +525,11 @@ class dbIdeaProjectUsers extends dbConnectLE {
             );
 
     private $createTables = false;
+    protected $lang = null;
 
     public function __construct($createTables = false) {
+        global $I18n;
+        $this->lang = $I18n;
         $this->createTables = $createTables;
         parent::__construct();
         $this->setTableName('mod_kit_idea_project_users');
@@ -562,7 +550,57 @@ class dbIdeaProjectUsers extends dbConnectLE {
                 }
             }
         }
+
         date_default_timezone_set(cfg_time_zone);
+
+        $this->status_array = array(
+            array(
+                    'value' => self::status_active,
+                    'text' => $this->lang->translate('Active')
+                    ),
+            array(
+                    'value' => self::status_locked,
+                    'text' => $this->lang->translate('Locked')
+                    ),
+            array(
+                    'value' => self::status_deleted,
+                    'text' => $this->lang->translate('Deleted')
+                    )
+            );
+
+        $this->status_array_short = array(
+            self::status_active => $this->lang->translate('Active'),
+            self::status_locked => $this->lang->translate('Locked'),
+            self::status_deleted => $this->lang->translate('Deleted')
+            );
+
+        $this->email_info_array = array(
+            self::EMAIL_UNDEFINED => array(
+                    'value' => self::EMAIL_UNDEFINED,
+                    'text' => $this->lang->translate('- undefined -')
+                    ),
+            self::EMAIL_NO_EMAIL => array(
+                    'value' => self::EMAIL_NO_EMAIL,
+                    'text' => $this->lang->translate('no E-Mail')
+                    ),
+            self::EMAIL_IMMEDIATE => array(
+                    'value' => self::EMAIL_IMMEDIATE,
+                    'text' => $this->lang->translate('immediate E-Mail')
+                    ),
+            self::EMAIL_DAILY => array(
+                    'value' => self::EMAIL_DAILY,
+                    'text' => $this->lang->translate('daily E-Mail')
+                    ),
+            self::EMAIL_WEEKLY => array(
+                    'value' => self::EMAIL_WEEKLY,
+                    'text' => $this->lang->translate('weekly E-Mail')
+                    ),
+            self::EMAIL_MONTHLY => array(
+                    'value' => self::EMAIL_MONTHLY,
+                    'text' => $this->lang->translate('monthly E-Mail')
+                    )
+            );
+
     } // __construct()
 
 
@@ -630,6 +668,10 @@ class dbIdeaCfg extends dbConnectLE {
     const cfgMailPackageSize = 'cfgMailPackageSize';
     const cfgArticleUseAbstract = 'cfgArticleUseAbstract';
     const cfgArticleAllowMinorChanges = 'cfgArticleAllowMinorChanges';
+    const cfgProjectNamePlural = 'cfgProjectNamePlural';
+    const cfgProjectNameSingular = 'cfgProjectNameSingular';
+    const cfgWYSIWYGtoolbarAuthor = 'cfgWYSIWYGtoolbarAuthor';
+    const cfgWYSIWYGtoolbarAdmin = 'cfgWYSIWYGtoolbarAdmin';
 
     public $config_array = array(
             array(
@@ -741,7 +783,7 @@ class dbIdeaCfg extends dbConnectLE {
                     'idea_label_cfg_access_grp_default_4',
                     self::cfgAccessGrpDefault_4,
                     self::type_integer,
-                    '506462207',
+                    '1043333119',
                     'idea_hint_cfg_access_grp_default'
                     ),
             array(
@@ -805,7 +847,36 @@ class dbIdeaCfg extends dbConnectLE {
                     self::type_boolean,
                     '1',
                     'idea_hint_cfg_article_allow_minor_changes'
-                    )
+                    ),
+            array(
+                    'idea_label_cfg_project_name_plural',
+                    self::cfgProjectNamePlural,
+                    self::type_string,
+                    '',
+                    'idea_hint_cfg_project_name_plural'
+                    ),
+            array(
+                    'idea_label_cfg_project_name_singular',
+                    self::cfgProjectNameSingular,
+                    self::type_string,
+                    '',
+                    'idea_hint_cfg_project_name_singular'
+                    ),
+            array(
+                    'WYSIWYG toolbar, authors',
+                    self::cfgWYSIWYGtoolbarAuthor,
+                    self::type_string,
+                    'Author',
+                    'Select the toolbar which should be used for authors'
+                    ),
+            array(
+                    'WYSIWYG toolbar, admins',
+                    self::cfgWYSIWYGtoolbarAdmin,
+                    self::type_string,
+                    'Admin',
+                    'Select the toolbar which should be used for admins'
+                    ),
+
             );
 
     public function __construct($createTables = false) {
@@ -816,8 +887,8 @@ class dbIdeaCfg extends dbConnectLE {
         $this->addFieldDefinition(self::field_name, "VARCHAR(32) NOT NULL DEFAULT ''");
         $this->addFieldDefinition(self::field_type, "TINYINT UNSIGNED NOT NULL DEFAULT '" . self::type_undefined . "'");
         $this->addFieldDefinition(self::field_value, "TEXT NOT NULL DEFAULT ''", false, false, true);
-        $this->addFieldDefinition(self::field_label, "VARCHAR(64) NOT NULL DEFAULT 'idea_str_undefined'");
-        $this->addFieldDefinition(self::field_description, "VARCHAR(255) NOT NULL DEFAULT 'idea_str_undefined'");
+        $this->addFieldDefinition(self::field_label, "VARCHAR(64) NOT NULL DEFAULT '- undefined -'");
+        $this->addFieldDefinition(self::field_description, "VARCHAR(255) NOT NULL DEFAULT '- undefined -'");
         $this->addFieldDefinition(self::field_status, "TINYINT UNSIGNED NOT NULL DEFAULT '" . self::status_active . "'");
         $this->addFieldDefinition(self::field_update_by, "VARCHAR(32) NOT NULL DEFAULT 'SYSTEM'");
         $this->addFieldDefinition(self::field_update_when, "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'");
@@ -832,6 +903,7 @@ class dbIdeaCfg extends dbConnectLE {
                 }
             }
         }
+        // set timezone
         date_default_timezone_set(cfg_time_zone);
         // Default Werte garantieren
         if ($this->sqlTableExists()) {

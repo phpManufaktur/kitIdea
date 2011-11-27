@@ -24,7 +24,7 @@
     <div class="{if $is_message == 1}message{else}intro{/if}">{$intro}</div>
     <table width="100%">
       <colgroup>
-        <col width="200" /> 
+        <col width="130" /> 
         <col width="*" />
         <col width="200" />
       </colgroup>
@@ -42,24 +42,29 @@
       {/if}
       <tr>
         <td class="project_label">{$project.project_title.label}</td>
-        <td class="project_value"><input type="text" name="{$project.project_title.name}" value="{$project.project_title.value}" /></td>
-        <td class="project_hint">{$project.project_id.hint}</td>
+        <td class="project_value" colspan="2"><input type="text" name="{$project.project_title.name}" value="{$project.project_title.value}" /></td>
+        {*<td class="project_hint">{$project.project_id.hint}</td>*}
       </tr>
+      <tr><td colspan="3">&nbsp;</td></tr>
       <tr>
         <td class="project_label">{$project.project_desc_short.label}</td>
-        <td class="project_value"><textarea name="{$project.project_desc_short.name}">{$project.project_desc_short.value}</textarea></td>
-        <td class="project_hint">{$project.project_desc_short.hint}</td>
+        {*<td class="project_value"><textarea name="{$project.project_desc_short.name}">{$project.project_desc_short.value}</textarea></td>*}
+        <td class="project_value" colspan="2">{$project.project_desc_short.editor}</td>
+        {*<td class="project_hint">{$project.project_desc_short.hint}</td>*}
       </tr>
+      <tr><td colspan="3">&nbsp;</td></tr>
       <tr>
         <td class="project_label">{$project.project_desc_long.label}</td>
-        <td class="project_value">{$project.project_desc_long.editor}</td>
-        <td class="project_hint">{$project.project_desc_long.hint}</td>
+        <td class="project_value" colspan="2">{$project.project_desc_long.editor}</td>
+        {*<td class="project_hint">{$project.project_desc_long.hint}</td>*}
       </tr>
+      <tr><td colspan="3">&nbsp;</td></tr>
       <tr>
         <td class="project_label">{$project.project_keywords.label}</td>
-        <td class="project_value"><textarea name="{$project.project_keywords.name}">{$project.project_keywords.value}</textarea></td>
-        <td class="project_hint">{$project.project_keywords.hint}</td>
+        <td class="project_value" colspan="2"><textarea name="{$project.project_keywords.name}">{$project.project_keywords.value}</textarea></td>
+        {*<td class="project_hint">{$project.project_keywords.hint}</td>*}
       </tr>
+      <tr><td colspan="3">&nbsp;</td></tr>
       <tr>
         <td class="project_label">{$project.project_access.label}</td>
         <td class="project_value">

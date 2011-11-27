@@ -127,20 +127,11 @@ class kitIdeaFrontend {
             );
 
     protected $logLogin = false;
-
-    // general TAB Navigation
-    private $tab_main_navigation_array = array(
-            self::ACTION_PROJECTS => idea_tab_projects,
-            self::ACTION_ACCOUNT => idea_tab_account
-            );
-
-    // TAB navigation for the account
-    private $tab_account_navigation_array = array(
-            self::ACTION_ACCOUNT => idea_tab_account_account,
-            self::ACTION_LOGOUT => idea_tab_logout
-            );
-
     protected $lang = NULL;
+    protected $tab_main_navigation_array = null;
+    protected $tab_account_navigation_array = null;
+    protected $project_singular;
+    protected $project_plural;
 
     /**
      * Constructor of the class kitIdeaFrontend
@@ -159,6 +150,22 @@ class kitIdeaFrontend {
         $this->media_path = WB_PATH . MEDIA_DIRECTORY . '/' . $dbIdeaCfg->getValue(dbIdeaCfg::cfgMediaDir) . '/';
         $this->media_url = str_replace(WB_PATH, WB_URL, $this->media_path);
         $this->lang = $I18n;
+        // general TAB Navigation
+        $plural = $dbIdeaCfg->getValue(dbIdeaCfg::cfgProjectNamePlural);
+        $singular = $dbIdeaCfg->getValue(dbIdeaCfg::cfgProjectNameSingular);
+        $this->project_plural = (!empty($plural)) ? $plural : $this->lang->translate('Projects');
+        $this->project_singular = (!empty($singular)) ? $singular : $this->lang->translate('Project');
+        $this->tab_main_navigation_array = array(
+                self::ACTION_PROJECTS => $this->project_plural,
+                self::ACTION_ACCOUNT => $this->lang->translate('Account')
+        );
+        // TAB navigation for the account
+        $this->tab_account_navigation_array = array(
+                self::ACTION_ACCOUNT => $this->lang->translate('Settings'),
+                self::ACTION_LOGOUT => $this->lang->translate('Log out')
+        );
+        // unset any session for kitDirList
+        unset($_SESSION['kdl_aut']);
     } // __construct()
 
     /**
@@ -182,7 +189,9 @@ class kitIdeaFrontend {
         $this->params = $params;
         $this->template_path = WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/templates/' . $this->params[self::PARAM_PRESET] . '/' . KIT_IDEA_LANGUAGE . '/';
         if (! file_exists($this->template_path)) {
-            $this->setError(sprintf(idea_error_preset_not_exists, '/modules/' . basename(dirname(__FILE__)) . '/templates/' . $this->params[self::PARAM_PRESET] . '/' . KIT_IDEA_LANGUAGE . '/'));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: The preset directory <b>{{ directory }}</b> does not exists, can\'t load any template!',
+                            array('directory' => '/modules/'.basename(dirname(__FILE__)).'/templates/'.$this->params[self::PARAM_PRESET].'/'.KIT_IDEA_LANGUAGE.'/'))));
             return false;
         }
         // if LEPTON group is set, authenticate via LEPTON USER
@@ -192,7 +201,9 @@ class kitIdeaFrontend {
             foreach ($gs as $g) {
                 $SQL = sprintf("SELECT group_id FROM %sgroups WHERE name='%s'", TABLE_PREFIX, trim($g));
                 if (false === ($id = $database->get_one($SQL))) {
-                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_lepton_group_invalid, $g)));
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                            $this->lang->translate('Error: Can\'t load the LEPTON group <b>{{ group }}</b>, please check the parameters of the kitIdea droplet!',
+                                    array('group' => $g))));
                     return false;
                 }
                 $grps[] = $id;
@@ -327,7 +338,9 @@ class kitIdeaFrontend {
         try {
             $result = $parser->get($this->template_path . $template, $template_data);
         } catch (Exception $e) {
-            $this->setError(sprintf(idea_error_template_error, $template, $e->getMessage()));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error executing the template <b>{{ template }}</b>: {{ error }}',
+                            array('template' => $template, 'error' => $e->getMessage()))));
             return false;
         }
         return $result;
@@ -474,7 +487,8 @@ class kitIdeaFrontend {
                 if ($this->getLogLogin() && isset($_SESSION[self::SESSION_LOG_LOGIN])) {
                     // if tracking for login is enabled also track the logout...
                     $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id],
-                            sprintf(idea_log_logout, date(idea_cfg_time_str)));
+                            $this->lang->translate('[kitIdea] user logout at {{ time }}',
+                                    array('time' => date(cfg_time_str))));
                 }
                 unset($_SESSION[self::SESSION_LOG_LOGIN]);
                 $kitContactInterface->logout();
@@ -537,7 +551,8 @@ class kitIdeaFrontend {
         if ($this->use_lepton_auth && $wb->is_authenticated()) {
             // authenticate via LEPTON
             if (! isset($_SESSION['GROUPS_ID']) || empty($this->params[self::PARAM_LEPTON_GROUPS])) {
-                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_lepton_group_missing));
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                        $this->lang->translate('Error: Missing the LEPTON Group! kitIdea can\'t check any permissions!')));
                 return false;
             }
             // unset KIT session vars...
@@ -590,7 +605,9 @@ class kitIdeaFrontend {
                         $_SESSION[kitContactInterface::session_kit_contact_id] = $register[dbKITregister::field_contact_id];
                         if ($this->getLogLogin() && !isset($_SESSION[self::SESSION_LOG_LOGIN])) {
                             $_SESSION[self::SESSION_LOG_LOGIN] = time();
-                            $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], sprintf(idea_log_login, date(cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN])));
+                            $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id],
+                                    $this->lang->translate('[kitIdea] user login in at {{ time }}',
+                                            array('time' => date(cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN]))));
                         }
                         return true;
                     } else {
@@ -615,7 +632,9 @@ class kitIdeaFrontend {
                         $_SESSION[kitContactInterface::session_kit_contact_id] = $register[dbKITregister::field_contact_id];
                         if ($this->getLogLogin() && !isset($_SESSION[self::SESSION_LOG_LOGIN])) {
                             $_SESSION[self::SESSION_LOG_LOGIN] = time();
-                            $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], sprintf(idea_log_login, date(cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN])));
+                            $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id],
+                                    $this->lang->translate('[kitIdea] user login in at {{ time }}',
+                                            array('time' => date(cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN]))));
                         }
                         return true;
                     }
@@ -639,12 +658,15 @@ class kitIdeaFrontend {
                 // user is authenticated and allowed to use kitIdea
                 if ($this->getLogLogin() && !isset($_SESSION[self::SESSION_LOG_LOGIN])) {
                     $_SESSION[self::SESSION_LOG_LOGIN] = time();
-                    $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], sprintf(idea_log_login, date(cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN])));
+                    $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id],
+                            $this->lang->translate('[kitIdea] user login in at {{ time }}',
+                                    array('time' => date(cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN]))));
                 }
                 return true;
             } else {
                 // user is authenticated but not allowed to access kitIdea
-                $this->setError(idea_error_auth_wrong_category);
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                        $this->lang->translate('Sorry, your permissions does not allow an access to kitIdea. Please contact the service to get access!')));
                 return false;
             }
         }
@@ -687,7 +709,8 @@ class kitIdeaFrontend {
             return $this->accountIsAuthenticated();
         } else {
             // Oooops, unspecified problem ...
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_undefined));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Undefined error - please contact the service!')));
             return false;
         }
     } // accountLoginDlg()
@@ -722,10 +745,25 @@ class kitIdeaFrontend {
         $result = $form->action();
         if (is_bool($result)) {
             // show welcome message
-            return sprintf(idea_msg_login_welcome, sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
-            self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS))), sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
-            self::REQUEST_MAIN_ACTION => self::ACTION_ACCOUNT,
-            self::REQUEST_ACCOUNT_ACTION => self::ACTION_ACCOUNT))));
+            $welcome = $this->lang->translate('<p>Welcome at kitIdea!</p><p>You have access to the <a href="{{ project_url }}">projects</a> and to your <a href="{{ account_url }}">personal settings</a>.</p>',
+                    array(
+                            'project_url' => sprintf('%s%s%s',
+                                    $this->page_link,
+                                    (strpos($this->page_link, '?') === false) ? '?' : '&',
+                                    http_build_query(array(
+                                            self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS
+                                            ))
+                                    ),
+                            'account_url' => sprintf('%s%s%s',
+                                    $this->page_link,
+                                    (strpos($this->page_link, '?') === false) ? '?' : '&',
+                                    http_build_query(array(
+                                            self::REQUEST_MAIN_ACTION => self::ACTION_ACCOUNT,
+                                            self::REQUEST_ACCOUNT_ACTION => self::ACTION_ACCOUNT
+                                            ))
+                                    )
+                            ));
+            return $welcome;
         }
         return $result;
     } // accountAccountDlg()
@@ -760,7 +798,7 @@ class kitIdeaFrontend {
                 }
             }
         } else {
-            return idea_str_author_anonymous;
+            return $this->lang->translate('Anonymous');
         }
     } // accountGetAuthor()
 
@@ -780,7 +818,8 @@ class kitIdeaFrontend {
         // check project group
         if ($this->params[self::PARAM_PROJECT_GROUP] < 1) {
             // invalid project group
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_project_group_invalid));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: Undefined project group! Please define a project group and use the parameter <b>group={{ group }}</b> to assign this page to specified project group.')));
             return false;
         }
 
@@ -796,7 +835,8 @@ class kitIdeaFrontend {
             // At direct access to a project the authentication must be checked first!
             if (! isset($_REQUEST[dbIdeaProject::field_id])) {
                 // missing project ID, break!
-                $this->setError(idea_error_project_access_invalid);
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                        $this->lang->translate('Error: Invalid access to a kitIdea project, access denied!')));
                 return $this->projectShow(false);
             }
             $SQL = sprintf("SELECT %s FROM %s WHERE %s='%s' AND %s='%s'", dbIdeaProject::field_access, $dbIdeaProject->getTableName(), dbIdeaProject::field_id, $_REQUEST[dbIdeaProject::field_id], dbIdeaProject::field_project_group, $this->params[self::PARAM_PROJECT_GROUP]);
@@ -814,7 +854,8 @@ class kitIdeaFrontend {
             if ($project[0][dbIdeaProject::field_access] == dbIdeaProject::access_closed) {
                 // check authentication!
                 if (! $this->accountIsAuthenticated()) {
-                    $this->setError(idea_error_access_not_auth);
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                            $this->lang->translate('Error: This access is not allowed, please login first! <b>HINT:</b> You will get this prompt too, if you were inactive for some time and the session was automatically terminated. Just login again!')));
                     return $this->projectShow(false);
                 }
                 $_SESSION[self::SESSION_PROJECT_ACCESS] = self::ACCESS_CLOSED;
@@ -846,7 +887,8 @@ class kitIdeaFrontend {
                 return $this->projectShow($this->projectOverview());
             default:
                 // illegal function call ...
-                $this->setError(idea_error_illegal_function_call);
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                        $this->lang->translate('Undefined error - please contact the service!')));
                 return $this->projectShow(false);
         endswitch
         ;
@@ -995,15 +1037,18 @@ class kitIdeaFrontend {
                     'access' => ($project[dbIdeaProject::field_access] == dbIdeaProject::access_public) ? 'public' : 'closed',
                     'status' => $project[dbIdeaProject::field_status],
                     'timestamp' => $project[dbIdeaProject::field_timestamp],
-                    'detail_url' => sprintf(
-                            '%s%s%s',
-                            $this->page_link,
-                            (strpos($this->page_link, '?') === false) ? '?' : '&',
-                            http_build_query(array(
-                                    self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
-                                    self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
-                                    dbIdeaProject::field_id => $project[dbIdeaProject::field_id]
-                                    ))
+                    'detail' => array(
+                            'text' => $this->lang->translate('Open {{ project }}', array('project' => $this->project_singular)),
+                            'link' => sprintf(
+                                    '%s%s%s',
+                                    $this->page_link,
+                                    (strpos($this->page_link, '?') === false) ? '?' : '&',
+                                    http_build_query(array(
+                                            self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
+                                            self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
+                                            dbIdeaProject::field_id => $project[dbIdeaProject::field_id]
+                                            ))
+                                    )
                             )
                     );
         }
@@ -1033,15 +1078,18 @@ class kitIdeaFrontend {
                         'items' => $items,
                         'count' => count($items),
                         'action' => array(
-                                'create_url' => sprintf(
+                                'create' => array(
+                                        'link' => sprintf(
                                         '%s%s%s',
                                         $this->page_link,
                                         (strpos($this->page_link, '?') === false) ? '?' : '&',
                                         http_build_query(array(
                                                 self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
                                                 self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_EDIT
-                                                ))
-                                ))
+                                                ))),
+                                        'text' => $this->lang->translate('Create {{ project }}', array('project' => $this->project_singular))
+                                        ),
+                                )
                         ),
                 'login_url' => sprintf(
                         '%s%s%s',
@@ -1069,6 +1117,7 @@ class kitIdeaFrontend {
      */
     public function projectProjectEdit() {
         global $dbIdeaProject;
+        global $dbIdeaProjectGroups;
         global $dbIdeaCfg;
 
         $project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : - 1;
@@ -1099,6 +1148,7 @@ class kitIdeaFrontend {
 
         $wysiwyg_height = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGeditorHeight);
         $wysiwyg_width = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGeditorWidth);
+        $toolbar = ($this->accountIsAuthenticated() && $dbIdeaProjectGroups->checkPermissions($_SESSION[self::SESSION_USER_ACCESS], dbIdeaProjectGroups::project_edit_html)) ? 'Admin' : 'User';
 
         $items = array();
         foreach ($project as $name => $value) {
@@ -1108,19 +1158,24 @@ class kitIdeaFrontend {
             if ($name == dbIdeaProject::field_access) $its = $dbIdeaProject->access_array;
             if (($name == dbIdeaProject::field_desc_long) || ($name == dbIdeaProject::field_desc_short)) {
                 ob_start();
-                show_wysiwyg_editor($name, $name, stripslashes($value), $wysiwyg_width, $wysiwyg_height);
+                show_wysiwyg_editor($name, $name, stripslashes($value), $wysiwyg_width, $wysiwyg_height, $toolbar);
                 $editor = ob_get_contents();
                 ob_end_clean();
             }
-            $items[$name] = array('name' => $name, 'value' => $value,
-            'editor' => $editor, 'items' => $its,
-            'label' => constant(sprintf('idea_label_%s', $name)),
-            'hint' => constant(sprintf('idea_hint_%s', $name)));
+            $items[$name] = array(
+                    'name' => $name,
+                    'value' => $value,
+                    'editor' => $editor,
+                    'items' => $its,
+                    'label' => $this->lang->translate(sprintf('label_%s', $name)),
+                    'hint' => $this->lang->translate(sprintf('hint_%s', $name))
+                    );
         }
         $data = array(
-                'head' => ($project_id < 1) ? idea_head_project_create : idea_head_project_edit,
-                'intro' => ($this->isMessage()) ? $this->getMessage() : idea_intro_project_edit,
-                'project' => $items, 'page_link' => $this->page_link,
+                'head' => ($project_id < 1) ? $this->lang->translate('Create {{ project }}', array('project' => $this->project_singular)) : $this->lang->translate('Edit {{ project }}', array('project' => $this->project_singular)),
+                'intro' => ($this->isMessage()) ? $this->getMessage() : $this->lang->translate('With this dialog you can create a new {{ project }} or edit an existing {{ project }}', array('project' => $this->project_singular)),
+                'project' => $items,
+                'page_link' => $this->page_link,
                 'form' => array(
                         'name' => 'project_edit',
                         'btn' => array(
@@ -1199,7 +1254,8 @@ class kitIdeaFrontend {
                     if (empty($value) && $must_field) {
                         // must fields should not be empty!
                         $checked = false;
-                        $message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
+                        $message .= $this->lang->translate('<p>The field <b>{{ field }}</b> must contain a valid value!</p>',
+                                array('field' => $this->lang->translate(sprintf('label_%s', $key))));
                     }
                 default:
                     // ignore all other fields
@@ -1223,7 +1279,8 @@ class kitIdeaFrontend {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
                     return false;
                 }
-                $message .= sprintf(idea_msg_project_inserted, $project_id);
+                $message .= $this->lang->translate('<p>The project with the <b>ID {{ id }}</b> was successfully created.</p><p>You may insert now the first article!</p>',
+                        array('id' => $project_id));
             } else {
                 // save the previous record to the revision archive
                 $data = array(
@@ -1246,11 +1303,12 @@ class kitIdeaFrontend {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
                     return false;
                 }
-                $message .= sprintf(idea_msg_project_updated, $project_id);
+                $message .= $this->lang->translate('<p>The project with the <b>ID {{ id }}</b> was updated.</p>',
+                        array('id' => $project_id));
                 $data = array(
                         dbIdeaStatusChange::FIELD_ARTICLE_ID => - 1,
                         dbIdeaStatusChange::FIELD_KIT_ID => (isset($_SESSION[kitContactInterface::session_kit_contact_id])) ? $_SESSION[kitContactInterface::session_kit_contact_id] : - 1,
-                        dbIdeaStatusChange::FIELD_INFO => sprintf(idea_msg_project_updated, $project_id),
+                        dbIdeaStatusChange::FIELD_INFO => $this->lang->translate('<p>The project with the <b>ID {{ id }}</b> was updated.</p>', array('id' => $project_id)),
                         dbIdeaStatusChange::FIELD_INFO_DATE => date('Y-m-d H:i:s'),
                         dbIdeaStatusChange::FIELD_PROJECT_ID => $project_id,
                         dbIdeaStatusChange::FIELD_PROJECT_GROUP => $this->params[self::PARAM_PROJECT_GROUP],
@@ -1359,7 +1417,7 @@ class kitIdeaFrontend {
             $project_array[$name] = array('name' => $name, 'value' => $value);
         }
         $project_edit = array(
-                'text' => idea_str_edit,
+                'text' => $this->lang->translate('Edit'),
                 'url' => sprintf('%s%s%s',
                         $this->page_link,
                         (strpos($this->page_link, '?') === false) ? '?' : '&',
@@ -1396,7 +1454,9 @@ class kitIdeaFrontend {
             $sections = array();
             foreach ($secs as $sec) {
                 if (strpos($sec, '|') === false) {
-                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_section_definition_invalid, $sec)));
+                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                            $this->lang->translate('Error: The Project Section <b>{{ section }} is invalid! The definition must contain a <b>TEXT</b>, followed by pipe <b>|</b> and a <b>unique identifier</b>. Please check the kitIdea configuration!',
+                                    array('section' => $sec))));
                     return false;
                 }
                 list ($text, $identifier) = explode('|', $sec);
@@ -1439,7 +1499,7 @@ class kitIdeaFrontend {
         if ($this->params[self::PARAM_SECTION_FILES] && ($is_authenticated || $dbIdeaProjectGroups->checkPermissions($visitor_permissions, dbIdeaProjectGroups::file_download))) {
             // add the section for the files
             $sections[self::IDENTIFIER_FILES] = array(
-                    'text' => idea_tab_files,
+                    'text' => $this->lang->translate('Files'),
                     'identifier' => self::IDENTIFIER_FILES,
                     'link' => sprintf('%s%s%s',
                             $this->page_link,
@@ -1479,7 +1539,7 @@ class kitIdeaFrontend {
         if ($this->params[self::PARAM_SECTION_ABOUT]) {
             // add the about section
             $sections[self::IDENTIFIER_ABOUT] = array(
-                    'text' => idea_tab_about,
+                    'text' => $this->lang->translate('About'),
                     'identifier' => self::IDENTIFIER_ABOUT,
                     'link' => sprintf('%s%s%s',
                             $this->page_link,
@@ -1498,7 +1558,7 @@ class kitIdeaFrontend {
 
         // add the edit button to the section
         $sections_edit = array(
-                'text' => idea_str_edit,
+                'text' => $this->lang->translate('Edit'),
                 'url' => sprintf('%s%s%s',
                         $this->page_link,
                         (strpos($this->page_link, '?') === false) ? '?' : '&',
@@ -1514,6 +1574,12 @@ class kitIdeaFrontend {
             /**
              * Prepare the "files" section
              */
+
+            if (!$this->accountIsAuthenticated() && $dbIdeaProjectGroups->checkPermissions($visitor_permissions, dbIdeaProjectGroups::file_download)) {
+                // auto login guests at kitIdea if they are allowed to download files...
+                $_SESSION['kdl_aut'] = 1;
+            }
+
             $kdl = new kitDirList();
             $params = $kdl->getParams();
             // set the kitIdea URL to kitDirList!
@@ -1539,7 +1605,6 @@ class kitIdeaFrontend {
                 }
             }
             $params[kitDirList::param_media] = $project_files_path;
-            // allow upload
             $params[kitDirList::param_recursive] = true;
             $params[kitDirList::param_copyright] = false;
             $params[kitDirList::param_hide_account] = true;
@@ -1551,7 +1616,10 @@ class kitIdeaFrontend {
             $params[kitDirList::param_idea_project_id] = $project_id;
             $params[kitDirList::param_use_idea_status] = true;
             $kdl->setParams($params);
+
+
             $kit_dirlist = $kdl->action();
+
 
             // setting data for the template
             $data = array(
@@ -1566,7 +1634,7 @@ class kitIdeaFrontend {
                             ),
                     'page_link' => $this->page_link,
                     'is_message' => $this->isMessage() ? 1 : 0,
-                    'intro' => $this->isMessage() ? $this->getMessage() : idea_intro_project_view,
+                    'intro' => $this->isMessage() ? $this->getMessage() : $this->lang->translate('intro_project_view'),
                     'kit_dirlist' => $kit_dirlist
                     );
 
@@ -1729,7 +1797,7 @@ class kitIdeaFrontend {
                     'fields' => $fields,
                     'links' => array(
                             'edit' => array(
-                                    'text' => idea_str_edit,
+                                    'text' => $this->lang->translate('Edit'),
                                     'url' => sprintf('%s%s%s',
                                             $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&',
                                             http_build_query(array(
@@ -1806,8 +1874,17 @@ class kitIdeaFrontend {
             // set width and height for the editor
             $width = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGeditorWidth);
             $height = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGeditorHeight);
+            // the toolbar depends on the permissions
+            if ($is_authenticated && $dbIdeaProjectGroups->checkPermissions($_SESSION[self::SESSION_USER_ACCESS], dbIdeaProjectGroups::article_edit_html)) {
+                // use the toolbar for the admins
+                $toolbar = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGtoolbarAdmin);
+            }
+            else {
+                // use the toolbar for the authors
+                $toolbar = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGtoolbarAuthor);
+            }
             ob_start();
-                show_wysiwyg_editor(self::REQUEST_WYSIWYG, self::REQUEST_WYSIWYG, $content, $width, $height);
+                show_wysiwyg_editor(self::REQUEST_WYSIWYG, self::REQUEST_WYSIWYG, $content, $width, $height, $toolbar);
                 $wysiwyg_editor = ob_get_contents();
             ob_end_clean();
 
@@ -1937,11 +2014,11 @@ class kitIdeaFrontend {
                     'article' => array(
                             'edit' => array(
                                     'editor' => array(
-                                            'label' => constant(sprintf('idea_label_%s', dbIdeaProjectArticles::field_content_html)),
+                                            'label' => $this->lang->translate(sprintf('label_%s', dbIdeaProjectArticles::field_content_html)),
                                             'value' => $wysiwyg_editor
                                             ),
                                     'title' => array(
-                                            'label' => constant(sprintf('idea_label_%s', dbIdeaProjectArticles::field_title)),
+                                            'label' => $this->lang->translate(sprintf('label_%s', dbIdeaProjectArticles::field_title)),
                                             'name' => dbIdeaProjectArticles::field_title,
                                             'value' => $article[dbIdeaProjectArticles::field_title]
                                             ),
@@ -1983,7 +2060,7 @@ class kitIdeaFrontend {
                             ),
                             // 'is_authenticated'=> $is_authenticated ? 1 : 0,
                     'is_message' => $this->isMessage() ? 1 : 0,
-                    'intro' => $this->isMessage() ? $this->getMessage() : idea_intro_project_view,
+                    'intro' => $this->isMessage() ? $this->getMessage() : $this->lang->translate('intro_project_view'),
                     'access' => $dbIdeaProjectGroups->getAccessArray($is_authenticated, $_SESSION[self::SESSION_USER_ACCESS]),
                     'sorter_table' => $sorter_table,
                     'sorter_active' => $sorter_active,
@@ -2010,7 +2087,7 @@ class kitIdeaFrontend {
         // first check CAPTCHA
         if (isset($_REQUEST['captcha']) && ($_REQUEST['captcha'] != $_SESSION['captcha'])) {
             // CAPTCHA is invalid
-            $this->setMessage(idea_msg_captcha_invalid);
+            $this->setMessage($this->lang->translate('<p>The CAPTCHA code you typed in is not correct, please try again.</p>'));
             return $this->projectProjectView();
         }
 
@@ -2068,7 +2145,8 @@ class kitIdeaFrontend {
                 case dbIdeaProjectArticles::field_section_identifier:
                     if (isset($_REQUEST[self::REQUEST_ARTICLE_MOVE]) && ($_REQUEST[self::REQUEST_ARTICLE_MOVE] != $article[dbIdeaProjectArticles::field_section_identifier])) {
                         $article[dbIdeaProjectArticles::field_section_identifier] = $_REQUEST[self::REQUEST_ARTICLE_MOVE];
-                        $message .= sprintf(idea_msg_article_moved, $article[dbIdeaProjectArticles::field_title]);
+                        $message .= $this->lang->translate('<p>The article <b>{{ article }}</b> was moved to this page!</p>',
+                                array('article' => $article[dbIdeaProjectArticles::field_title]));
                         $changed = true;
                     } else {
                         $value = isset($_REQUEST[$key]) ? $_REQUEST[$key] : '';
@@ -2085,7 +2163,8 @@ class kitIdeaFrontend {
                         $value = $_REQUEST[dbIdeaProject::field_id];
                     } else {
                         $checked = false;
-                        $message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
+                        $message .= $this->lang->translate('<p>The field <b>{{ field }}</b> must contain a valid value!</p>',
+                                array('field' => $this->lang->translate(sprintf('label_%s', $key))));
                     }
                     if ($value != $article[$key]) {
                         $changed = true;
@@ -2100,7 +2179,8 @@ class kitIdeaFrontend {
                             $value = $_SESSION[kitContactInterface::session_kit_contact_id];
                         } else {
                             $checked = false;
-                            $message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
+                            $message .= $this->lang->translate('<p>The field <b>{{ field }}</b> must contain a valid value!</p>',
+                                array('field' => $this->lang->translate(sprintf('label_%s', $key))));
                         }
                         if ($value != $article[$key]) {
                             $changed = true;
@@ -2118,7 +2198,8 @@ class kitIdeaFrontend {
                         $value = $_REQUEST[dbIdeaProjectArticles::field_content_html];
                     } else {
                         $checked = false;
-                        $message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
+                        $message .= $this->lang->translate('<p>The field <b>{{ field }}</b> must contain a valid value!</p>',
+                                array('field' => $this->lang->translate(sprintf('label_%s', $key))));
                     }
                     if ($value != $article[$key]) {
                         $changed = true;
@@ -2127,7 +2208,8 @@ class kitIdeaFrontend {
                     if (empty($value)) {
                         // must fields should not be empty!
                         $checked = false;
-                        $message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
+                        $message .= $this->lang->translate('<p>The field <b>{{ field }}</b> must contain a valid value!</p>',
+                                array('field' => $this->lang->translate(sprintf('label_%s', $key))));
                     }
                     break;
                 case dbIdeaProjectArticles::field_id:
@@ -2147,7 +2229,8 @@ class kitIdeaFrontend {
                     if (empty($value) && ($must_field == true)) {
                         // must fields should not be empty!
                         $checked = false;
-                        $message .= sprintf(idea_msg_project_must_field_missing, constant(sprintf('idea_label_%s', $key)));
+                        $message .= $this->lang->translate('<p>The field <b>{{ field }}</b> must contain a valid value!</p>',
+                                array('field' => $this->lang->translate(sprintf('label_%s', $key))));
                     }
             endswitch
             ;
@@ -2356,8 +2439,10 @@ class kitIdeaFrontend {
 
         // create array for delete section
         $delete_array = array();
-        $delete_array[] = array('value' => - 1,
-        'text' => idea_str_please_select);
+        $delete_array[] = array(
+                'value' => - 1,
+                'text' => $this->lang->translate('- please select -')
+                );
         if (count($sections) > 1) {
             foreach ($sections as $section) {
                 $delete_array[] = array(
@@ -2367,8 +2452,8 @@ class kitIdeaFrontend {
         }
 
         $data = array(
-                'head' => idea_head_section_edit,
-                'intro' => $this->isMessage() ? $this->getMessage() : idea_intro_section_edit,
+                'head' => $this->lang->translate('Edit sections'),
+                'intro' => $this->isMessage() ? $this->getMessage() : $this->lang->translate('intro_section_edit'),
                 'is_message' => $this->isMessage() ? 1 : 0,
                 'page_link' => $this->page_link,
                 'form' => array(
@@ -2381,19 +2466,19 @@ class kitIdeaFrontend {
                 'sections' => array(
                         'navigation' => array(
                                 'tabs' => $section_array,
-                                'hint' => idea_hint_section_tab_move
+                                'hint' => $this->lang->translate('hint_section_tab_move')
                                 ),
                         'add' => array(
-                                'label' => idea_label_section_add,
+                                'label' => $this->lang->translate('label_section_add'),
                                 'name' => self::REQUEST_SECTION_ADD,
                                 'value' => '',
-                                'hint' => idea_hint_section_add
+                                'hint' => $this->lang->translate('hint_section_add')
                                 ),
                         'delete' => array(
-                                'label' => idea_label_section_delete,
+                                'label' => $this->lang->translate('label_section_delete'),
                                 'name' => self::REQUEST_SECTION_DELETE,
                                 'values' => $delete_array,
-                                'hint' => idea_hint_section_delete
+                                'hint' => $this->lang->translate('hint_section_delete')
                                 )
                         ),
                 'main_action' => array(
@@ -2466,7 +2551,8 @@ class kitIdeaFrontend {
                 $value = trim($_REQUEST[$section[dbIdeaProjectSections::field_identifier]]);
                 if ($section[dbIdeaProjectSections::field_text] != $value) {
                     if (empty($value)) {
-                        $message .= sprintf(idea_msg_section_text_empty, $section[dbIdeaProjectSections::field_text]);
+                        $message .= $this->lang->translate('<p>The name for the section <b>{{ section }}</b> should not empty!</p>',
+                                array('section' => $section[dbIdeaProjectSections::field_text]));
                         $checked = false;
                         continue;
                     }
@@ -2480,7 +2566,8 @@ class kitIdeaFrontend {
                             $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
                             return false;
                         }
-                        $message .= sprintf(idea_msg_section_text_updated, $section[dbIdeaProjectSections::field_text], $value);
+                        $message .= $this->lang->translate('<p>The name for the section <b>{{ old_name }}</b> was changed to <b>{{ new_name }}</b>',
+                                array('old_name', $section[dbIdeaProjectSections::field_text], 'new_name' => $value));
                     }
                 }
             }
@@ -2499,7 +2586,8 @@ class kitIdeaFrontend {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
                     return false;
                 }
-                $message .= sprintf(idea_msg_section_inserted, $value);
+                $message .= $this->lang->translate('<p>The section <b>{{ section }}</b> was inserted.</p>',
+                        array('section' => $value));
             }
         }
 
@@ -2535,7 +2623,8 @@ class kitIdeaFrontend {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectSections->getError()));
                     return false;
                 }
-                $message .= sprintf(idea_msg_section_deleted, $article[0][dbIdeaProjectSections::field_text]);
+                $message .= $this->lang->translate('<p>The section <b>{{ section }}</b> was deleted.</p>',
+                        array('section' => $article[0][dbIdeaProjectSections::field_text]));
             } else {
                 // section is not empty and cant deleted
                 $where = array(
@@ -2551,7 +2640,8 @@ class kitIdeaFrontend {
                                     array('id' => $identifier))));
                     return false;
                 }
-                $message .= sprintf(idea_msg_section_not_empty, $article[0][dbIdeaProjectSections::field_text]);
+                $message .= $this->lang->translate('<p>The section <b>{{ section }}</b> contains one or more articles and can\'t deleted!</p>',
+                        array('section' => $article[0][dbIdeaProjectSections::field_text]));
                 $checked = false;
             }
         }
@@ -2566,7 +2656,8 @@ class kitIdeaFrontend {
         global $dbIdeaProjectUsers;
 
         if (! isset($_REQUEST[self::REQUEST_COMMAND]) || empty($_REQUEST[self::REQUEST_COMMAND])) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_invalid));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: Invalid command. You will get this prompt also if the command was already executed or if the command is timed out and no longer valid.')));
             return false;
         }
 
@@ -2579,19 +2670,22 @@ class kitIdeaFrontend {
             return false;
         }
         if (count($command) < 1) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_invalid));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: Invalid command. You will get this prompt also if the command was already executed or if the command is timed out and no longer valid.')));
             return false;
         }
         $command = $command[0];
         if ($command[dbKITformCommands::FIELD_TYPE] != dbKITformCommands::TYPE_IDEA_EMAIL_INFO) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_unknown));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: Unknown command. Please contact the service!')));
             return false;
         }
         $params = array();
         parse_str($command[dbKITformCommands::FIELD_PARAMS], $params);
 print_R($params);
         if (! isset($params['project_group']) || !isset($params['contact']) || ! isset($params['email_info']) || ! isset($params['kit_id'])) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, idea_error_command_params_invalid));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: Invalid command - missing parameters, please contact the service!')));
             return false;
         }
         $where = array(
@@ -2613,7 +2707,8 @@ print_R($params);
         }
 
         $einfo = $dbIdeaProjectUsers->email_info_array[$params['email_info']];
-        $message = sprintf(idea_msg_email_info_changed, $params['contact'][kitContactInterface::kit_email], $einfo['text']);
+        $message = $this->lang->translate('<p>The automatic reports for the email address <b>{{ email }}</b> where changed to <b>{{ report }}</b>.</p>',
+                array('email' => $params['contact'][kitContactInterface::kit_email], 'report' => $einfo['text']));
         return $message;
     } // projectCommand()
 

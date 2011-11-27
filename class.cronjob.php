@@ -139,7 +139,9 @@ class ideaCronjob {
         try {
             $result = $parser->get($this->getTemplatePath().$template, $template_data);
         } catch (Exception $e) {
-            $this->setError(sprintf(idea_error_template_error, $template, $e->getMessage()));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error executing the template <b>{{ template }}</b>: {{ error }}',
+                            array('template' => $template, 'error' => $e->getMessage()))));
             return false;
         }
         return $result;
@@ -157,14 +159,18 @@ class ideaCronjob {
 
         $time = $dbIdeaCfg->getValue(dbIdeaCfg::cfgMailDeliverDaily);
         if (false === strpos($time, ':')) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_time_invalid, $time)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: Invalid time: <b>{{ time }}</b>.',
+                            array('time' => $time))));
             return false;
         }
         list($hour, $minute) = explode(':', $time);
         $hour = intval($hour);
         $minute = intval($minute);
         if (($hour < 0) || ($hour > 23) || !is_int($minute) || ($minute < 0) || ($minute > 59)) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_time_invalid, $time)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: Invalid time: <b>{{ time }}</b>.',
+                            array('time' => $time))));
             return false;
         }
         $value = date('Y-m-d H:i:s', mktime($hour, $minute, 0, date('n'), date('j')+1, date('Y')));
@@ -200,24 +206,32 @@ class ideaCronjob {
 
         $weekly = $dbIdeaCfg->getValue(dbIdeaCfg::cfgMailDeliverWeekly);
         if (false === strpos($weekly, '|')) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_weekday_time_invalid, $weekly)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: Invalid value for weekday and time, needed: WEEKDAY|HH:MM, submitted: <b>{{ weekday }}</b>.',
+                            array('weekday' => $weekly))));
             return false;
         }
         list($dow, $time) = explode('|', $weekly);
         $dow = intval($dow);
         if (($dow < 0) || ($dow > 6)) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_weekday_invalid, $weekly)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: Invalid value for the weekday, needed 0-6, submitted: <b>{{ weekday }}</b>.',
+                            array('weekday' => $weekly))));
             return false;
         }
         if (false === strpos($time, ':')) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_time_invalid, $weekly)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: Invalid time: <b>{{ time }}</b>.',
+                            array('time' => $weekly))));
             return false;
         }
         list($hour, $minute) = explode(':', $time);
         $hour = intval($hour);
         $minute = intval($minute);
         if (($hour < 0) || ($hour > 23) || !is_int($minute) || ($minute < 0) || ($minute > 59)) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_time_invalid, $weekly)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: Invalid time: <b>{{ time }}</b>.',
+                            array('time' => $weekly))));
             return false;
         }
         $next = strtotime("next ".$this->days_of_week[intval($dow)]);
@@ -254,24 +268,32 @@ class ideaCronjob {
 
         $monthly = $dbIdeaCfg->getValue(dbIdeaCfg::cfgMailDeliverMonthly);
         if (false === strpos($monthly, '|')) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_monthday_time_invalid, $monthly)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: Invalid value for the day of month and the time, needed: DAY_OF_MONTH|HH:MM, submitted: <b>{{ value }}</b>.',
+                            array('value' => $monthly))));
             return false;
         }
         list($dom, $time) = explode('|', $monthly);
         $dom = intval($dom);
         if (($dom < 1) || ($dom > 31)) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_monthday_invalid, $monthly)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: Invalid value for the day of month, needed: 1-31, submitted: <b>{{ day }}</b>.',
+                            array('day' => $monthly))));
             return false;
         }
         if (false === strpos($time, ':')) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_time_invalid, $monthly)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: Invalid time: <b>{{ time }}</b>.',
+                            array('time' => $monthly))));
             return false;
         }
         list($hour, $minute) = explode(':', $time);
         $hour = intval($hour);
         $minute = intval($minute);
         if (($hour < 0) || ($hour > 23) || !is_int($minute) || ($minute < 0) || ($minute > 59)) {
-            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(idea_error_time_invalid, $monthly)));
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                    $this->lang->translate('Error: Invalid time: <b>{{ time }}</b>.',
+                            array('time' => $monthly))));
             return false;
         }
         $next = strtotime("next Month");

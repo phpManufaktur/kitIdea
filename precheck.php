@@ -43,22 +43,24 @@ $PRECHECK['WB_ADDONS'] = array(
 	'kit_tools' => array('VERSION' => '0.15', 'OPRATOR' => '>='),
 	'kit' => array('VERSION' => '0.45', 'OPERATOR' => '>='),
 	'kit_form' => array('VERSION' => '0.22', 'OPERATOR' => '>='),
-	'kit_dirlist' => array('VERSION' => '0.25', 'OPERATOR' => '>=')
+	'kit_dirlist' => array('VERSION' => '0.26', 'OPERATOR' => '>=')
 );
 
 global $database;
+// check for UTF-8 charset
+$charset = 'utf-8';
 $sql = "SELECT `value` FROM `".TABLE_PREFIX."settings` WHERE `name`='default_charset'";
 $result = $database->query($sql);
 if ($result) {
-	$data = $result->fetchRow(MYSQL_ASSOC);
-	$PRECHECK['CUSTOM_CHECKS'] = array(
-		'Default Charset' => array(
-			'REQUIRED' => 'utf-8',
-			'ACTUAL' => $data['value'],
-			'STATUS' => ($data['value'] === 'utf-8')
-		)
-	);
+    $data = $result->fetchRow(MYSQL_ASSOC);
+    $charset = $data['value'];
 }
+// jQueryAdmin should be uninstalled
+$jqa = (file_exists(WB_PATH.'/modules/jqueryadmin/tool.php')) ? 'NO' : 'YES';
+$PRECHECK['CUSTOM_CHECKS'] = array(
+        'Default Charset' => array('REQUIRED' => 'utf-8', 'ACTUAL' => $charset,	'STATUS' => ($charset === 'utf-8')),
+        'REMOVED: jQueryAdmin' => array('REQUIRED' => 'YES', 'ACTUAL' => $jqa, 'STATUS' => ($jqa === 'YES'))
+);
 
 
 ?>
