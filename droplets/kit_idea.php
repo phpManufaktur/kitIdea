@@ -22,7 +22,7 @@ if (file_exists(WB_PATH.'/modules/kit_idea/class.frontend.php')) {
 	$params = $idea->getParams();
 	$params[kitIdeaFrontend::PARAM_PRESET] = (isset($preset)) ? (int) $preset : 1;
 	$params[kitIdeaFrontend::PARAM_CSS] = (isset($css) && (strtolower($css) == 'false')) ? false : true;
-	$params[kitIdeaFrontend::PARAM_JS] = (isset($js) && (strtolower($js) == 'false')) ? false : true;
+	//$params[kitIdeaFrontend::PARAM_JS] = (isset($js) && (strtolower($js) == 'false')) ? false : true;
 	$params[kitIdeaFrontend::PARAM_SEARCH] = (isset($search) && (strtolower($search) == 'false')) ? false : true;
 	$params[kitIdeaFrontend::PARAM_SECTION_ABOUT] = (isset($section_about) && (strtolower($section_about) == 'false')) ? false : true;
 	$params[kitIdeaFrontend::PARAM_SECTION_FILES] = (isset($section_files) && (strtolower($section_files) == 'false')) ? false : true;

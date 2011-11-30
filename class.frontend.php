@@ -9,27 +9,24 @@
  * @version $Id$
  */
 
-// try to include LEPTON class.secure.php to protect this file and the whole CMS!
+// include class.secure.php to protect this file and the whole CMS!
 if (defined('WB_PATH')) {
-    if (defined('LEPTON_VERSION')) include (WB_PATH . '/framework/class.secure.php');
-} elseif (file_exists($_SERVER['DOCUMENT_ROOT'] . '/framework/class.secure.php')) {
-    include ($_SERVER['DOCUMENT_ROOT'] . '/framework/class.secure.php');
+	if (defined('LEPTON_VERSION')) include(WB_PATH.'/framework/class.secure.php');
 } else {
-    $subs = explode('/', dirname($_SERVER['SCRIPT_NAME']));
-    $dir = $_SERVER['DOCUMENT_ROOT'];
-    $inc = false;
-    foreach ($subs as $sub) {
-        if (empty($sub)) continue;
-        $dir .= '/' . $sub;
-        if (file_exists($dir . '/framework/class.secure.php')) {
-            include ($dir . '/framework/class.secure.php');
-            $inc = true;
-            break;
-        }
-    }
-    if (! $inc) trigger_error(sprintf("[ <b>%s</b> ] Can't include LEPTON class.secure.php!", $_SERVER['SCRIPT_NAME']), E_USER_ERROR);
+	$oneback = "../";
+	$root = $oneback;
+	$level = 1;
+	while (($level < 10) && (!file_exists($root.'/framework/class.secure.php'))) {
+		$root .= $oneback;
+		$level += 1;
+	}
+	if (file_exists($root.'/framework/class.secure.php')) {
+		include($root.'/framework/class.secure.php');
+	} else {
+		trigger_error(sprintf("[ <b>%s</b> ] Can't include class.secure.php!", $_SERVER['SCRIPT_NAME']), E_USER_ERROR);
+	}
 }
-// end include LEPTON class.secure.php
+// end include class.secure.php
 
 
 // load the required libraries
@@ -1662,20 +1659,25 @@ class kitIdeaFrontend {
             foreach ($protocols as $protocol) {
                 // gather info about the author
                 $author = array();
-                if (!$kitContactInterface->getContact($protocol[dbIdeaStatusChange::FIELD_KIT_ID], $author)) {
-                    $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
-                    return false;
+                if ($protocol[dbIdeaStatusChange::FIELD_KIT_ID] > 0) {
+                    if (!$kitContactInterface->getContact($protocol[dbIdeaStatusChange::FIELD_KIT_ID], $author)) {
+                        $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+                        return false;
+                    }
+                    if (!empty($author[kitContactInterface::kit_first_name]) && ! empty($author[kitContactInterface::kit_last_name])) {
+                        $name = sprintf('%s %s', $author[kitContactInterface::kit_first_name], $author[kitContactInterface::kit_last_name]);
+                    } elseif (! empty($author[kitContactInterface::kit_last_name])) {
+                        $name = $author[kitContactInterface::kit_last_name];
+                    } elseif (! empty($author[kitContactInterface::kit_first_name])) {
+                        $name = $author[kitContactInterface::kit_first_name];
+                    } else {
+                        $name = $author[kitContactInterface::kit_email];
+                    }
                 }
-                if (!empty($author[kitContactInterface::kit_first_name]) && ! empty($author[kitContactInterface::kit_last_name])) {
-                    $name = sprintf('%s %s', $author[kitContactInterface::kit_first_name], $author[kitContactInterface::kit_last_name]);
-                } elseif (! empty($author[kitContactInterface::kit_last_name])) {
-                    $name = $author[kitContactInterface::kit_last_name];
-                } elseif (! empty($author[kitContactInterface::kit_first_name])) {
-                    $name = $author[kitContactInterface::kit_first_name];
-                } else {
-                    $name = $author[kitContactInterface::kit_email];
+                else {
+                    // anonymous author ...
+                    $name = $this->lang->translate('Anonymous');
                 }
-
                 $items[] = array(
                                 'info' => $protocol[dbIdeaStatusChange::FIELD_INFO],
                                 'date' => $protocol[dbIdeaStatusChange::FIELD_INFO_DATE],

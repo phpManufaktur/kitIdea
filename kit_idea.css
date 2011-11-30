@@ -100,8 +100,21 @@ input[name=kit_zip] {
 input[name=kit_city] {
   width: auto;
 }
-.project_sections,
-.nav_tab
+#idea_frontend h2,
+#idea_frontend h3,
+#idea_frontend h4
+{
+  text-align: left;
+  font-weight: bold;
+  font-variant: normal;
+  font-size: 12pt;
+  color: #000;
+  background-color: transparent;
+  background-image: none;
+}
+
+#idea_frontend ul.project_sections,
+#idea_frontend ul.nav_tab
 {
   padding: 3px 0 3px 10px;
   margin: 15px 0;
@@ -109,17 +122,17 @@ input[name=kit_city] {
   list-style-type: none;
   text-align: right; /*set to left, center, or right to align the menu as desired*/
 }
-.project_sections {
+#idea_frontend ul.project_sections {
   text-align: left;
 }
-.project_sections li,
-.nav_tab li
+#idea_frontend ul.project_sections li,
+#idea_frontend ul.nav_tab li
 {
   display: inline;
   margin: 0;
 }
-.project_sections li a,
-.nav_tab li a
+#idea_frontend ul.project_sections li a,
+#idea_frontend ul.nav_tab li a
 {
   text-decoration: none;
   padding: 3px 7px;
@@ -128,10 +141,10 @@ input[name=kit_city] {
   border-bottom: none;
   background-color: #E8E8E8;
 }
-.project_sections li a:link,
-.project_sections li a:visited,
-.nav_tab li a:link,
-.nav_tab li a:visited
+#idea_frontend ul.project_sections li a:link,
+#idea_frontend ul.project_sections li a:visited,
+#idea_frontend ul.nav_tab li a:link,
+#idea_frontend ul.nav_tab li a:visited
 {
   color: #AFAFAF;
   background-color: #e8e8e8;
@@ -141,16 +154,16 @@ input[name=kit_city] {
   color:#003366;
   background-color: #e8e8e8;
 }
-.project_sections li a:hover,
-.project_sections li a:active,
-.nav_tab li a:hover,
-.nav_tab li a:active
+#idea_frontend ul.project_sections li a:hover,
+#idea_frontend ul.project_sections li a:active,
+#idea_frontend ul.nav_tab li a:hover,
+#idea_frontend ul.nav_tab li a:active
 {
   background-color: #FFFFCC;
   color: #000;
 }
-.project_sections li.selected a,
-.nav_tab li.selected a
+#idea_frontend ul.project_sections li.selected a,
+#idea_frontend ul.nav_tab li.selected a
 { /*selected tab effect*/
   position: relative;
   top: 1px;
@@ -175,6 +188,9 @@ input[name=kit_city] {
 }
 .idea_project_author,
 .idea_article_author {
+  font-size: 8pt;
+  color: #6d6d6d;
+  background-color: transparent;
   margin: 10px 0 10px 0;
   text-align: right;
   font-style: italic;
@@ -201,13 +217,16 @@ input[name=kit_city] {
 }
 
 .protocol_item {
-  margin: 10px 0 20px 0;
-  font-size: 8pt;
+  margin: 5px 0 10px 0;
+  font-size: 7pt;
 }
 .protocol_item_info {
   
 }
 .protocol_item_author {
+  font-size: 6pt;
   text-align: right;
   font-style: italic;
+  color: #6d6d6d;
+  background-color: transparent;
 }

@@ -17,7 +17,8 @@
 <script type="text/javascript">
   var WB_URL = '{$WB_URL}';
 </script>
-<div class="idea_frontend"><a name="{$anchor}"></a>
+[[LibInclude?lib=lib_jquery&preset=code]]
+<div id="idea_frontend"><a name="{$anchor}"></a>
   <ul class="nav_tab">
   {foreach $navigation nav}
     {if $nav.active == 1}
@@ -30,8 +31,8 @@
 {if $error == 1}
   <div class="error">
 {else}
-  <div>
+  <div class="idea_content">
 {/if}
     {$content}
-  </div>
-</div>
+  </div><!-- /idea_content -->
+</div><!-- /idea_frontend -->
