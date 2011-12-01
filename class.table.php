@@ -232,16 +232,16 @@ class calcTable {
 	    switch ($calculateCommand) {
 	        case 'sum':
 	            // calculate sum
-	            return $this->calculateSum($cell_ID, $values, &$content, $cell_array, $command, $result);
+	            return $this->calculateSum($cell_ID, $values, $content, $cell_array, $command, $result);
 	        case 'mul':
 	            // calculate mutliplication
-	            return $this->calculateMul($cell_ID, $values, &$content, $cell_array, $command, $result);
+	            return $this->calculateMul($cell_ID, $values, $content, $cell_array, $command, $result);
 	        case 'sub':
 	            // calculate substraction
-	            return $this->calculateSub($cell_ID, $values, &$content, $cell_array, $command, $result);
+	            return $this->calculateSub($cell_ID, $values, $content, $cell_array, $command, $result);
 	        case 'div':
 	            // calculate substraction
-	            return $this->calculateDiv($cell_ID, $values, &$content, $cell_array, $command, $result);
+	            return $this->calculateDiv($cell_ID, $values, $content, $cell_array, $command, $result);
 	        default:
 	            // unknown command
 	            $this->setMessage(sprintf('[%s - %s] %s', __METHOD__, __LINE__,

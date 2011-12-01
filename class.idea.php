@@ -1218,6 +1218,86 @@ class dbIdeaTableSort extends dbConnectLE {
 
 
 } // class dbIdeaTableSort
+<<<<<<< .mine
+
+/*
+class dbIdeaProjectAccess extends dbConnectLE {
+
+	const field_id						= 'access_id';
+	const field_kit_category	= 'access_kit_category';
+	const field_rights				=	'access_rights';
+	const field_timestamp			= 'access_timestamp';
+
+	// rights: general
+	const no_access						= 0;
+
+	// rights: project
+	const project_view				= 1;
+	const project_create			= 2;
+	const project_edit				= 4;
+	const project_lock				= 8;
+	const project_delete			= 16;
+
+	// rights: articles
+	const article_view				= 32;
+	const article_create			= 64;
+	const article_edit				= 128;
+	const article_edit_html		= 16777216;
+	const article_move				= 256;
+	const article_lock				= 512;
+	const article_delete			= 1024;
+
+	// rights: sections
+	const section_view				= 2048;
+	const section_create			= 4096;
+	const section_edit				= 8192;
+	const section_move				= 16384;
+	const section_delete			= 32768;
+
+	// rights: files
+	const file_download				= 65536;
+	const file_upload					= 131072;
+	const file_delete_file		= 262144;
+	const file_rename_file		= 524288;
+	const file_create_dir			= 1048576;
+	const file_rename_dir			= 2097152;
+	const file_delete_dir			= 4194304;
+
+	// rights: admins
+	const admin_change_rights	= 8388608;
+
+	// default rights
+	var $default_visitor			= -1;
+	var $default_editor				= -1;
+
+	private $create_tables = false;
+
+	public function __construct($create_tables=false) {
+		$this->create_tables = $create_tables;
+		$this->default_visitor = self::project_view | self::article_view | self::section_view | self::file_download;
+		$this->default_editor  = self::project_create|self::project_delete|self::project_edit|self::project_lock|self::project_view|self::article_create|self::article_edit|self::article_lock|self::article_move|self::article_view|self::section_create|self::section_edit|self::section_move|self::section_view|self::file_download|self::file_upload;
+		parent::__construct();
+		$this->setTableName('mod_kit_idea_project_access');
+		$this->addFieldDefinition(self::field_id, "INT(11) NOT NULL AUTO_INCREMENT", true);
+		$this->addFieldDefinition(self::field_kit_category, "VARCHAR(64) NOT NULL DEFAULT ''");
+		$this->addFieldDefinition(self::field_rights, "INT(11) NOT NULL DEFAULT '".$this->default_editor."'");
+		$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
+		$this->checkFieldDefinitions();
+		if ($this->create_tables) {
+			if (!$this->sqlTableExists()) {
+				if (!$this->sqlCreateTable()) {
+					$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->getError()));
+					return false;
+				}
+			}
+		}
+		date_default_timezone_set(idea_cfg_time_zone);
+	} // __construct()
+
+} // class dbIdeaProjectAccess
+*/
+
+=======
 
 class dbIdeaStatusChange extends dbConnectLE {
 
@@ -1282,4 +1362,5 @@ class dbIdeaStatusChange extends dbConnectLE {
 
 
 } // class dbIdeaStatusChange
+>>>>>>> .r28
 ?>
