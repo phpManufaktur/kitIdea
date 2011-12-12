@@ -57,10 +57,10 @@ if ($result) {
     $charset = $data['value'];
 }
 // jQueryAdmin should be uninstalled
-$jqa = (file_exists(WB_PATH.'/modules/jqueryadmin/tool.php')) ? 'NO' : 'YES';
+$jqa = (file_exists(WB_PATH.'/modules/jqueryadmin/tool.php')) ? 'INSTALLED' : 'UNINSTALLED';
 $PRECHECK['CUSTOM_CHECKS'] = array(
         'Default Charset' => array('REQUIRED' => 'utf-8', 'ACTUAL' => $charset,	'STATUS' => ($charset === 'utf-8')),
-        'REMOVED: jQueryAdmin' => array('REQUIRED' => 'YES', 'ACTUAL' => $jqa, 'STATUS' => ($jqa === 'YES'))
+        'jQueryAdmin (replaced by LibraryAdmin)' => array('REQUIRED' => 'UNINSTALLED', 'ACTUAL' => $jqa, 'STATUS' => ($jqa === 'UNINSTALLED'))
 );
 
 
