@@ -3,6 +3,10 @@ kitIdea
 Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
+Release 0.23
+2012-01-31
+added: projects can now moved between the different project groups
+
 Release 0.22
 2011-11-27
 added: the used toolbar of the WYSIWYG editor now depends on the permission

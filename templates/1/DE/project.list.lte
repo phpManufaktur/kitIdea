@@ -23,6 +23,11 @@
   <input id="sorter_active" type="hidden" name="sorter_active" value="{$sorter_active}" />
   {/if}  
   {if $projects.count > 0}
+  {if (isset($message) && (count_characters($message) > 0))}
+  <div class="message">
+  	{$message}
+  </div>
+  {/if}
   <div{if $access.project.move == 1} id="sorter"{/if}>
     {* <div id="response"></div> remove comment to get jQuery responses for the sorter! *}
     <table width="100%">

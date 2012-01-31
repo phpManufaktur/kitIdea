@@ -565,6 +565,11 @@ class kitIdeaBackend {
     								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_move)
     								),
     							array(
+    							    'value'	=> dbIdeaProjectGroups::project_move_group,
+    								'text' => $this->lang->translate('label_access_project_move_group'),
+    								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_move_group)
+    								),
+    							array(
     							    'value' => dbIdeaProjectGroups::project_lock,
     								'text' => $this->lang->translate('label_access_project_lock'),
     								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($value, dbIdeaProjectGroups::project_lock)
@@ -1160,18 +1165,30 @@ class kitIdeaBackend {
 					array('value'	=> dbIdeaProjectGroups::project_view,
 								'text' => $this->lang->translate('label_access_project_view'),
 								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::project_view)),
-					array('value'	=> dbIdeaProjectGroups::project_create,
-								'text' => $this->lang->translate('label_access_project_create'),
-								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::project_create)),
-					array('value'	=> dbIdeaProjectGroups::project_edit,
-								'text' => $this->lang->translate('label_access_project_edit'),
-								'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::project_edit)),
+					array(
+					        'value'	=> dbIdeaProjectGroups::project_create,
+							'text' => $this->lang->translate('label_access_project_create'),
+							'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::project_create)),
+					array(
+					        'value'	=> dbIdeaProjectGroups::project_edit,
+							'text' => $this->lang->translate('label_access_project_edit'),
+							'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::project_edit)),
 					array(
 					        'value' => dbIdeaProjectGroups::project_edit_html,
     						'text' => $this->lang->translate('Edit (HTML)'),
     						'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::project_edit_html)
     						),
     				array(
+					        'value' => dbIdeaProjectGroups::project_move,
+    						'text' => $this->lang->translate('Move'),
+    						'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::project_move)
+    						),
+    				array(
+    					    'value'	=> dbIdeaProjectGroups::project_move_group,
+    						'text' => $this->lang->translate('label_access_project_move_group'),
+    						'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::project_move_group)
+    						),
+    			    array(
     				        'value'	=> dbIdeaProjectGroups::project_lock,
 							'text' => $this->lang->translate('label_access_project_lock'),
 							'checked' => (int) $dbIdeaProjectGroups->checkPermissions($access_rights, dbIdeaProjectGroups::project_lock)),

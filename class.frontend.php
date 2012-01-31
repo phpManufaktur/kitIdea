@@ -57,6 +57,7 @@ class kitIdeaFrontend {
     const REQUEST_SECTION_DELETE = 'secd';
     const REQUEST_COMMAND = 'kic'; // DONT CHANGE, also defined in class.cronjob.php!
     const REQUEST_REVISION_RESTORE = 'rr';
+    const REQUEST_PROJECT_MOVE = 'pmov';
 
     const ACTION_ACCOUNT = 'acc';
     const ACTION_DEFAULT = 'def';
@@ -1100,7 +1101,8 @@ class kitIdeaFrontend {
                 'access' => $dbIdeaProjectGroups->getAccessArray($is_authenticated, $_SESSION[self::SESSION_USER_ACCESS]),
                 'sorter_table' => $sorter_table, 'sorter_active' => $sorter_active,
                 'sorter_value' => $this->params[self::PARAM_PROJECT_GROUP],
-                'sorter_item' => 0
+                'sorter_item' => 0,
+                'message' => ($this->isMessage()) ? $this->getMessage() : ''
                 );
 
         return $this->getTemplate('project.list.lte', $data);
@@ -1147,6 +1149,40 @@ class kitIdeaFrontend {
         $wysiwyg_width = $dbIdeaCfg->getValue(dbIdeaCfg::cfgWYSIWYGeditorWidth);
         $toolbar = ($this->accountIsAuthenticated() && $dbIdeaProjectGroups->checkPermissions($_SESSION[self::SESSION_USER_ACCESS], dbIdeaProjectGroups::project_edit_html)) ? 'Admin' : 'User';
 
+        // get all projects to enable moving projects
+        $SQL = sprintf("SELECT %s,%s FROM %s WHERE %s!='%s' AND %s='%s' ORDER BY %s ASC",
+                dbIdeaProjectGroups::field_id,
+                dbIdeaProjectGroups::field_name,
+                $dbIdeaProjectGroups->getTableName(),
+                dbIdeaProjectGroups::field_id,
+                $project[dbIdeaProject::field_project_group],
+                dbIdeaProjectGroups::field_status,
+                dbIdeaProjectGroups::status_active,
+                dbIdeaProjectGroups::field_name);
+        $result = array();
+        if (!$dbIdeaProjectGroups->sqlExec($SQL, $result)) {
+            $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectGroups->getError()));
+            return false;
+        }
+        $items = array();
+        $items[] = array(
+                'text' => $this->lang->translate('- no change -'),
+                'value' => -1,
+                );
+        foreach ($result as $group) {
+            $items[] = array(
+                    'text' => $group[dbIdeaProjectGroups::field_name],
+                    'value' => $group[dbIdeaProjectGroups::field_id],
+                    );
+        }
+        $project_move = array(
+                'name' => self::REQUEST_PROJECT_MOVE,
+                'value' => -1,
+                'label' => $this->lang->translate('Move project'),
+                'hint' => $this->lang->translate('You can move this project to another project group, please select the target.'),
+                'items' => $items
+                );
+        
         $items = array();
         foreach ($project as $name => $value) {
             $its = array();
@@ -1168,6 +1204,8 @@ class kitIdeaFrontend {
                     'hint' => $this->lang->translate(sprintf('hint_%s', $name))
                     );
         }
+        $is_authenticated = $this->accountIsAuthenticated() ? true : false;
+        
         $data = array(
                 'head' => ($project_id < 1) ? $this->lang->translate('Create {{ project }}', array('project' => $this->project_singular)) : $this->lang->translate('Edit {{ project }}', array('project' => $this->project_singular)),
                 'intro' => ($this->isMessage()) ? $this->getMessage() : $this->lang->translate('With this dialog you can create a new {{ project }} or edit an existing {{ project }}', array('project' => $this->project_singular)),
@@ -1187,7 +1225,10 @@ class kitIdeaFrontend {
                 'project_action' => array(
                         'name' => self::REQUEST_PROJECT_ACTION,
                         'value' => self::ACTION_PROJECT_EDIT_CHECK
-                        )
+                        ),
+                'project_move' => $project_move,
+                'user_access' => $dbIdeaProjectGroups->getAccessArray($is_authenticated, $_SESSION[self::SESSION_USER_ACCESS]),
+                
                 );
         return $this->getTemplate('project.edit.lte', $data);
     } // projectProjectEdit()
@@ -1202,9 +1243,62 @@ class kitIdeaFrontend {
         global $dbIdeaProject;
         global $dbIdeaRevisionArchive;
         global $dbIdeaStatusChange;
+        global $dbIdeaProjectGroups;
 
         $project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : - 1;
 
+        if ($project_id > 0) {
+            $where = array(dbIdeaProject::field_id => $project_id);
+            $project = array();
+            if (! $dbIdeaProject->sqlSelectRecord($where, $project)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
+                return false;
+            }
+            if (count($project) < 1) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                        $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!',
+                                array('id' => $project_id))));
+                return false;
+            }
+            $project = $project[0];
+        } else {
+            $project = $dbIdeaProject->getFields();
+            $project[dbIdeaProject::field_id] = $project_id;
+        }
+        
+        if (($project_id > 0) && isset($_REQUEST[self::REQUEST_PROJECT_MOVE]) && ($_REQUEST[self::REQUEST_PROJECT_MOVE] > 0)) {
+            // move the project to another project group
+            $SQL = sprintf("SELECT %s FROM %s WHERE %s='%s'", 
+                    dbIdeaProjectGroups::field_name, 
+                    $dbIdeaProjectGroups->getTableName(),
+                    dbIdeaProjectGroups::field_id,
+                    $_REQUEST[self::REQUEST_PROJECT_MOVE]);
+            $result = array();
+            if (!$dbIdeaProjectGroups->sqlExec($SQL, $result)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectGroups->getError()));
+                return false;
+            }
+            if (count($result) < 1) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, 
+                        $this->lang->translate('The project group with the {{ id }} does not exists!', 
+                                array('id' => $_REQUEST[self::REQUEST_PROJECT_MOVE]))));
+                return false;
+            }
+            $where = array(
+                    dbIdeaProject::field_id => $project_id);
+            $data = array(
+                    dbIdeaProject::field_project_group => $_REQUEST[self::REQUEST_PROJECT_MOVE]);
+            if (!$dbIdeaProject->sqlUpdateRecord($data, $where)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProject->getError()));
+                return false;
+            }
+            $this->setMessage($this->lang->translate('The project {{ project }} is successfully moved to the project group {{ group }}.',
+                    array( 'project' => $project[dbIdeaProject::field_title],
+                           'group' => $result[0][dbIdeaProjectGroups::field_name])));
+            // show the project overview and prompt message
+            return $this->projectOverview();
+        }
+        
         if ($project_id > 0) {
             $where = array(dbIdeaProject::field_id => $project_id);
             $project = array();
@@ -1230,7 +1324,6 @@ class kitIdeaFrontend {
         $checked = true;
         $fields = $dbIdeaProject->getFields();
         $message = '';
-
         foreach ($fields as $key => $value) {
             $must_field = false;
             switch ($key) :

@@ -309,8 +309,9 @@ class dbIdeaProjectGroups extends dbConnectLE {
     const project_view = 1;
     const project_create = 2;
     const project_edit = 4;
-    const project_edit_html = 536870912; // last added
+    const project_edit_html = 536870912;
     const project_move = 33554432;
+    const project_move_group = 1073741824; // last added
     const project_lock = 8;
     const project_delete = 16;
     const project_view_protocol = 134217728;
@@ -355,6 +356,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
                     'edit' => self::project_edit,
                     'edit_html' => self::project_edit_html,
                     'move' => self::project_move,
+                    'move_group' => self::project_move_group,
                     'lock' => self::project_edit,
                     'delete' => self::project_delete,
                     'view_protocol' => self::project_view_protocol

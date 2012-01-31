@@ -31,6 +31,8 @@ if (defined('WB_PATH')) {
 $module_description = 'kitIdea ermöglicht das Formulieren, Teilen und gemeinsame Ausarbeiten von Ideen.';
 
 $LANG = array(
+        '- no change -'
+            => '- keine Änderung -',
         '- not defined -'
             => '- nicht definiert -',
         '- please select -'
@@ -122,6 +124,8 @@ $LANG = array(
             => 'Die Definition <b>{{ section }}</b> für einen Projektbereich ist ungültig. Die Definition muss einen <b>Text</b>, gefolgt von einer Pipe <b>|</b> und einen <b>eindeutigen Bezeichner</b> enthalten. Bitte prüfen Sie die kitIdea Einstellungen!',
         'Error: The preset directory <b>{{ directory }}</b> does not exists, can\'t load any template!'
             => 'Das Presetverzeichnis <b>{{ directory }}</b> existiert nicht, die erforderlichen Templates können nicht geladen werden!',
+        'Error: The project group with the ID {{ id }} does not exists!'
+            => 'Die Projektgruppe mit der ID {{ id }} existiert nicht!',
         'Error: There is no action defined for the key <b>{{ key }}</b>.'
             => 'Fataler Fehler: für den Schlüssel <b>{{ key }}</b> ist keine Aktion definiert!',
         'Error: This access is not allowed, please login first! <b>HINT:</b> You will get this prompt too, if you were inactive for some time and the session was automatically terminated. Just login again!'
@@ -397,7 +401,9 @@ $LANG = array(
         'label_access_project_lock'
             => 'Sperren',
         'label_access_project_move'
-            => 'Verschieben',
+            => 'Verschieben (Reihenfolge)',
+        'label_access_project_move_group'
+            => 'Verschieben (Gruppe)',
         'label_access_project_view'
             => 'Sehen',
         'label_access_rights'
@@ -521,6 +527,8 @@ $LANG = array(
             => 'monatliche Zusammenfassung',
         'Move'
             => 'Verschieben',
+        'Move project'
+            => 'Projekt verschieben',
         'Name'
             => "Name",
         'no E-Mail'
@@ -599,6 +607,8 @@ $LANG = array(
             => '<p>Die Bezeichnung für den Abschnitt <b>{{ section }}</b> darf nicht leer sein!</p>',
         '<p>The name for the section <b>{{ old_name }}</b> was changed to <b>{{ new_name }}</b>'
             => '<p>Die Bezeichnung für den Abschnitt <b>{{ old_name }}</b> wurde in <b>{{ new_name }}</b> geändert!</p>',
+        'The project {{ project }} is successfully moved to the project group {{ group }}.'
+            => '<p>Das Projekt <b>{{ project }}</b> wurde in die Projekt Gruppe <b>{{ group }}</b> verschoben.</p>',
         '<p>The project with the <b>ID {{ id }}</b> was successfully created.</p><p>You may insert now the first article!</p>'
             => '<p>Das Projekt mit der <b>ID {{ id }}</b> wurde erfolgreich angelegt.</p><p>Fügen Sie dem Projekt jetzt gleich den ersten Artikel hinzu!</p>',
         '<p>The project with the <b>ID {{ id }}</b> was updated.</p>'
@@ -635,5 +645,6 @@ $LANG = array(
             => 'WYSIWYG Toolbar, Admins',
         'WYSIWYG toolbar, authors'
             => 'WYSIWYG Toolbar, Autoren',
-
+        'You can move this project to another project group, please select the target.'
+            => 'Sie können dieses Projekt in eine andere Projektgruppe verscheiben, bitte wählen Sie das Ziel aus.'
         );

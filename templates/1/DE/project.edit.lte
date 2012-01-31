@@ -76,6 +76,19 @@
         </td>
         <td class="project_hint">{$project.project_access.hint}</td>
       </tr>
+      {if $user_access.project.move_group == 1}
+      <tr>
+      	<td class="project_label">{$project_move.label}</td>
+      	<td class="project_value">
+      	  <select name="{$project_move.name}">
+      		{foreach $project_move.items move}
+      		<option value="{$move.value}"{if $move.value == $project_move.value} selected="selected"{/if}>{$move.text}</option>
+      		{/foreach}
+          </select>
+      	</td>
+      	<td class="project_hint">{$project_move.hint}</td>
+      </tr>
+      {/if}
       <tr>
         <td class="project_label">{$project.project_status.label}</td>
         <td class="project_value">
