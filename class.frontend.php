@@ -2684,7 +2684,6 @@ class kitIdeaFrontend {
         }
         $params = array();
         parse_str($command[dbKITformCommands::FIELD_PARAMS], $params);
-print_R($params);
         if (! isset($params['project_group']) || !isset($params['contact']) || ! isset($params['email_info']) || ! isset($params['kit_id'])) {
             $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
                     $this->lang->translate('Error: Invalid command - missing parameters, please contact the service!')));
