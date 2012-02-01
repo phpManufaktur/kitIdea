@@ -193,7 +193,7 @@ $droplets = new checkDroplets();
 $droplets->droplet_path = WB_PATH.'/modules/kit_idea/droplets/';
 
 if ($droplets->insertDropletsIntoTable()) {
-    $message .= 'The droplets for kitIdea are successfully installed. Please check the documentation for information about the usage!';
+    $message .= 'The droplets for kitIdea are successfully installed.\n\nPlease check the kitIdea history for changes in the program and for changes in the templates (this is very important if you are using user defined templates!).';
 }
 else {
     $message .= sprintf('Error installing the droplets for kitIdea: %s', $droplets->getError());
@@ -223,5 +223,6 @@ foreach ($delete_files as $file) {
 if (!empty($error)) {
 	$admin->print_error($error);
 }
-
-?>
+else {
+    $admin->print_success('Thank you for using kitIdea!', WB_URL.'/admins/admintools/tool.php?tool=kit_idea&act=abt');
+}

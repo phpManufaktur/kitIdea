@@ -19,6 +19,9 @@
 </script>
 [[LibInclude?lib=lib_jquery&preset=code]]
 <div id="idea_frontend"><a name="{$anchor}"></a>
+  {if $user_status.active == 1}
+  <div class="user_status">{$user_status.text}</div>
+  {/if}
   <ul class="nav_tab">
   {foreach $navigation nav}
     {if $nav.active == 1}

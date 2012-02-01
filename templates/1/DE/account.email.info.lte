@@ -1,0 +1,59 @@
+{*
+ * kitIdea
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *
+ * Please consult the Dwoo Documentation & WIKI to get further informations 
+ * and hints for the usage of the Dwoo template engine.
+ *
+ * @link http://wiki.dwoo.org/
+ *
+ * Use {dump()} to get a list of all in this template available variables!
+ *}
+<div class="idea_frontend">
+  <form name="{$form.name}" action="{$page_link}" method="post">
+    <input type="hidden" name="{$main_action.name}" value="{$main_action.value}" />
+    <input type="hidden" name="{$account_action.name}" value="{$account_action.value}" />
+    <h2>{$head}</h2>
+    <div class="{if $is_message == 1}message{else}intro{/if}">{$intro}</div>
+    <table width="100%">
+      <colgroup>
+        <col width="130" /> 
+        <col width="*" />
+        <col width="200" />
+      </colgroup>
+      <tr><td colspan="3">&nbsp;</td></tr>
+      <tr>
+        <td class="project_label">{$email_info.label}</td>
+        <td class="project_value">
+          <select name="{$email_info.name}">
+          {foreach $email_info.items info}
+          <option value="{$info.value}"{if $info.value == $email_info.value} selected="selected"{/if}>{$info.text}</option>
+          {/foreach}
+          </select>
+        </td>
+        <td class="project_hint">{$email_info.hint}</td>
+      </tr>
+      <tr><td colspan="3">&nbsp;</td></tr>
+      <tr>
+        <td class="project_label">{$change_all.label}</td>
+        <td class="project_value">
+          <input type="checkbox" name="{$change_all.name}" value="1" /> {$change_all.text}
+        </td>
+        <td class="project_hint">{$change_all.hint}</td>
+      </tr>
+      <tr><td colspan="3">&nbsp;</td></tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td colspan="2">
+          <input type="submit" value="{$form.btn.ok}" />&nbsp;
+          <input type="button" value="{$form.btn.abort}" onclick="javascript: window.location = '{$page_link}'; return false;" />
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>

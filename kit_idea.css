@@ -230,3 +230,10 @@ input[name=kit_city] {
   color: #6d6d6d;
   background-color: transparent;
 }
+.user_status {
+    font-size: 7pt;
+    text-align: right;
+    font-style: italic;
+    color: #6d6d6d;
+    background-color: transparent;
+}

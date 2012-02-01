@@ -31,6 +31,7 @@ if (file_exists(WB_PATH.'/modules/kit_idea/class.frontend.php')) {
 	$params[kitIdeaFrontend::PARAM_LEPTON_GROUPS] = (isset($lepton_groups)) ? $lepton_groups : '';
 	$params[kitIdeaFrontend::PARAM_PROJECT_GROUP] = (isset($group)) ? $group : -1;
 	$params[kitIdeaFrontend::PARAM_LOG] = (isset($log)) ? strtolower($log) : '';
+	$params[kitIdeaFrontend::PARAM_USER_STATUS] = (isset($user_status) && (strtolower($user_status) == 'true')) ? true : false; 
 	if (!$idea->setParams($params)) return $idea->getError();
 	return $idea->action();
 }

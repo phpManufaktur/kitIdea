@@ -326,6 +326,11 @@ class ideaCronjob {
         global $dbCronjobData;
         global $dbIdeaProjectUsers;
 
+        if (!$dbIdeaCfg->getValue(dbIdeaCfg::cfgMailActive)) {
+            // if Mailing is not active leave immediate ...
+            exit();
+        }
+        
         $check_array = array(
                 self::IDEA_LAST_CALL,
                 self::IDEA_LAST_MAIL_DAILY,

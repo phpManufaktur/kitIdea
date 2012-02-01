@@ -3,9 +3,20 @@ kitIdea
 Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
+Release 0.24
+2012-02-01
+fixed: the cronjob does not check if the mailing function is switched off
+added: 'user_status' enable the user to see that they are logged in and to see
+  and set the email information mode.
+added: parameter 'user_status' = true|false in droplet kit_idea, default=false
+added template: please read /modules/kit_idea/templates/changes.txt for
+  more informations!
+
 Release 0.23
 2012-01-31
 added: projects can now moved between the different project groups
+changed templates: please read /modules/kit_idea/templates/changes.txt for
+  more informations!
 
 Release 0.22
 2011-11-27

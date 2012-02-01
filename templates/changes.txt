@@ -1,0 +1,41 @@
+kitIdea
+(c) 2011-2012 by phpManufaktur
+Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
+http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
+
+THIS FILE INFORMS YOU ABOUT CHANGES IN THE kitIdea STANDARD TEMPLATES.
+IF YOU ARE USING YOUR OWN TEMPLATES (PRESETS) PLEASE CHECK THE CHANGES AND
+ADAPT YOUR TEMPLATES IF NECESSARY.
+
+Release 0.24
+2012-02-01
+
+/templates/1/DE/account.email.info.lte - additional template
+
+Release 0.23
+2012-01-31
+
+/templates/1/DE/project.edit.lte - added lines 79 - 91:
+
+      {if $user_access.project.move_group == 1}
+      <tr>
+      	<td class="project_label">{$project_move.label}</td>
+      	<td class="project_value">
+      	  <select name="{$project_move.name}">
+      		{foreach $project_move.items move}
+      		<option value="{$move.value}"{if $move.value == $project_move.value} selected="selected"{/if}>{$move.text}</option>
+      		{/foreach}
+          </select>
+      	</td>
+      	<td class="project_hint">{$project_move.hint}</td>
+      </tr>
+      {/if}
+
+ /templates/1/DE/project.list.lte - added lines 26 - 30:
+ 
+   	{if (isset($message) && (count_characters($message) > 0))}
+	<div class="message">
+	  	{$message}
+	</div>
+  	{/if}
+ 

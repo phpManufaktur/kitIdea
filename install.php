@@ -130,5 +130,6 @@ if ($message != "") {
 if (!empty($error)) {
 	$admin->print_error($error);
 }
-
-?>
+else {
+    $admin->print_success('Thank you for using kitIdea!', WB_URL.'/admins/admintools/tool.php?tool=kit_idea&act=abt');
+}

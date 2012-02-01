@@ -58,6 +58,7 @@ class kitIdeaFrontend {
     const REQUEST_COMMAND = 'kic'; // DONT CHANGE, also defined in class.cronjob.php!
     const REQUEST_REVISION_RESTORE = 'rr';
     const REQUEST_PROJECT_MOVE = 'pmov';
+    const REQUEST_SELECT_ALL = 'all';
 
     const ACTION_ACCOUNT = 'acc';
     const ACTION_DEFAULT = 'def';
@@ -74,6 +75,8 @@ class kitIdeaFrontend {
     const ACTION_PROJECT_VIEW = 'prjv';
     const ACTION_ARTICLE_CHECK = 'artc';
     const ACTION_COMMAND = 'cmd'; // DONT CHANGE, also defined in class.cronjob.php!
+    const ACTION_EMAIL_INFO = 'einfo';
+    const ACTION_EMAIL_INFO_CHECK = 'einfoc';
 
     const ANCHOR = 'ki';
 
@@ -109,6 +112,7 @@ class kitIdeaFrontend {
     const PARAM_LEPTON_GROUPS = 'lepton_groups';
     const PARAM_PROJECT_GROUP = 'group';
     const PARAM_LOG = 'log';
+    const PARAM_USER_STATUS = 'user_status';
 
     private $params = array(
             self::PARAM_CSS => true,
@@ -120,8 +124,10 @@ class kitIdeaFrontend {
             self::PARAM_SECTION_PROTOCOL => true,
             self::PARAM_PROTOCOL_MAX => 20,
             self::PARAM_LEPTON_GROUPS => '',
+            self::PARAM_PROJECT_GROUP => -1,
             self::PARAM_PRESET => - 1,
-            self::PARAM_LOG => ''
+            self::PARAM_LOG => '',
+            self::PARAM_USER_STATUS => false
             );
 
     protected $logLogin = false;
@@ -445,17 +451,62 @@ class kitIdeaFrontend {
      * @return STR dialog
      */
     public function show_main($action, $content) {
+        global $dbIdeaProjectUsers;
+        
+        $user_status = array(
+                'active' => 0
+                );
+        
+        $is_authenticated = $this->accountIsAuthenticated() ? true : false;
+        if ($is_authenticated && $this->params[self::PARAM_USER_STATUS]) { 
+            $SQL = sprintf("SELECT %s FROM %s WHERE %s='%s' AND %s='%s'",
+                    dbIdeaProjectUsers::field_email_info,
+                    $dbIdeaProjectUsers->getTableName(),
+                    dbIdeaProjectUsers::field_kit_id,
+                    $_SESSION[kitContactInterface::session_kit_contact_id],
+                    dbIdeaProjectUsers::field_group_id,
+                    $this->params[self::PARAM_PROJECT_GROUP]);
+            $result = array();
+            if (!$dbIdeaProjectUsers->sqlExec($SQL, $result)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
+                return false;
+            }
+            if (count($result) == 1) {
+                $email_info = $dbIdeaProjectUsers->email_info_array[$result[0][dbIdeaProjectUsers::field_email_info]];
+                $user_status = array(
+                        'active' => 1,
+                        'text' => $this->lang->translate('You are logged in as <b>{{ username }}</b> and get emails: <a href="{{ action_link }}">{{ email_info }}</a>',
+                                array('username' => $this->accountGetAuthor(), 'email_info' => $email_info['text'],
+                                        'action_link' => sprintf('%s%s%s',
+                                            $this->page_link,
+                                            (strpos($this->page_link, '?') === false) ? '?' : '&',
+                                            http_build_query(array(
+                                                self::REQUEST_MAIN_ACTION => self::ACTION_ACCOUNT,
+                                                self::REQUEST_ACCOUNT_ACTION => self::ACTION_EMAIL_INFO
+                                            ))
+                                    )))
+                        );
+            }
+        }
+        
         $navigation = array();
         foreach ($this->tab_main_navigation_array as $key => $value) {
             // skip account tab if using LEPTON authentication
             if ($this->use_lepton_auth && ($key == self::ACTION_ACCOUNT)) continue;
-            $navigation[] = array('active' => ($key == $action) ? 1 : 0,
-            'url' => sprintf('%s%s%s=%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', self::REQUEST_MAIN_ACTION, $key),
-            'text' => $value);
+            $navigation[] = array(
+                    'active' => ($key == $action) ? 1 : 0,
+                    'url' => sprintf('%s%s%s=%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', self::REQUEST_MAIN_ACTION, $key),
+                    'text' => $value
+                    );
         }
-        $data = array('WB_URL' => WB_URL, 'anchor' => self::ANCHOR,
-        'navigation' => $navigation, 'error' => ($this->isError()) ? 1 : 0,
-        'content' => ($this->isError()) ? $this->getError() : $content);
+        $data = array(
+                'WB_URL' => WB_URL, 
+                'user_status' => $user_status,
+                'anchor' => self::ANCHOR,
+                'navigation' => $navigation, 
+                'error' => ($this->isError()) ? 1 : 0,
+                'content' => ($this->isError()) ? $this->getError() : $content
+                );
         return $this->getTemplate('body.lte', $data);
     } // show_main()
 
@@ -481,6 +532,14 @@ class kitIdeaFrontend {
         }
 
         switch ($action) :
+            case self::ACTION_EMAIL_INFO:
+                return $this->accountEmailInfo();
+                break;
+            case self::ACTION_EMAIL_INFO_CHECK:
+                $this->accountEmailInfoCheck();
+                $_REQUEST[self::REQUEST_MAIN_ACTION] = self::ACTION_PROJECTS;
+                return $this->projectAction();
+                break;
             case self::ACTION_LOGOUT:
                 if ($this->getLogLogin() && isset($_SESSION[self::SESSION_LOG_LOGIN])) {
                     // if tracking for login is enabled also track the logout...
@@ -800,6 +859,111 @@ class kitIdeaFrontend {
         }
     } // accountGetAuthor()
 
+    public function accountEmailInfo() {
+        global $dbIdeaProjectUsers;
+        
+        $is_authenticated = $this->accountIsAuthenticated() ? true : false;
+        $email_info = 0;
+        if ($is_authenticated && $this->params[self::PARAM_USER_STATUS]) {
+            $SQL = sprintf("SELECT %s FROM %s WHERE %s='%s' AND %s='%s'",
+                    dbIdeaProjectUsers::field_email_info,
+                    $dbIdeaProjectUsers->getTableName(),
+                    dbIdeaProjectUsers::field_kit_id,
+                    $_SESSION[kitContactInterface::session_kit_contact_id],
+                    dbIdeaProjectUsers::field_group_id,
+                    $this->params[self::PARAM_PROJECT_GROUP]);
+            $result = array();
+            if (!$dbIdeaProjectUsers->sqlExec($SQL, $result)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
+                return false;
+            }
+            if (count($result) == 1) {
+                $email_info = $result[0][dbIdeaProjectUsers::field_email_info];
+            }
+        }
+        $data = array(
+                'form' => array(
+                        'name' => 'email_info',
+                        'btn' => array(
+                                'ok' => $this->lang->translate('OK'),
+                                'abort' => $this->lang->translate('Abort')
+                                ),
+                        ),
+                'page_link' => $this->page_link,
+                'main_action' => array(
+                        'name' => self::REQUEST_MAIN_ACTION,
+                        'value' => self::ACTION_ACCOUNT
+                        ),
+                'account_action' => array(
+                        'name' => self::REQUEST_ACCOUNT_ACTION,
+                        'value' => self::ACTION_EMAIL_INFO_CHECK
+                        ),
+                'head' => $this->lang->translate('E-Mail settings for this project'),
+                'is_message' => $this->isMessage() ? 1 : 0,
+                'intro' => $this->isMessage() ? $this->getMessage() : $this->lang->translate('Change the settings for the E-Mail information of this project.'),
+                'email_info' => array(
+                        'label' => $this->lang->translate('E-Mail information'),
+                        'name' => dbIdeaProjectUsers::field_email_info,
+                        'value' => $email_info,
+                        'items' => $dbIdeaProjectUsers->email_info_array,
+                        'hint' => ''
+                        ),
+                'change_all' => array(
+                        'label' => '',
+                        'name' => self::REQUEST_SELECT_ALL,
+                        'text' => $this->lang->translate('Change settings in all project groups'),
+                        'hint' => ''
+                        )
+                );
+        return $this->getTemplate('account.email.info.lte', $data);
+    } // accountEmailInfo()
+    
+    public function accountEmailInfoCheck() {
+        global $dbIdeaProjectUsers;
+        
+        $is_authenticated = $this->accountIsAuthenticated() ? true : false;
+        $email_info = 0;
+        if ($is_authenticated && $this->params[self::PARAM_USER_STATUS]) {
+            $SQL = sprintf("SELECT %s FROM %s WHERE %s='%s' AND %s='%s'",
+                    dbIdeaProjectUsers::field_email_info,
+                    $dbIdeaProjectUsers->getTableName(),
+                    dbIdeaProjectUsers::field_kit_id,
+                    $_SESSION[kitContactInterface::session_kit_contact_id],
+                    dbIdeaProjectUsers::field_group_id,
+                    $this->params[self::PARAM_PROJECT_GROUP]);
+            $result = array();
+            if (!$dbIdeaProjectUsers->sqlExec($SQL, $result)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
+                return false;
+            }
+            if (count($result) == 1) {
+                $email_info = $result[0][dbIdeaProjectUsers::field_email_info];
+            }
+        }
+        $this->setMessage($this->lang->translate('Settings not changed'));
+        if (isset($_REQUEST[dbIdeaProjectUsers::field_email_info]) && ($_REQUEST[dbIdeaProjectUsers::field_email_info] != $email_info)) {
+            if (isset($_REQUEST[self::REQUEST_SELECT_ALL])) {
+                $where = array(
+                        dbIdeaProjectUsers::field_kit_id => $_SESSION[kitContactInterface::session_kit_contact_id]
+                        );
+            }
+            else {
+                $where = array(
+                        dbIdeaProjectUsers::field_group_id => $this->params[self::PARAM_PROJECT_GROUP],
+                        dbIdeaProjectUsers::field_kit_id => $_SESSION[kitContactInterface::session_kit_contact_id]
+                );
+            }
+            $data = array(
+                    dbIdeaProjectUsers::field_email_info => $_REQUEST[dbIdeaProjectUsers::field_email_info]
+                    );
+            if (!$dbIdeaProjectUsers->sqlUpdateRecord($data, $where)) {
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
+                return false;
+            }
+            $this->setMessage($this->lang->translate('The settings where successfully changed'));
+        }
+        return true;
+    } // accountEmailInfoCheck()
 
     /**
      * PROJECT FUNCTIONS
@@ -1171,7 +1335,7 @@ class kitIdeaFrontend {
                 );
         foreach ($result as $group) {
             $items[] = array(
-                    'text' => $group[dbIdeaProjectGroups::field_name],
+                    'text' => sprintf('[%03d] %s', $group[dbIdeaProjectGroups::field_id], $group[dbIdeaProjectGroups::field_name]),
                     'value' => $group[dbIdeaProjectGroups::field_id],
                     );
         }
@@ -1610,7 +1774,7 @@ class kitIdeaFrontend {
              ($dbIdeaProjectGroups->checkPermissions($visitor_permissions, dbIdeaProjectGroups::project_view_protocol)))) {
             // add the section for the Protocol
             $sections[self::IDENTIFIER_PROTOCOL] = array(
-                    'text' => $this->lang->translate('Protocol'),
+                    'text' => $this->lang->translate('Process log'),
                     'identifier' => self::IDENTIFIER_PROTOCOL,
                     'link' => sprintf('%s%s%s',
                             $this->page_link,

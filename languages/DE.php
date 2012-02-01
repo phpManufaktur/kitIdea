@@ -74,6 +74,8 @@ $LANG = array(
             => '<p>Aus dem Zellenbezeichner <b>{{ cell_name }}</b> konnte die Zeilennummer nicht ermittelt werden!</p>',
         'Change settings in all project groups'
             => 'Einstellung in allen Projektgruppen ändern',
+        'Change the settings for the E-Mail information of this project.'
+            => 'Ändern Sie die Einstellungen für die E-Mail Benachrichtigungen für dieses Projekt.',
         'Closed'
             => 'Geschlossen',
         'Create {{ project }}'
@@ -98,6 +100,10 @@ $LANG = array(
             => 'Bearbeiten Sie die Einstellungen für kitIdea.',
         'Edit user'
             => 'Benutzer bearbeiten',
+        'E-Mail information'
+            => 'E-Mail Benachrichtigung',
+        'E-Mail settings for this project'
+            => 'E-Mail Einstellungen für dieses Projekt',
         'Error: Can\'t load the LEPTON group <b>{{ group }}</b>, please check the parameters of the kitIdea droplet!'
             => 'Die LEPTON Gruppe <b>{{ group }}</b> wurde nicht gefunden, bitte prüfen Sie die Parameter die an kitIdea übergeben werden!',
         'Error: Invalid access to a kitIdea project, access denied!'
@@ -543,12 +549,12 @@ $LANG = array(
             => 'Projekt',
         'Projects'
             => 'Projekte',
-        'Protocol'
-            => 'Protokoll',
+        'Process log'
+            => 'Verlauf',
         'Public'
             => 'Öffentlich',
-        'Read protocol'
-            => 'Protokoll lesen',
+        'Read process log'
+            => 'Verlaufsprotokoll lesen',
         'restore'
             => 'wiederherstellen',
         'Restore revisions'
@@ -567,6 +573,8 @@ $LANG = array(
             => 'Benutzer auswählen',
         'Settings'
             => 'Einstellungen',
+        'Settings not changed'
+            => 'Einstellungen nicht geändert.',
         'Sorry, your permissions does not allow an access to kitIdea. Please contact the service to get access!'
             => 'Ihr Benutzerkonto gestattet Ihnen leider keinen Zugriff auf die Verwaltung von kitIdea. Bitte wenden Sie sich an den Service, dieser kann Sie für kitIdea freischalten!',
         'Status'
@@ -613,6 +621,8 @@ $LANG = array(
             => '<p>Das Projekt mit der <b>ID {{ id }}</b> wurde erfolgreich angelegt.</p><p>Fügen Sie dem Projekt jetzt gleich den ersten Artikel hinzu!</p>',
         '<p>The project with the <b>ID {{ id }}</b> was updated.</p>'
             => '<p>Das Projekt mit der <b>ID {{ id }}</b> wurde aktualisiert.</p>',
+        'The settings where successfully changed'
+            => 'Die Einstellungen wurden erfolgreich geändert.',
         '<p>The user account was not changed.</p>'
             => '<p>Die Benutzerdaten wurden <b>nicht</b> geändert.</p>',
         '<p>The user account was updated.</p>'
@@ -645,6 +655,8 @@ $LANG = array(
             => 'WYSIWYG Toolbar, Admins',
         'WYSIWYG toolbar, authors'
             => 'WYSIWYG Toolbar, Autoren',
+        'You are logged in as <b>{{ username }}</b> and get emails: <a href="{{ action_link }}">{{ email_info }}</a>'
+            => 'Sie sind angemeldet als <b>{{ username }}</b> und erhalten Benachrichtigungen zu diesem Projekt: <a href="{{ action_link }}">{{ email_info }}</a>.',
         'You can move this project to another project group, please select the target.'
             => 'Sie können dieses Projekt in eine andere Projektgruppe verscheiben, bitte wählen Sie das Ziel aus.'
         );
