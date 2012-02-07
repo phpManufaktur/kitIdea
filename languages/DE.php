@@ -342,7 +342,7 @@ $LANG = array(
         'intro_project_group_edit'
             => 'Wählen Sie eine bereits existierende Projektgruppe zum bearbeiten aus oder erstellen Sie eine neue Projektgruppe',
         'intro_project_view'
-            => 'Fügen Sie dem Projekt neue Artikel hinzu oder bearbeiten Sie bereits vorhandene Artikel.',
+            => 'Fügen Sie dem Projekt weitere Register hinzu oder bearbeiten Sie bereits vorhandene Register.',
         'intro_section_edit'
             => '<p>Fügen sie neue Abschnitte hinzu, löschen oder verschieben Sie Abschnitte.</p><p>Der Abschnitt <b>Dateien</b> kann weder umbenannt noch gelöscht oder verschoben werden und wird hier nicht angezeigt.</p>',
         'intro_user_edit'

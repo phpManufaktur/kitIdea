@@ -452,13 +452,13 @@ class kitIdeaFrontend {
      */
     public function show_main($action, $content) {
         global $dbIdeaProjectUsers;
-        
+
         $user_status = array(
                 'active' => 0
                 );
-        
+
         $is_authenticated = $this->accountIsAuthenticated() ? true : false;
-        if ($is_authenticated && $this->params[self::PARAM_USER_STATUS]) { 
+        if ($is_authenticated && $this->params[self::PARAM_USER_STATUS]) {
             $SQL = sprintf("SELECT %s FROM %s WHERE %s='%s' AND %s='%s'",
                     dbIdeaProjectUsers::field_email_info,
                     $dbIdeaProjectUsers->getTableName(),
@@ -488,7 +488,7 @@ class kitIdeaFrontend {
                         );
             }
         }
-        
+
         $navigation = array();
         foreach ($this->tab_main_navigation_array as $key => $value) {
             // skip account tab if using LEPTON authentication
@@ -500,10 +500,10 @@ class kitIdeaFrontend {
                     );
         }
         $data = array(
-                'WB_URL' => WB_URL, 
+                'WB_URL' => WB_URL,
                 'user_status' => $user_status,
                 'anchor' => self::ANCHOR,
-                'navigation' => $navigation, 
+                'navigation' => $navigation,
                 'error' => ($this->isError()) ? 1 : 0,
                 'content' => ($this->isError()) ? $this->getError() : $content
                 );
@@ -749,8 +749,8 @@ class kitIdeaFrontend {
         // get the params array of kitForm
         $params = $form->getParams();
         // set the needed params
-        $params[formFrontend::param_form] = $dlg;
-        $params[formFrontend::param_return] = true;
+        $params['form'] = $dlg;
+        $params['return'] = true;
         $form->setParams($params);
 
         $result = $form->action();
@@ -795,8 +795,8 @@ class kitIdeaFrontend {
         // get the params array
         $params = $form->getParams();
         // set the needed params
-        $params[formFrontend::param_form] = $dlg;
-        $params[formFrontend::param_return] = true;
+        $params['form'] = $dlg;
+        $params['return'] = true;
         $form->setParams($params);
         // return the user account dialog
         $result = $form->action();
@@ -861,7 +861,7 @@ class kitIdeaFrontend {
 
     public function accountEmailInfo() {
         global $dbIdeaProjectUsers;
-        
+
         $is_authenticated = $this->accountIsAuthenticated() ? true : false;
         $email_info = 0;
         if ($is_authenticated && $this->params[self::PARAM_USER_STATUS]) {
@@ -917,10 +917,10 @@ class kitIdeaFrontend {
                 );
         return $this->getTemplate('account.email.info.lte', $data);
     } // accountEmailInfo()
-    
+
     public function accountEmailInfoCheck() {
         global $dbIdeaProjectUsers;
-        
+
         $is_authenticated = $this->accountIsAuthenticated() ? true : false;
         $email_info = 0;
         if ($is_authenticated && $this->params[self::PARAM_USER_STATUS]) {
@@ -1346,7 +1346,7 @@ class kitIdeaFrontend {
                 'hint' => $this->lang->translate('You can move this project to another project group, please select the target.'),
                 'items' => $items
                 );
-        
+
         $items = array();
         foreach ($project as $name => $value) {
             $its = array();
@@ -1369,7 +1369,7 @@ class kitIdeaFrontend {
                     );
         }
         $is_authenticated = $this->accountIsAuthenticated() ? true : false;
-        
+
         $data = array(
                 'head' => ($project_id < 1) ? $this->lang->translate('Create {{ project }}', array('project' => $this->project_singular)) : $this->lang->translate('Edit {{ project }}', array('project' => $this->project_singular)),
                 'intro' => ($this->isMessage()) ? $this->getMessage() : $this->lang->translate('With this dialog you can create a new {{ project }} or edit an existing {{ project }}', array('project' => $this->project_singular)),
@@ -1392,7 +1392,7 @@ class kitIdeaFrontend {
                         ),
                 'project_move' => $project_move,
                 'user_access' => $dbIdeaProjectGroups->getAccessArray($is_authenticated, $_SESSION[self::SESSION_USER_ACCESS]),
-                
+
                 );
         return $this->getTemplate('project.edit.lte', $data);
     } // projectProjectEdit()
@@ -1429,11 +1429,11 @@ class kitIdeaFrontend {
             $project = $dbIdeaProject->getFields();
             $project[dbIdeaProject::field_id] = $project_id;
         }
-        
+
         if (($project_id > 0) && isset($_REQUEST[self::REQUEST_PROJECT_MOVE]) && ($_REQUEST[self::REQUEST_PROJECT_MOVE] > 0)) {
             // move the project to another project group
-            $SQL = sprintf("SELECT %s FROM %s WHERE %s='%s'", 
-                    dbIdeaProjectGroups::field_name, 
+            $SQL = sprintf("SELECT %s FROM %s WHERE %s='%s'",
+                    dbIdeaProjectGroups::field_name,
                     $dbIdeaProjectGroups->getTableName(),
                     dbIdeaProjectGroups::field_id,
                     $_REQUEST[self::REQUEST_PROJECT_MOVE]);
@@ -1443,8 +1443,8 @@ class kitIdeaFrontend {
                 return false;
             }
             if (count($result) < 1) {
-                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, 
-                        $this->lang->translate('The project group with the {{ id }} does not exists!', 
+                $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__,
+                        $this->lang->translate('The project group with the {{ id }} does not exists!',
                                 array('id' => $_REQUEST[self::REQUEST_PROJECT_MOVE]))));
                 return false;
             }
@@ -1462,7 +1462,7 @@ class kitIdeaFrontend {
             // show the project overview and prompt message
             return $this->projectOverview();
         }
-        
+
         if ($project_id > 0) {
             $where = array(dbIdeaProject::field_id => $project_id);
             $project = array();

@@ -3,6 +3,10 @@ kitIdea
 Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
+Release 0.25
+
+changed some small typos.
+
 Release 0.24
 2012-02-01
 fixed: the cronjob does not check if the mailing function is switched off
