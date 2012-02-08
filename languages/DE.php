@@ -330,6 +330,8 @@ $LANG = array(
             => 'WYSIWYG Editor, Höhe',
         'idea_label_cfg_wysiwyg_editor_width'
             => 'WYSIWYG Editor, Breite',
+				'If set to true (1) kitIdea use the detailed project description also for the short description in the overview of the projects.'
+						=> 'Wenn diese Option auf <b>true</b> (== 1) gesetzt ist, verwendet kitIdea die detailierte Projektbeschreibung auch für die Übersichtsseite der Projekte. Die Kurzbeschreibung wird nicht mehr angezeigt.',
         'If you want to change the access rights of this group, please change to the desired <a href="{{ group_url }}">project group</a>.'
             => 'Wenn Sie die Berechtigungen dieser Gruppe ändern möchten, wechseln Sie bitte in die jeweilige <a href="{{ group_url }}">Projektgruppe</a>.',
         'Illegal function call, access denied!'
@@ -342,7 +344,7 @@ $LANG = array(
         'intro_project_group_edit'
             => 'Wählen Sie eine bereits existierende Projektgruppe zum bearbeiten aus oder erstellen Sie eine neue Projektgruppe',
         'intro_project_view'
-            => 'Fügen Sie dem Projekt weitere Register hinzu oder bearbeiten Sie bereits vorhandene Register.',
+            => 'Fügen Sie dem Projekt neue Artikel hinzu oder bearbeiten Sie bereits vorhandene Artikel.',
         'intro_section_edit'
             => '<p>Fügen sie neue Abschnitte hinzu, löschen oder verschieben Sie Abschnitte.</p><p>Der Abschnitt <b>Dateien</b> kann weder umbenannt noch gelöscht oder verschoben werden und wird hier nicht angezeigt.</p>',
         'intro_user_edit'
@@ -493,9 +495,9 @@ $LANG = array(
         'label_project_author'
             => 'Autor',
         'label_project_desc_long'
-            => 'Beschreibung',
+            => 'Beschreibung für die Detailseite',
         'label_project_desc_short'
-            => 'Kurzbeschreibung',
+            => 'Kurzbeschreibung für die Übersicht',
         'label_project_group'
             => 'Projektgruppe',
         'label_project_id'
@@ -549,6 +551,8 @@ $LANG = array(
             => 'Projekt',
         'Projects'
             => 'Projekte',
+				'Projects: No short description'
+						=> 'Projekte: keine Kurzbeschreibung',
         'Process log'
             => 'Verlauf',
         'Public'

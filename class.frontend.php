@@ -1392,7 +1392,7 @@ class kitIdeaFrontend {
                         ),
                 'project_move' => $project_move,
                 'user_access' => $dbIdeaProjectGroups->getAccessArray($is_authenticated, $_SESSION[self::SESSION_USER_ACCESS]),
-
+        				'no_short_description' => (int) $dbIdeaCfg->getValue(dbIdeaCfg::cfgProjectNoShortDescription)
                 );
         return $this->getTemplate('project.edit.lte', $data);
     } // projectProjectEdit()
@@ -1408,7 +1408,8 @@ class kitIdeaFrontend {
         global $dbIdeaRevisionArchive;
         global $dbIdeaStatusChange;
         global $dbIdeaProjectGroups;
-
+        global $dbIdeaCfg;
+        
         $project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : - 1;
 
         if ($project_id > 0) {
@@ -1494,11 +1495,12 @@ class kitIdeaFrontend {
                 case dbIdeaProject::field_access:
                 case dbIdeaProject::field_kit_categories:
                 case dbIdeaProject::field_title:
-                case dbIdeaProject::field_desc_short:
                 case dbIdeaProject::field_desc_long:
                 case dbIdeaProject::field_status:
                     // these fields must contain a value
                     $must_field = true;
+                case dbIdeaProject::field_desc_short:
+                	  if ($dbIdeaCfg->getValue(dbIdeaCfg::cfgProjectNoShortDescription) === false) $must_field = true;
                 case dbIdeaProject::field_keywords:
                     $value = isset($_REQUEST[$key]) ? stripslashes($_REQUEST[$key]) : '';
                     if ($value != $project[$key]) {
@@ -2671,8 +2673,8 @@ class kitIdeaFrontend {
             if ($section[dbIdeaProjectSections::field_identifier] == self::IDENTIFIER_FILES) continue;
             $section_array[] = array(
             'id' => $section[dbIdeaProjectSections::field_id],
-            'value' => $section[dbIdeaProjectSections::field_text],
-            'name' => $section[dbIdeaProjectSections::field_identifier]);
+            'value' => trim($section[dbIdeaProjectSections::field_text]),
+            'name' => trim($section[dbIdeaProjectSections::field_identifier]));
         }
 
         $sorter_table = 'mod_kit_idea_project_section';

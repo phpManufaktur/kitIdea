@@ -6,6 +6,7 @@ http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 Release 0.25
 
 changed some small typos.
+fixed: standard section name can contain leading space, which causes problems
 
 Release 0.24
 2012-02-01

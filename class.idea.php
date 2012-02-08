@@ -674,6 +674,7 @@ class dbIdeaCfg extends dbConnectLE {
     const cfgProjectNameSingular = 'cfgProjectNameSingular';
     const cfgWYSIWYGtoolbarAuthor = 'cfgWYSIWYGtoolbarAuthor';
     const cfgWYSIWYGtoolbarAdmin = 'cfgWYSIWYGtoolbarAdmin';
+    const cfgProjectNoShortDescription = 'cfgProjectNoShortDescription';
 
     public $config_array = array(
             array(
@@ -878,7 +879,12 @@ class dbIdeaCfg extends dbConnectLE {
                     'Admin',
                     'Select the toolbar which should be used for admins'
                     ),
-
+    				array(
+    						'Projects: No short description',
+    						self::cfgProjectNoShortDescription,
+    						self::type_boolean,
+    						'0',
+    						'If set to true (1) kitIdea use the detailed project description also for the short description in the overview of the projects.')
             );
 
     public function __construct($createTables = false) {

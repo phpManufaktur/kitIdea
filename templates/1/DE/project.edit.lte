@@ -46,17 +46,15 @@
         {*<td class="project_hint">{$project.project_id.hint}</td>*}
       </tr>
       <tr><td colspan="3">&nbsp;</td></tr>
-      <tr>
+      {*<tr>
         <td class="project_label">{$project.project_desc_short.label}</td>
-        {*<td class="project_value"><textarea name="{$project.project_desc_short.name}">{$project.project_desc_short.value}</textarea></td>*}
         <td class="project_value" colspan="2">{$project.project_desc_short.editor}</td>
-        {*<td class="project_hint">{$project.project_desc_short.hint}</td>*}
-      </tr>
+      </tr>*}
+      
       <tr><td colspan="3">&nbsp;</td></tr>
       <tr>
         <td class="project_label">{$project.project_desc_long.label}</td>
         <td class="project_value" colspan="2">{$project.project_desc_long.editor}</td>
-        {*<td class="project_hint">{$project.project_desc_long.hint}</td>*}
       </tr>
       <tr><td colspan="3">&nbsp;</td></tr>
       <tr>
