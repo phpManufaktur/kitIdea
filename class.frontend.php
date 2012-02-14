@@ -401,14 +401,26 @@ class kitIdeaFrontend {
     public function action() {
         // rewrite temporary variables to $_REQUESTs...
         $this->getTempVars();
-
-        $html_allowed = array(dbIdeaProject::field_desc_long,
-        dbIdeaProject::field_desc_short, self::REQUEST_WYSIWYG);
+        
+        /**
+         * to prevent cross site scripting XSS it is important to look also to 
+         * $_REQUESTs which are needed by other KIT addons. Addons which need
+         * a $_REQUEST with HTML must set this key in $_SESSION['KIT_HTML_REQUEST']
+         */
+        $html_allowed = array();
+        if (isset($_SESSION['KIT_HTML_REQUEST'])) $html_allowed = $_SESSION['KIT_HTML_REQUEST'];
+        $html = array(
+        		dbIdeaProject::field_desc_long,
+        		dbIdeaProject::field_desc_short, 
+        		self::REQUEST_WYSIWYG);
+        foreach ($html as $key) $html_allowed[] = $key;
+        $_SESSION['KIT_HTML_REQUEST'] = $html_allowed;
         foreach ($_REQUEST as $key => $value) {
-            if (! in_array($key, $html_allowed)) {
+            if (!in_array($key, $html_allowed)) {
                 $_REQUEST[$key] = $this->xssPrevent($value);
             }
         }
+        
         $action = isset($_REQUEST[self::REQUEST_MAIN_ACTION]) ? $_REQUEST[self::REQUEST_MAIN_ACTION] : self::ACTION_DEFAULT;
 
         // load CSS?

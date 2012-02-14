@@ -9,6 +9,11 @@
  * @version $Id$
  */
 
+if ('á' != "\xc3\xa1") {
+	// important: language files must be saved as UTF-8 (without BOM)
+	trigger_error('The language file <b>'.basename(__FILE__).'</b> is damaged, it must be saved <b>UTF-8</b> encoded!', E_USER_ERROR);
+}
+
 if (!defined('cfg_currency'))
     define('cfg_currency', '%s €');
 if (!defined('cfg_date_separator'))

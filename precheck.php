@@ -34,10 +34,10 @@ if (defined('WB_PATH')) {
 $PRECHECK['WB_VERSION'] = array('VERSION' => '2.8', 'OPERATOR' => '>=');
 $PRECHECK['PHP_VERSION'] = array('VERSION' => '5.2.0', 'OPERATOR' => '>=');
 $PRECHECK['WB_ADDONS'] = array(
-    'wblib' => array('VERSION' => '0.65', 'OPERATOR' => '>='),
-    'libraryadmin' => array('VERSION' => '1.9', 'OPERATOR' => '>='),
+  'wblib' => array('VERSION' => '0.65', 'OPERATOR' => '>='),
+  'libraryadmin' => array('VERSION' => '1.9', 'OPERATOR' => '>='),
 	'lib_jquery' => array('VERSION' => '1.25', 'OPERATOR' => '>='),
-    'dbconnect_le'	=> array('VERSION' => '0.65', 'OPERATOR' => '>='),
+  'dbconnect_le'	=> array('VERSION' => '0.65', 'OPERATOR' => '>='),
 	'dwoo' => array('VERSION' => '0.11', 'OPERATOR' => '>='),
 	'droplets' => array('VERSION' => '1.51', 'OPERATOR' => '>='),
 	'droplets_extension' => array('VERSION' => '0.16', 'OPERATOR' => '>='),
