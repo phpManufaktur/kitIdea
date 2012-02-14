@@ -1294,7 +1294,11 @@ class kitIdeaFrontend {
         global $dbIdeaProject;
         global $dbIdeaProjectGroups;
         global $dbIdeaCfg;
+        global $dbIdeaProjectUsers;
 
+        require_once WB_PATH.'/modules/kit/class.contact.php';
+        global $dbContact;
+        
         $project_id = isset($_REQUEST[dbIdeaProject::field_id]) ? $_REQUEST[dbIdeaProject::field_id] : - 1;
 
         if ($project_id > 0) {
@@ -1360,7 +1364,8 @@ class kitIdeaFrontend {
                 );
 
         $items = array();
-        foreach ($project as $name => $value) {
+        foreach ($project as $name => $value) { 
+        	if (($name == dbIdeaProject::field_desc_short) && ($dbIdeaCfg->getValue(dbIdeaCfg::cfgProjectNoShortDescription) == true)) continue;
             $its = array();
             $editor = '';
             if ($name == dbIdeaProject::field_status) $its = $dbIdeaProject->status_array;
@@ -1382,6 +1387,35 @@ class kitIdeaFrontend {
         }
         $is_authenticated = $this->accountIsAuthenticated() ? true : false;
 
+        // get all active users for selection of the project director
+        $SQL = sprintf("SELECT DISTINCT `%s` FROM %s WHERE `%s`='%s'", 
+        		dbIdeaProjectUsers::field_kit_id, 
+        		$dbIdeaProjectUsers->getTableName(),
+        		dbIdeaProjectUsers::field_status,
+        		dbIdeaProjectUsers::status_active);
+        $kit_ids = array();
+        if (!$dbIdeaProjectUsers->sqlExec($SQL, $kit_ids)) {
+        	$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbIdeaProjectUsers->getError()));
+        	return false;
+        }
+        $kits = array();
+        foreach ($kit_ids as $ids) $kits[] = $ids['kit_id'];
+        
+        $SQL = sprintf("SELECT `%s`, `%s`, `%s`, `%s` FROM %s WHERE `%s` IN (%s)", 
+        		dbKITcontact::field_id,
+        		dbKITcontact::field_email_standard,
+        		dbKITcontact::field_person_first_name,
+        		dbKITcontact::field_person_last_name, 
+        		$dbContact->getTableName(), 
+        		dbKITcontact::field_id, 
+        		implode(',', $kits));
+        if (!$dbContact->sqlExec($SQL, $result)) {
+        	$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbContact->getError()));
+        	return false;
+        }
+        
+        print_r($result);
+        
         $data = array(
                 'head' => ($project_id < 1) ? $this->lang->translate('Create {{ project }}', array('project' => $this->project_singular)) : $this->lang->translate('Edit {{ project }}', array('project' => $this->project_singular)),
                 'intro' => ($this->isMessage()) ? $this->getMessage() : $this->lang->translate('With this dialog you can create a new {{ project }} or edit an existing {{ project }}', array('project' => $this->project_singular)),
@@ -1496,7 +1530,8 @@ class kitIdeaFrontend {
         }
         // save project for revision archive
         $old_project = $project;
-
+        $no_short_description = $dbIdeaCfg->getValue(dbIdeaCfg::cfgProjectNoShortDescription);
+        
         $changed = false;
         $checked = true;
         $fields = $dbIdeaProject->getFields();
@@ -1512,7 +1547,7 @@ class kitIdeaFrontend {
                     // these fields must contain a value
                     $must_field = true;
                 case dbIdeaProject::field_desc_short:
-                	  if ($dbIdeaCfg->getValue(dbIdeaCfg::cfgProjectNoShortDescription) === false) $must_field = true;
+                	  if (!$no_short_description) $must_field = true;
                 case dbIdeaProject::field_keywords:
                     $value = isset($_REQUEST[$key]) ? stripslashes($_REQUEST[$key]) : '';
                     if ($value != $project[$key]) {
@@ -1538,7 +1573,7 @@ class kitIdeaFrontend {
             if ($project_id < 1) {
                 // insert a new record
                 $project[dbIdeaProject::field_desc_long] = $project[dbIdeaProject::field_desc_long];
-                $project[dbIdeaProject::field_desc_short] = $project[dbIdeaProject::field_desc_short];
+                $project[dbIdeaProject::field_desc_short] = ($no_short_description) ? $project[dbIdeaProject::field_desc_long] : $project[dbIdeaProject::field_desc_short];
                 $project[dbIdeaProject::field_author] = $this->accountGetAuthor();
                 $project[dbIdeaProject::field_status] = dbIdeaProject::status_active;
                 $project[dbIdeaProject::field_revision] = 1;
@@ -1564,7 +1599,7 @@ class kitIdeaFrontend {
                 $where = array(
                 dbIdeaProject::field_id => $project_id);
                 $project[dbIdeaProject::field_desc_long] = $project[dbIdeaProject::field_desc_long];
-                $project[dbIdeaProject::field_desc_short] = $project[dbIdeaProject::field_desc_short];
+                $project[dbIdeaProject::field_desc_short] = ($no_short_description) ? $project[dbIdeaProject::field_desc_long] : $project[dbIdeaProject::field_desc_short];
                 $project[dbIdeaProject::field_author] = $this->accountGetAuthor();
                 $project[dbIdeaProject::field_revision] = $project[dbIdeaProject::field_revision] + 1;
                 if (! $dbIdeaProject->sqlUpdateRecord($project, $where)) {

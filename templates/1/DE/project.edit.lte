@@ -46,11 +46,12 @@
         {*<td class="project_hint">{$project.project_id.hint}</td>*}
       </tr>
       <tr><td colspan="3">&nbsp;</td></tr>
-      {*<tr>
+      {if isset($project.project_desc_short.editor)}
+      <tr>
         <td class="project_label">{$project.project_desc_short.label}</td>
         <td class="project_value" colspan="2">{$project.project_desc_short.editor}</td>
-      </tr>*}
-      
+      </tr>
+      {/if}
       <tr><td colspan="3">&nbsp;</td></tr>
       <tr>
         <td class="project_label">{$project.project_desc_long.label}</td>

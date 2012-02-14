@@ -10,6 +10,8 @@ fixed: standard section name can contain leading space, which causes problems
 changed: introduce $_SESSION['KIT_HTML_REQUEST'] to mark fields which should not
   processed by xssPrevent()
 added: check the language files for correct UTF-8 encoding
+changed template: please read /modules/kit_idea/templates/changes.txt for
+  more informations! 
 
 Release 0.24
 2012-02-01
