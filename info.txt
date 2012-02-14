@@ -4,7 +4,7 @@ Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
 Release 0.25
-
+2012-02-14
 changed some small typos.
 fixed: standard section name can contain leading space, which causes problems
 changed: introduce $_SESSION['KIT_HTML_REQUEST'] to mark fields which should not
