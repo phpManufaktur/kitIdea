@@ -7,6 +7,18 @@ THIS FILE INFORMS YOU ABOUT CHANGES IN THE kitIdea STANDARD TEMPLATES.
 IF YOU ARE USING YOUR OWN TEMPLATES (PRESETS) PLEASE CHECK THE CHANGES AND
 ADAPT YOUR TEMPLATES IF NECESSARY.
 
+Release 0.25
+2012-02-14
+
+/templates/1/DE/project.edit.lte - added line 49 and 54, lines 50 - 53 with no changes!:
+
+      {if isset($project.project_desc_short.editor)}
+      <tr>
+        <td class="project_label">{$project.project_desc_short.label}</td>
+        <td class="project_value" colspan="2">{$project.project_desc_short.editor}</td>
+      </tr>
+      {/if}
+
 Release 0.24
 2012-02-01
 
@@ -34,8 +46,8 @@ Release 0.23
  /templates/1/DE/project.list.lte - added lines 26 - 30:
  
    	{if (isset($message) && (count_characters($message) > 0))}
-	<div class="message">
+    <div class="message">
 	  	{$message}
-	</div>
+    </div>
   	{/if}
  
