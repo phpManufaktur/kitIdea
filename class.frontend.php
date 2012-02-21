@@ -1414,8 +1414,6 @@ class kitIdeaFrontend {
         	return false;
         }
         
-        print_r($result);
-        
         $data = array(
                 'head' => ($project_id < 1) ? $this->lang->translate('Create {{ project }}', array('project' => $this->project_singular)) : $this->lang->translate('Edit {{ project }}', array('project' => $this->project_singular)),
                 'intro' => ($this->isMessage()) ? $this->getMessage() : $this->lang->translate('With this dialog you can create a new {{ project }} or edit an existing {{ project }}', array('project' => $this->project_singular)),
