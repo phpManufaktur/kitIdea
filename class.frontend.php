@@ -2315,7 +2315,6 @@ class kitIdeaFrontend {
               self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
               self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
               dbIdeaProject::field_id => $project_id,
-              dbIdeaProjectArticles::field_section_identifier => $item[dbIdeaProjectArticles::field_section_identifier],
               self::REQUEST_ARTICLE_NEW => 1
             )))
           ),
