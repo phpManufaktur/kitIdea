@@ -3,6 +3,15 @@ kitIdea
 Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
+Release 0.26
+2012-02-24
+added: Dwoo plugin translate() for direct I18n translations within the templates
+added: option to switch of the WYSIWYG editor if not really needed
+changed template: please read /modules/kit_idea/templates/changes.txt for 
+  more informations! 
+changed: install.php, upgrade.php - removed switching to about dialog (caused 
+  problems at some installations)
+
 Release 0.25
 2012-02-14
 changed some small typos.

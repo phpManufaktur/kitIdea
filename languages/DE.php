@@ -337,6 +337,8 @@ $LANG = array(
             => 'WYSIWYG Editor, Breite',
 				'If set to true (1) kitIdea use the detailed project description also for the short description in the overview of the projects.'
 						=> 'Wenn diese Option auf <b>true</b> (== 1) gesetzt ist, verwendet kitIdea die detailierte Projektbeschreibung auch für die Übersichtsseite der Projekte. Die Kurzbeschreibung wird nicht mehr angezeigt.',
+		    'If set to true (1) the WYSIWYG editor is permanently visible for creating new articles if the user has enough rights.'
+		      => 'Falls gesetzt (1) wird der WYSIWYG Editor permanent für die Erstellung von neuen Artikeln angezeigt, sofern der Anwender über ausreichende Rechte verfügt. Ansonsten (0) nur, wenn ein neuer Artikel angelegt oder ein Artikel bearbeitet wird.',
         'If you want to change the access rights of this group, please change to the desired <a href="{{ group_url }}">project group</a>.'
             => 'Wenn Sie die Berechtigungen dieser Gruppe ändern möchten, wechseln Sie bitte in die jeweilige <a href="{{ group_url }}">Projektgruppe</a>.',
         'Illegal function call, access denied!'
@@ -544,6 +546,8 @@ $LANG = array(
             => 'Projekt verschieben',
         'Name'
             => "Name",
+        'New article'
+          => 'Neuer Artikel',
         'no E-Mail'
             => 'KEINE Benachrichtigung',
         'OK'
@@ -660,6 +664,8 @@ $LANG = array(
             => '<p>Herzlich willkommen bei kitIdea!</p><p>Sie haben Zugriff auf die verschiedenen <a href="{{ project_url }}">Projekte</a> und auf Ihre <a href="{{ account_url }}">persönlichen Einstellungen</a>.</p>',
         'With this dialog you can create a new {{ project }} or edit an existing {{ project }}'
             => 'Erstellen Sie ein neues {{ project }} oder bearbeiten Sie ein bestehendes {{ project }}.',
+    		'WYSIWIG editor, show permanent'
+    		  => 'WYSIWYG Editor, Anzeige',
         'WYSIWYG toolbar, admins'
             => 'WYSIWYG Toolbar, Admins',
         'WYSIWYG toolbar, authors'

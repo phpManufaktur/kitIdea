@@ -7,6 +7,18 @@ THIS FILE INFORMS YOU ABOUT CHANGES IN THE kitIdea STANDARD TEMPLATES.
 IF YOU ARE USING YOUR OWN TEMPLATES (PRESETS) PLEASE CHECK THE CHANGES AND
 ADAPT YOUR TEMPLATES IF NECESSARY.
 
+Release 0.26
+2012-02-24
+
+/templates/1/DE/project.overview.lte - changed lines  95 ff. to:
+
+  {* include the WYSIWYG editor to create and edit articles only if the access is granted *}
+  {if (($access.article.create == 1) && ($options.editor_show == 1)) || (($access.article.edit == 1) && ($article.fields.article_id.value > 0))}
+    {include('project.article.edit.lte')}
+  {elseif (($access.article.create == 1) && ($options.editor_show == 0))}
+  <div class="idea_article_commands"><a href="{$article.create.link}">[ {translate('New article')} ]</a></div>
+  {/if}
+
 Release 0.25
 2012-02-14
 
