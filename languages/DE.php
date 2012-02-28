@@ -38,7 +38,7 @@ $module_description = 'kitIdea ermöglicht das Formulieren, Teilen und gemeinsam
 $LANG = array(
         '- no change -'
             => '- keine Änderung -',
-        '- not defined -'
+        '- not defined -' 
             => '- nicht definiert -',
         '- please select -'
             => '- bitte auswählen -',
@@ -85,8 +85,12 @@ $LANG = array(
             => 'Geschlossen',
         'Create {{ project }}'
             => '{{ project }} erstellen',
+        'Create a new role or select an existing role'
+          => 'Erstellen Sie eine neue Rolle oder wählen Sie eine Rolle zum Bearbeiten aus',
         'Create or edit project group'
             => 'Projektgruppe erstellen oder bearbeiten',
+        'Create or edit role'
+          => 'Erstellen oder Bearbeiten Sie eine Rolle', 
         'daily E-Mail'
             => 'tägliche Zusammenfassung',
         'Deleted'
@@ -137,6 +141,8 @@ $LANG = array(
             => 'Das Presetverzeichnis <b>{{ directory }}</b> existiert nicht, die erforderlichen Templates können nicht geladen werden!',
         'Error: The project group with the ID {{ id }} does not exists!'
             => 'Die Projektgruppe mit der ID {{ id }} existiert nicht!',
+        'Error: The role with the <b>ID {{ id }}</b> does not exists!'
+           => 'Die Rolle mit der <b>ID {{ id }}</b> existiert nicht!',
         'Error: There is no action defined for the key <b>{{ key }}</b>.'
             => 'Fataler Fehler: für den Schlüssel <b>{{ key }}</b> ist keine Aktion definiert!',
         'Error: This access is not allowed, please login first! <b>HINT:</b> You will get this prompt too, if you were inactive for some time and the session was automatically terminated. Just login again!'
@@ -220,12 +226,22 @@ $LANG = array(
             => '',
         'hint_project_url'
             => '',
+        'HINT_ROLE_DESCRIPTION'
+          => '',
+        'HINT_ROLE_ID'
+          => '',
+        'HINT_ROLE_NAME'
+          => '',
+        'HINT_ROLE_SELECT'
+          => 'Wählen Sie die Rolle aus, deren Berechtigungen Sie bearbeiten möchten oder erstellen Sie eine neue Rolle.',
         'hint_section_add'
             => '<p>Fügen Sie einen neuen Abschnitt hinzu, in dem Sie den gewünschten Bezeichner eintragen.</p>',
         'hint_section_delete'
             => '<p>Wählen Sie den Abschnitt aus, den Sie löschen möchten.</p><p><u>Bitte beachten Sie:</u> der zu löschende Abschnitt darf keine Artikel enhalten, muss also leer sein und Sie können nicht den letzten (einzigen) Abschnitt löschen.</p>',
         'hint_section_tab_move'
             => '<p>Ordnen Sie die einzelnen TAB\'s für die Abschnitte per Drag & Drop in der gewünschten Reihenfolge an und ändern Sie die Bezeichnungen nach Belieben.</p>',
+        'HINT_STATUS'
+          => '',
         'hint_user'
             => '',
         'hint_user_edit_group_select'
@@ -346,6 +362,8 @@ $LANG = array(
         'immediate E-Mail'
             => 'direkte Benachrichtigung',
         // intros
+        'INTRO_DIALOG_ROLES'
+          => 'Wählen Sie die Rolle aus, der Berechtigungen Sie bearbeiten möchten oder erstellen Sie eine neue Rolle mit den gewünschten Berechtigungen.',
         'intro_project_edit'
             => 'Mit diesem Dialog können Sie neue Projekte anlegen bzw. bestehende Projekte bearbeiten.',
         'intro_project_group_edit'
@@ -362,6 +380,8 @@ $LANG = array(
             => 'Ungültige Projekt ID: {{ id }}',
         'Revision'
             => 'Revision',
+        'Roles settings'
+          => 'Rollen Verwaltung',
         '<p>Load Revision <b>{{ revision }}</b> of article <b>{{ article }}</b>.</p>'
             => 'Revision <b>{{ revision }}</b> des Artikel <b>{{ article }}</b> geladen!</p>',
         'Log out'
@@ -525,12 +545,22 @@ $LANG = array(
             => 'Titel',
         'label_project_url'
             => 'Projekt URL',
+        'LABEL_ROLE_DESCRIPTION'
+          => 'Rollen Beschreibung',
+        'LABEL_ROLE_NAME'
+          => 'Rollen Bezeichner',
+        'LABEL_ROLE_ID'
+          => 'Rollen ID',
+        'LABEL_ROLE_SELECT'
+          => 'Rolle auswählen',
         'label_section_add'
             => 'Abschnitt hinzufügen',
         'label_section_delete'
             => 'Abschnitt löschen',
         'label_sections'
             => 'Abschnitte',
+        'LABEL_STATUS'
+          => 'Status',
         'label_timestamp'
             => 'Letzte Änderung',
         'label_user'

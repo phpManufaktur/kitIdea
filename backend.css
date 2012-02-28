@@ -209,3 +209,97 @@ textarea
   text-align: right;
   font-size: 8pt;
 }
+
+#role_edit {
+  font-size: 8pt;
+  width: 900px;
+}
+.idea_label {
+  float: left;
+  width: 200px;
+}
+.idea_text,
+.idea_select {
+  float:left;
+  width: 450px;
+}
+
+.idea_hint {
+  float: left;
+  width: 250px;
+  font-size: 7pt;
+  font-style: italic;
+}
+.idea_clear {
+  clear:both;
+  margin: 0 0 10px 0;
+}
+
+/**
+  Status buttons
+**/  
+input.idea_btn_status_active_active,
+input.idea_btn_status_active_inactive,
+input.idea_btn_status_locked_active,
+input.idea_btn_status_locked_inactive,
+input.idea_btn_status_deleted_active,
+input.idea_btn_status_deleted_inactive
+{
+  width: 90px;
+  height: 22px;
+  border: 2px outset;
+  background-image: none;
+  background-repeat: no-repeat;
+  background-position: top left;
+  margin: 0;
+  padding: 0 0 3px 18px;
+  text-align: left;
+  font-size: 10px;
+}
+input.idea_btn_status_active_active {
+  color: inherit;
+  border: 2px inset;
+  background-image: url(images/icons/active/16/ok.png);
+}
+input.idea_btn_status_active_inactive {
+  color: #666;
+  cursor: default;
+  background-image: url(images/icons/inactive/16/ok.png);
+}
+input.idea_btn_status_active_inactive:hover {
+  color: inherit;
+  cursor: pointer;
+  background-image: url(images/icons/active/16/ok.png);  
+}
+
+input.idea_btn_status_locked_active {
+  color: inherit;
+  border: 2px inset;
+  background-image: url(images/icons/active/16/lock.png);
+}
+input.idea_btn_status_locked_inactive {
+  color: #666;
+  cursor: default;
+  background-image: url(images/icons/inactive/16/lock.png);
+}
+input.idea_btn_status_locked_inactive:hover {
+  color: inherit;
+  cursor: pointer;
+  background-image: url(images/icons/active/16/lock.png);  
+}
+
+input.idea_btn_status_deleted_active {
+  color: inherit;
+  border: 2px inset;
+  background-image: url(images/icons/active/16/trash.png);
+}
+input.idea_btn_status_deleted_inactive {
+  color: #666;
+  cursor: default;
+  background-image: url(images/icons/inactive/16/trash.png);
+}
+input.idea_btn_status_deleted_inactive:hover {
+  color: inherit;
+  cursor: pointer;
+  background-image: url(images/icons/active/16/trash.png);  
+}

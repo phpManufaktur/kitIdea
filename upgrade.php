@@ -99,6 +99,7 @@ $tables = array(
         'dbIdeaRevisionArchive',
         'dbIdeaTableSort',
         'dbIdeaProjectGroups',
+        'dbIdeaProjectAccess',
         'dbIdeaProjectUsers',
         'dbIdeaStatusChange');
 

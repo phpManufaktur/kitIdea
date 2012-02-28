@@ -107,6 +107,8 @@ if (!is_object($dbIdeaTableSort)) $dbIdeaTableSort = new dbIdeaTableSort();
 
 global $dbIdeaProjectGroups;
 if (!is_object($dbIdeaProjectGroups)) $dbIdeaProjectGroups = new dbIdeaProjectGroups();
+global $dbIdeaProjectAccess;
+if (!is_object($dbIdeaProjectAccess)) $dbIdeaProjectAccess = new dbIdeaProjectAccess();
 global $dbIdeaProjectUsers;
 if (!is_object($dbIdeaProjectUsers)) $dbIdeaProjectUsers = new dbIdeaProjectUsers();
 global $dbIdeaStatusChange;
