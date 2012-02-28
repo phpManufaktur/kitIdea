@@ -78,7 +78,7 @@ if (!is_object($parser)) $parser = new Dwoo($compiled_path, $cache_path);
 
 // load extensions for the template engine
 $loader = $parser->getLoader();
-$loader->addDirectory(WB_PATH.'/modules/kit_idea/templates/plugins/');
+$loader->addDirectory(WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/templates/plugins/');
 
 if (!class_exists('dbconnectle')) {
 	require_once WB_PATH.'/modules/dbconnect_le/include.php';
