@@ -357,8 +357,8 @@ class calcTable {
                     // add value of a cell to the $result
                     $val = ($cell_array[$cell]);
                     $val = str_replace(' ', '', $val);
-                    $val = str_replace(cfg_thousand_separator, '', $val);
-                    $val = str_replace(cfg_decimal_separator, '.', $val);
+                    $val = str_replace(CFG_THOUSAND_SEPARATOR, '', $val);
+                    $val = str_replace(CFG_DECIMAL_SEPARATOR, '.', $val);
                     $result += (float) $val;
                 }
             }
@@ -385,8 +385,8 @@ class calcTable {
                                 // add cell value to $result
                                 $val = ($cell_array[$ce]);
                                 $val = str_replace(' ', '', $val);
-                                $val = str_replace(cfg_thousand_separator, '', $val);
-                                $val = str_replace(cfg_decimal_separator, '.', $val);
+                                $val = str_replace(CFG_THOUSAND_SEPARATOR, '', $val);
+                                $val = str_replace(CFG_DECIMAL_SEPARATOR, '.', $val);
                                 $result += (float) $val;
                             }
                         }
@@ -411,8 +411,8 @@ class calcTable {
                                 // add cell value to $result
                                 $val = ($cell_array[$ce]);
                                 $val = str_replace(' ', '', $val);
-                                $val = str_replace(cfg_thousand_separator, '', $val);
-                                $val = str_replace(cfg_decimal_separator, '.', $val);
+                                $val = str_replace(CFG_THOUSAND_SEPARATOR, '', $val);
+                                $val = str_replace(CFG_DECIMAL_SEPARATOR, '.', $val);
                                 $result += (float) $val;
                             }
                         }
@@ -452,8 +452,8 @@ class calcTable {
                             // add cell value to $result
                             $val = ($cell_array[$ce]);
                             $val = str_replace(' ', '', $val);
-                            $val = str_replace(cfg_thousand_separator, '', $val);
-                            $val = str_replace(cfg_decimal_separator, '.', $val);
+                            $val = str_replace(CFG_THOUSAND_SEPARATOR, '', $val);
+                            $val = str_replace(CFG_DECIMAL_SEPARATOR, '.', $val);
                             $result += (float) $val;
                         }
                     }
@@ -477,8 +477,8 @@ class calcTable {
                             // add cell value to $result
                             $val = ($cell_array[$ce]);
                             $val = str_replace(' ', '', $val);
-                            $val = str_replace(cfg_thousand_separator, '', $val);
-                            $val = str_replace(cfg_decimal_separator, '.', $val);
+                            $val = str_replace(CFG_THOUSAND_SEPARATOR, '', $val);
+                            $val = str_replace(CFG_DECIMAL_SEPARATOR, '.', $val);
                             $result += (float) $val;
                         }
                     }
@@ -494,12 +494,12 @@ class calcTable {
             else {
                 // assume that the value is numeric
                 $val = str_replace(' ', '', $cell);
-                $val = str_replace(cfg_thousand_separator, '', $val);
-                $val = str_replace(cfg_decimal_separator, '.', $val);
+                $val = str_replace(CFG_THOUSAND_SEPARATOR, '', $val);
+                $val = str_replace(CFG_DECIMAL_SEPARATOR, '.', $val);
                 $result += (float) $val;
             }
         } // foreach
-        $content = str_replace($command, number_format($result, $decimals, cfg_decimal_separator, cfg_thousand_separator), $content);
+        $content = str_replace($command, number_format($result, $decimals, CFG_DECIMAL_SEPARATOR, CFG_THOUSAND_SEPARATOR), $content);
         return true;
 	} // calculateSum
 
@@ -560,20 +560,20 @@ class calcTable {
 	                // add value of a cell to the $result
 	                $val = ($cell_array[$cell]);
 	                $val = str_replace(' ', '', $val);
-	                $val = str_replace(cfg_thousand_separator, '', $val);
-	                $val = str_replace(cfg_decimal_separator, '.', $val);
+	                $val = str_replace(CFG_THOUSAND_SEPARATOR, '', $val);
+	                $val = str_replace(CFG_DECIMAL_SEPARATOR, '.', $val);
 	                $result *= (float) $val;
 	            }
 	        }
 	        else {
 	            // assume that the value is numeric
 	            $val = str_replace(' ', '', $cell);
-	            $val = str_replace(cfg_thousand_separator, '', $val);
-	            $val = str_replace(cfg_decimal_separator, '.', $val);
+	            $val = str_replace(CFG_THOUSAND_SEPARATOR, '', $val);
+	            $val = str_replace(CFG_DECIMAL_SEPARATOR, '.', $val);
 	            $result *= (float) $val;
 	        }
 	    } // foreach
-	    $content = str_replace($command, number_format($result, $decimals, cfg_decimal_separator, cfg_thousand_separator), $content);
+	    $content = str_replace($command, number_format($result, $decimals, CFG_DECIMAL_SEPARATOR, CFG_THOUSAND_SEPARATOR), $content);
         return true;
 	} // calculateMul()
 
@@ -634,20 +634,20 @@ class calcTable {
 	                // add value of a cell to the $result
 	                $val = ($cell_array[$cell]);
 	                $val = str_replace(' ', '', $val);
-	                $val = str_replace(cfg_thousand_separator, '', $val);
-	                $val = str_replace(cfg_decimal_separator, '.', $val);
+	                $val = str_replace(CFG_THOUSAND_SEPARATOR, '', $val);
+	                $val = str_replace(CFG_DECIMAL_SEPARATOR, '.', $val);
 	                $result = ($result !== null) ? $result - $val : $val;
 	            }
 	        }
 	        else {
 	            // assume that the value is numeric
 	            $val = str_replace(' ', '', $cell);
-	            $val = str_replace(cfg_thousand_separator, '', $val);
-	            $val = str_replace(cfg_decimal_separator, '.', $val);
+	            $val = str_replace(CFG_THOUSAND_SEPARATOR, '', $val);
+	            $val = str_replace(CFG_DECIMAL_SEPARATOR, '.', $val);
                 $result = ($result !== null) ? $result - $val : $val;
 	        }
 	    } // foreach
-	    $content = str_replace($command, number_format($result, $decimals, cfg_decimal_separator, cfg_thousand_separator), $content);
+	    $content = str_replace($command, number_format($result, $decimals, CFG_DECIMAL_SEPARATOR, CFG_THOUSAND_SEPARATOR), $content);
 	    return true;
 	} // calculateSub()
 
@@ -709,20 +709,20 @@ class calcTable {
 	                // add value of a cell to the $result
 	                $val = ($cell_array[$cell]);
 	                $val = str_replace(' ', '', $val);
-	                $val = str_replace(cfg_thousand_separator, '', $val);
-	                $val = str_replace(cfg_decimal_separator, '.', $val);
+	                $val = str_replace(CFG_THOUSAND_SEPARATOR, '', $val);
+	                $val = str_replace(CFG_DECIMAL_SEPARATOR, '.', $val);
 	                $result = ($result !== null) ? $result/(float) $val : $val;
 	            }
 	        }
 	        else {
 	            // assume that the value is numeric
 	            $val = str_replace(' ', '', $cell);
-	            $val = str_replace(cfg_thousand_separator, '', $val);
-	            $val = str_replace(cfg_decimal_separator, '.', $val);
+	            $val = str_replace(CFG_THOUSAND_SEPARATOR, '', $val);
+	            $val = str_replace(CFG_DECIMAL_SEPARATOR, '.', $val);
 	            $result = ($result !== null) ? $result/(float) $val : $val;
 	        }
 	    } // foreach
-	    $content = str_replace($command, number_format($result, $decimals, cfg_decimal_separator, cfg_thousand_separator), $content);
+	    $content = str_replace($command, number_format($result, $decimals, CFG_DECIMAL_SEPARATOR, CFG_THOUSAND_SEPARATOR), $content);
 	    return true;
 	} // calculateDiv()
 

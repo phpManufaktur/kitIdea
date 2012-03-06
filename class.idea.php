@@ -92,7 +92,7 @@ class dbIdeaProject extends dbConnectLE {
         }
       }
     }
-    date_default_timezone_set(cfg_time_zone);
+    date_default_timezone_set(CFG_TIME_ZONE);
     $this->status_array = array(
         array(
             'value' => self::status_active, 
@@ -145,7 +145,7 @@ class dbIdeaProjectSections extends dbConnectLE {
         }
       }
     }
-    date_default_timezone_set(cfg_time_zone);
+    date_default_timezone_set(CFG_TIME_ZONE);
   } // __construct()
 
 
@@ -208,7 +208,7 @@ class dbIdeaProjectArticles extends dbConnectLE {
         }
       }
     }
-    date_default_timezone_set(cfg_time_zone);
+    date_default_timezone_set(CFG_TIME_ZONE);
     
     $lang = new LEPTON_Helper_I18n();
     // init arrays
@@ -262,7 +262,7 @@ class dbIdeaRevisionArchive extends dbConnectLE {
         }
       }
     }
-    date_default_timezone_set(cfg_time_zone);
+    date_default_timezone_set(CFG_TIME_ZONE);
   } // __construct()
 
 
@@ -410,7 +410,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
         }
       }
     }
-    date_default_timezone_set(cfg_time_zone);
+    date_default_timezone_set(CFG_TIME_ZONE);
     $this->status_array = array(
         array(
             'value' => self::status_active, 
@@ -580,7 +580,7 @@ class dbIdeaProjectAccess extends dbConnectLE {
     global $I18n;
     $this->lang = $I18n;
     $this->create_table = $create_table;
-    date_default_timezone_set(cfg_time_zone);
+    date_default_timezone_set(CFG_TIME_ZONE);
     parent::__construct();
     $this->setTableName('mod_kit_idea_project_access');
     $this->addFieldDefinition(self::FIELD_ID, "INT NOT NULL AUTO_INCREMENT", true);
@@ -721,7 +721,7 @@ class dbIdeaProjectUsers extends dbConnectLE {
       }
     }
     
-    date_default_timezone_set(cfg_time_zone);
+    date_default_timezone_set(CFG_TIME_ZONE);
     
     $this->status_array = array(
         array(
@@ -1052,7 +1052,7 @@ class dbIdeaCfg extends dbConnectLE {
       }
     }
     // set timezone
-    date_default_timezone_set(cfg_time_zone);
+    date_default_timezone_set(CFG_TIME_ZONE);
     // Default Werte garantieren
     if ($this->sqlTableExists()) {
       $this->checkConfig();
@@ -1366,7 +1366,7 @@ class dbIdeaTableSort extends dbConnectLE {
         }
       }
     }
-    date_default_timezone_set(cfg_time_zone);
+    date_default_timezone_set(CFG_TIME_ZONE);
   } // __construct()
 
 
@@ -1417,7 +1417,7 @@ class dbIdeaStatusChange extends dbConnectLE {
         }
       }
     }
-    date_default_timezone_set(cfg_time_zone);
+    date_default_timezone_set(CFG_TIME_ZONE);
   } // __construct()
   
 

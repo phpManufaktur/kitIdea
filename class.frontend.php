@@ -156,7 +156,7 @@ class kitIdeaFrontend {
     $this->page_link = $url;
     $this->template_path = WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/templates/' . $this->params[self::PARAM_PRESET] . '/' . KIT_IDEA_LANGUAGE . '/';
     $this->img_url = WB_URL . '/modules/' . basename(dirname(__FILE__)) . '/images/';
-    date_default_timezone_set(cfg_time_zone);
+    date_default_timezone_set(CFG_TIME_ZONE);
     $this->media_path = WB_PATH . MEDIA_DIRECTORY . '/' . $dbIdeaCfg->getValue(dbIdeaCfg::cfgMediaDir) . '/';
     $this->media_url = str_replace(WB_PATH, WB_URL, $this->media_path);
     $this->lang = $I18n;
@@ -551,7 +551,7 @@ class kitIdeaFrontend {
         if ($this->getLogLogin() && isset($_SESSION[self::SESSION_LOG_LOGIN])) {
           // if tracking for login is enabled also track the logout...
           $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], $this->lang->translate('[kitIdea] user logout at {{ time }}', array(
-            'time' => date(cfg_time_str)
+            'time' => date(CFG_TIME_STR)
           )));
         }
         unset($_SESSION[self::SESSION_LOG_LOGIN]);
@@ -682,7 +682,7 @@ class kitIdeaFrontend {
             if ($this->getLogLogin() && !isset($_SESSION[self::SESSION_LOG_LOGIN])) {
               $_SESSION[self::SESSION_LOG_LOGIN] = time();
               $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], $this->lang->translate('[kitIdea] user login in at {{ time }}', array(
-                'time' => date(cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN])
+                'time' => date(CFG_TIME_STR, $_SESSION[self::SESSION_LOG_LOGIN])
               )));
             }
             return true;
@@ -711,7 +711,7 @@ class kitIdeaFrontend {
             if ($this->getLogLogin() && !isset($_SESSION[self::SESSION_LOG_LOGIN])) {
               $_SESSION[self::SESSION_LOG_LOGIN] = time();
               $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], $this->lang->translate('[kitIdea] user login in at {{ time }}', array(
-                'time' => date(cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN])
+                'time' => date(CFG_TIME_STR, $_SESSION[self::SESSION_LOG_LOGIN])
               )));
             }
             return true;
@@ -738,7 +738,7 @@ class kitIdeaFrontend {
         if ($this->getLogLogin() && !isset($_SESSION[self::SESSION_LOG_LOGIN])) {
           $_SESSION[self::SESSION_LOG_LOGIN] = time();
           $dbContact->addSystemNotice($_SESSION[kitContactInterface::session_kit_contact_id], $this->lang->translate('[kitIdea] user login in at {{ time }}', array(
-            'time' => date(cfg_time_str, $_SESSION[self::SESSION_LOG_LOGIN])
+            'time' => date(CFG_TIME_STR, $_SESSION[self::SESSION_LOG_LOGIN])
           )));
         }
         return true;
@@ -2244,7 +2244,7 @@ class kitIdeaFrontend {
           }
           $items[] = array(
             'value' => $revision[dbIdeaRevisionArchive::field_archived_revision],
-            'text' => sprintf('[%03d] %s - %s', $revision[dbIdeaRevisionArchive::field_archived_revision], date(cfg_datetime_str, strtotime($revision[dbIdeaRevisionArchive::field_timestamp])), $record[dbIdeaProjectArticles::field_author]),
+            'text' => sprintf('[%03d] %s - %s', $revision[dbIdeaRevisionArchive::field_archived_revision], date(CFG_DATETIME_STR, strtotime($revision[dbIdeaRevisionArchive::field_timestamp])), $record[dbIdeaProjectArticles::field_author]),
             'selected' => ($record[dbIdeaProjectArticles::field_revision] == $select_revision) ? 1 : 0
           );
         }
