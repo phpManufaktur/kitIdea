@@ -1849,6 +1849,7 @@ class kitIdeaFrontend {
       'url' => sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
         self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
         self::REQUEST_PROJECT_ACTION => self::ACTION_SECTION_EDIT,
+        dbIdeaProjectSections::field_identifier => $section_identifier,
         dbIdeaProject::field_id => $project_id
       )))
     );
@@ -2314,6 +2315,7 @@ class kitIdeaFrontend {
             'link' => sprintf('%s%s%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', http_build_query(array(
               self::REQUEST_MAIN_ACTION => self::ACTION_PROJECTS,
               self::REQUEST_PROJECT_ACTION => self::ACTION_PROJECT_VIEW,
+              dbIdeaProjectSections::field_identifier => $section_identifier,
               dbIdeaProject::field_id => $project_id,
               self::REQUEST_ARTICLE_NEW => 1
             )))
