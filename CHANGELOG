@@ -1,0 +1,134 @@
+### kitIdea
+(c) 2011 - 2012 by phpManufaktur
+Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
+http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
+
+Release 0.27 - 2012-06-19
+
+* added CHANGELOG
+* removed info.txt 
+
+Release 0.26 - 2012-02-24
+
+* added: Dwoo plugin translate() for direct I18n translations within the templates
+* added: option to switch of the WYSIWYG editor if not really needed
+* changed template: please read /modules/kit_idea/templates/changes.txt for 
+  more informations! 
+* changed: install.php, upgrade.php - removed switching to about dialog (caused 
+  problems at some installations)
+
+Release 0.25 - 2012-02-14
+
+* changed some small typos.
+* fixed: standard section name can contain leading space, which causes problems
+* changed: introduce $_SESSION['KIT_HTML_REQUEST'] to mark fields which should 
+  not processed by xssPrevent()
+* added: check the language files for correct UTF-8 encoding
+* changed template: please read /modules/kit_idea/templates/changes.txt for
+  more informations! 
+
+Release 0.24 - 2012-02-01
+
+* fixed: the cronjob does not check if the mailing function is switched off
+* added: 'user_status' enable the user to see that they are logged in and to see
+  and set the email information mode.
+* added: parameter 'user_status' = true|false in droplet kit_idea, default=false
+* added template: please read /modules/kit_idea/templates/changes.txt for
+  more informations!
+
+Release 0.23 - 2012-01-31
+
+* added: projects can now moved between the different project groups
+* changed templates: please read /modules/kit_idea/templates/changes.txt for
+  more informations!
+
+Release 0.22 - 2011-11-27
+
+* added: the used toolbar of the WYSIWYG editor now depends on the permission
+  article_edit_html, so admins may get more rights and abilities
+* changed: it is now possible to change "project" and "projects" to other terms
+* fixed: XHTML error in in /modules/kit_idea/templates/1/DE/project.overview.lte
+* added: guests may now download files from protected directories
+* added: LEPTON 2.x I18n language support is right now implemented in kitIdea
+* changed: separated language depending settings from the language files
+* added: support for english language
+* added: calculate table cells with SUM, ADD, SUB and DIV (see documentation)
+
+Release 0.21 - 2011-11-25
+
+* fixed: missing command parameter in class.cronjob.php disturb links in reports
+* fixed: duplicate entry for moving articles in group permissions
+* added: select and restore articles by revisons - need group permission.
+
+Release 0.20 - 2011-11-23
+
+* added: fields "abstract", "minor changes" and "description" for articles
+* changed: content and design of all reports (immediate, daily, weekly, monthly)
+* added: project protocol show the last changes in a own tab - need permission
+  and can be switched with the droplet parameter "section_protocol"
+
+Release 0.19 - 2011-11-20
+
+* added: parameter "log=login" in droplet "kit_idea" tracks the login of kitIdea
+  users in the KIT account protocol 
+
+Release 0.18 - 2011-11-16
+
+* fixed: visitors can't see public projects
+* added: can change email reporting in user settings now for all project groups
+  at once
+
+Release 0.17 - 2011-11-15
+
+* changed: kitIdea uses now LibraryAdmin for including jQuery
+* fixed: drag & drop problem at the project overview
+* added: immediated, daily, weekly and monthly reports. User can switch between
+  the report modes by links
+* changed: mail.xxx.lte templates replaced by status.xxx.lte templates
+
+Release 0.16 - 2011-11-14
+
+* changed: kitIdea process status mails now with the KIT cronjob.
+
+Release 0.15 - 2011-10-21
+
+* added: kitIdea can calculate within HTML tables sums and multiplications
+
+Release 0.14 - 2011-10-15
+
+* changed: kitIdea is now using project-groups and allows multiple usage at 
+  different pages within the same webspace
+* added: comprehensive access-rights allow to define up to 5 access-groups at each
+  project-group, specify rights for the project, sections, articles, files a.s.o.
+* added: default access-rights for just registered users
+* changed: now uses the CKE as editor and no longer the WB/LEPTON default editor
+* changed: CKEditor is restricted to the defined project space within the MEDIA
+  directory, users can no longer access to files of other projects and system
+* added: features of the CKEditer are controlled via access-rights of the group
+* changed: inbound kitDirList is now restricted to the defined space for each 
+  project - user can no longer access to files of other projects
+* changed: features and rights within kitDirList are now controlled via the group
+  access-rights of the projects
+* improved: inbound features of kitDirList within kitIdea
+* added: drag & drop sorting of projects within a project group 
+
+Release 0.13 - 2011-09-16
+
+* added: parameter lepton_groups for droplet kit_idea allows to login via LEPTON 
+  user interface. The user must be member of one of the specified groups.
+
+Release 0.12 - 2011-09-13
+
+* fixed: missing the section identifier at creating new articles moves the 
+  articles to an non existing section
+
+Release 0.11 - 2011-09-12
+
+* fixed: moving articles between sections does not work
+* fixed: missing check for dropletsExtension in precheck.php 
+* fixed: some minor problems, code cleanup
+* added: email information on project changes for all subscribed persons
+
+Release 0.10 - 2011-09-11
+
+* First Beta Release
