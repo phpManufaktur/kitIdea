@@ -1,42 +1,38 @@
 <?php
+
 /**
  * kitIdea
  *
- * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @author Ralf Hertsch <ralf.hertsch@phpmanufaktur.de>
  * @link http://phpmanufaktur.de
- * @copyright 2011
- * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
- * @version $Id$
+ * @copyright 2011 - 2012
+ * @license MIT License (MIT) http://www.opensource.org/licenses/MIT
  */
 
-// try to include LEPTON class.secure.php to protect this file and the whole CMS!
+// include class.secure.php to protect this file and the whole CMS!
 if (defined('WB_PATH')) {
-  if (defined('LEPTON_VERSION')) include (WB_PATH . '/framework/class.secure.php');
-}
-elseif (file_exists($_SERVER['DOCUMENT_ROOT'] . '/framework/class.secure.php')) {
-  include ($_SERVER['DOCUMENT_ROOT'] . '/framework/class.secure.php');
+  if (defined('LEPTON_VERSION'))
+    include(WB_PATH.'/framework/class.secure.php');
 }
 else {
-  $subs = explode('/', dirname($_SERVER['SCRIPT_NAME']));
-  $dir = $_SERVER['DOCUMENT_ROOT'];
-  $inc = false;
-  foreach ($subs as $sub) {
-    if (empty($sub)) continue;
-    $dir .= '/' . $sub;
-    if (file_exists($dir . '/framework/class.secure.php')) {
-      include ($dir . '/framework/class.secure.php');
-      $inc = true;
-      break;
-    }
+  $oneback = "../";
+  $root = $oneback;
+  $level = 1;
+  while (($level < 10) && (!file_exists($root.'/framework/class.secure.php'))) {
+    $root .= $oneback;
+    $level += 1;
   }
-  if (!$inc) trigger_error(sprintf("[ <b>%s</b> ] Can't include LEPTON class.secure.php!", $_SERVER['SCRIPT_NAME']), E_USER_ERROR);
+  if (file_exists($root.'/framework/class.secure.php')) {
+    include($root.'/framework/class.secure.php');
+  }
+  else {
+    trigger_error(sprintf("[ <b>%s</b> ] Can't include class.secure.php!", $_SERVER['SCRIPT_NAME']), E_USER_ERROR);
+  }
 }
-
-// end include LEPTON class.secure.php
-
+// end include class.secure.php
 
 class dbIdeaProject extends dbConnectLE {
-  
+
   const field_id = 'project_id';
   const field_project_group = 'project_group';
   const field_title = 'project_title';
@@ -50,20 +46,20 @@ class dbIdeaProject extends dbConnectLE {
   const field_status = 'project_status';
   const field_url = 'project_url';
   const field_timestamp = 'project_timestamp';
-  
+
   const status_active = 1;
   const status_locked = 2;
   const status_deleted = 4;
-  
+
   const access_public = 1;
   const access_closed = 2;
-  
+
   public $status_array;
   public $access_array;
-  
+
   private $createTables = false;
   protected $lang = null;
-  
+
   public function __construct($createTables = false) {
     global $I18n;
     $this->lang = $I18n;
@@ -95,22 +91,22 @@ class dbIdeaProject extends dbConnectLE {
     date_default_timezone_set(CFG_TIME_ZONE);
     $this->status_array = array(
         array(
-            'value' => self::status_active, 
-            'text' => $this->lang->translate('Active')), 
+            'value' => self::status_active,
+            'text' => $this->lang->translate('Active')),
         array(
-            'value' => self::status_locked, 
-            'text' => $this->lang->translate('Locked')), 
+            'value' => self::status_locked,
+            'text' => $this->lang->translate('Locked')),
         array(
-            'value' => self::status_deleted, 
+            'value' => self::status_deleted,
             'text' => $this->lang->translate('Deleted')));
     $this->access_array = array(
         array(
-            'value' => self::access_public, 
-            'text' => $this->lang->translate('Public')), 
+            'value' => self::access_public,
+            'text' => $this->lang->translate('Public')),
         array(
-            'value' => self::access_closed, 
+            'value' => self::access_closed,
             'text' => $this->lang->translate('Closed')));
-  
+
   } // __construct()
 
 
@@ -118,15 +114,15 @@ class dbIdeaProject extends dbConnectLE {
 
 
 class dbIdeaProjectSections extends dbConnectLE {
-  
+
   const field_id = 'section_id';
   const field_project_id = 'project_id';
   const field_text = 'section_text';
   const field_identifier = 'section_identifier';
   const field_timestamp = 'section_timestamp';
-  
+
   private $createTables = false;
-  
+
   public function __construct($createTables = false) {
     $this->createTables = $createTables;
     parent::__construct();
@@ -153,7 +149,7 @@ class dbIdeaProjectSections extends dbConnectLE {
 
 
 class dbIdeaProjectArticles extends dbConnectLE {
-  
+
   const field_id = 'article_id';
   const field_project_id = 'project_id';
   const field_section_identifier = 'section_identifier';
@@ -168,19 +164,19 @@ class dbIdeaProjectArticles extends dbConnectLE {
   const field_description = 'article_description';
   const field_change = 'article_change';
   const field_timestamp = 'article_timestamp';
-  
+
   const status_active = 1;
   const status_locked = 2;
   const status_deleted = 4;
-  
+
   public $status_array;
-  
+
   const CHANGE_UNDEFINED = 0;
   const CHANGE_NORMAL = 1;
   const CHANGE_MINOR = 2;
-  
+
   private $createTables = false;
-  
+
   public function __construct($createTables = false) {
     $this->createTables = $createTables;
     parent::__construct();
@@ -209,18 +205,18 @@ class dbIdeaProjectArticles extends dbConnectLE {
       }
     }
     date_default_timezone_set(CFG_TIME_ZONE);
-    
+
     $lang = new LEPTON_Helper_I18n();
     // init arrays
     $this->status_array = array(
         array(
-            'value' => self::status_active, 
-            'text' => $lang->translate('Active')), 
+            'value' => self::status_active,
+            'text' => $lang->translate('Active')),
         array(
-            'value' => self::status_locked, 
-            'text' => $lang->translate('Locked')), 
+            'value' => self::status_locked,
+            'text' => $lang->translate('Locked')),
         array(
-            'value' => self::status_deleted, 
+            'value' => self::status_deleted,
             'text' => $lang->translate('Deleted')));
   } // __construct()
 
@@ -229,20 +225,20 @@ class dbIdeaProjectArticles extends dbConnectLE {
 
 
 class dbIdeaRevisionArchive extends dbConnectLE {
-  
+
   const field_id = 'revision_id';
   const field_archived_id = 'revision_archived_id';
   const field_archived_type = 'revision_archived_type';
   const field_archived_revision = 'revision_archived_revision';
   const field_archived_record = 'revision_archived_record';
   const field_timestamp = 'revision_timestamp';
-  
+
   const archive_type_undefined = 1;
   const archive_type_project = 2;
   const archive_type_article = 4;
-  
+
   private $createTables = false;
-  
+
   public function __construct($createTables = false) {
     $this->createTables = $createTables;
     parent::__construct();
@@ -270,7 +266,7 @@ class dbIdeaRevisionArchive extends dbConnectLE {
 
 
 class dbIdeaProjectGroups extends dbConnectLE {
-  
+
   const field_id = 'grp_id';
   const field_name = 'grp_name';
   const field_description = 'grp_description';
@@ -287,16 +283,16 @@ class dbIdeaProjectGroups extends dbConnectLE {
   const field_access_rights_5 = 'grp_access_rights_5';
   const field_access_default = 'grp_access_default';
   const field_timestamp = 'grp_timestamp';
-  
+
   const status_active = 1;
   const status_locked = 2;
   const status_deleted = 4;
-  
+
   public $status_array;
-  
+
   // rights: general
   const no_access = 0;
-  
+
   // rights: project
   const project_view = 1;
   const project_create = 2;
@@ -307,7 +303,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
   const project_lock = 8;
   const project_delete = 16;
   const project_view_protocol = 134217728;
-  
+
   // rights: articles
   const article_view = 32;
   const article_create = 64;
@@ -318,14 +314,14 @@ class dbIdeaProjectGroups extends dbConnectLE {
   const article_lock = 1024;
   const article_delete = 2048;
   const article_revision = 268435456;
-  
+
   // rights: sections
   const section_view = 4096;
   const section_create = 8192;
   const section_edit = 16384;
   const section_move = 32768;
   const section_delete = 65536;
-  
+
   // rights: files
   const file_download = 131072;
   const file_upload = 262144;
@@ -334,51 +330,51 @@ class dbIdeaProjectGroups extends dbConnectLE {
   const file_create_dir = 2097152;
   const file_rename_dir = 4194304;
   const file_delete_dir = 8388608;
-  
+
   // rights: admins
   const admin_change_rights = 16777216;
-  
+
   // default array for the access rights
   private $access_array = array(
-      'authenticated' => 0, 
-      'rights' => 0, 
+      'authenticated' => 0,
+      'rights' => 0,
       'project' => array(
-          'view' => self::project_view, 
-          'create' => self::project_create, 
-          'edit' => self::project_edit, 
-          'edit_html' => self::project_edit_html, 
-          'move' => self::project_move, 
-          'move_group' => self::project_move_group, 
-          'lock' => self::project_edit, 
-          'delete' => self::project_delete, 
-          'view_protocol' => self::project_view_protocol), 
+          'view' => self::project_view,
+          'create' => self::project_create,
+          'edit' => self::project_edit,
+          'edit_html' => self::project_edit_html,
+          'move' => self::project_move,
+          'move_group' => self::project_move_group,
+          'lock' => self::project_edit,
+          'delete' => self::project_delete,
+          'view_protocol' => self::project_view_protocol),
       'article' => array(
-          'view' => self::article_view, 
-          'create' => self::article_create, 
-          'edit' => self::article_edit, 
-          'edit_html' => self::article_edit_html, 
-          'move' => self::article_move, 
-          'move_section' => self::article_move_section, 
-          'lock' => self::article_lock, 
-          'delete' => self::article_delete), 
+          'view' => self::article_view,
+          'create' => self::article_create,
+          'edit' => self::article_edit,
+          'edit_html' => self::article_edit_html,
+          'move' => self::article_move,
+          'move_section' => self::article_move_section,
+          'lock' => self::article_lock,
+          'delete' => self::article_delete),
       'section' => array(
-          'view' => self::section_view, 
-          'create' => self::section_create, 
-          'edit' => self::section_edit, 
-          'move' => self::section_move, 
-          'delete' => self::section_delete), 
+          'view' => self::section_view,
+          'create' => self::section_create,
+          'edit' => self::section_edit,
+          'move' => self::section_move,
+          'delete' => self::section_delete),
       'file' => array(
-          'download' => self::file_download, 
-          'upload' => self::file_upload, 
-          'delete_file' => self::file_delete_file, 
-          'rename_file' => self::file_rename_file, 
-          'create_dir' => self::file_create_dir, 
-          'rename_dir' => self::file_rename_dir, 
+          'download' => self::file_download,
+          'upload' => self::file_upload,
+          'delete_file' => self::file_delete_file,
+          'rename_file' => self::file_rename_file,
+          'create_dir' => self::file_create_dir,
+          'rename_dir' => self::file_rename_dir,
           'delete_dir' => self::file_delete_dir));
-  
+
   private $createTables = false;
   protected $lang = null;
-  
+
   public function __construct($createTables = false) {
     global $I18n;
     $this->lang = $I18n;
@@ -413,17 +409,17 @@ class dbIdeaProjectGroups extends dbConnectLE {
     date_default_timezone_set(CFG_TIME_ZONE);
     $this->status_array = array(
         array(
-            'value' => self::status_active, 
-            'text' => $this->lang->translate('Active')), 
+            'value' => self::status_active,
+            'text' => $this->lang->translate('Active')),
         array(
-            'value' => self::status_locked, 
-            'text' => $this->lang->translate('Locked')), 
+            'value' => self::status_locked,
+            'text' => $this->lang->translate('Locked')),
         array(
-            'value' => self::status_deleted, 
+            'value' => self::status_deleted,
             'text' => $this->lang->translate('Deleted')));
-  
+
   } // __construct()
-  
+
 
   /**
    * Check if the $access integer contains the $permission and return true on
@@ -437,7 +433,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
     if ($access & $permission) return true;
     return false;
   } // checkPermissions()
-  
+
 
   /**
    * Walk throught self::access_array and sets all permissions for each access
@@ -475,7 +471,7 @@ class dbIdeaProjectGroups extends dbConnectLE {
 
 
 class dbIdeaProjectAccess extends dbConnectLE {
-  
+
   const FIELD_ID = 'access_id';
   const FIELD_GROUP_ID = 'grp_id';
   const FIELD_NAME = 'access_name';
@@ -483,16 +479,16 @@ class dbIdeaProjectAccess extends dbConnectLE {
   const FIELD_RIGHTS = 'access_rights';
   const FIELD_STATUS = 'access_status';
   const FIELD_TIMESTAMP = 'access_timestamp';
-  
+
   const STATUS_ACTIVE = 'ACTIVE';
   const STATUS_LOCKED = 'LOCKED';
   const STATUS_DELETED = 'DELETED';
-  
+
   public $status_array;
-  
+
   // rights: general
   const no_access = 0;
-  
+
   // RIGHTS: PROJECT
   CONST PROJECT_VIEW = 1;
   CONST PROJECT_CREATE = 2;
@@ -503,7 +499,7 @@ class dbIdeaProjectAccess extends dbConnectLE {
   CONST PROJECT_LOCK = 8;
   CONST PROJECT_DELETE = 16;
   CONST PROJECT_VIEW_PROTOCOL = 134217728;
-  
+
   // RIGHTS: ARTICLES
   CONST ARTICLE_VIEW = 32;
   CONST ARTICLE_CREATE = 64;
@@ -514,14 +510,14 @@ class dbIdeaProjectAccess extends dbConnectLE {
   CONST ARTICLE_LOCK = 1024;
   CONST ARTICLE_DELETE = 2048;
   CONST ARTICLE_REVISION = 268435456;
-  
+
   // RIGHTS: SECTIONS
   CONST SECTION_VIEW = 4096;
   CONST SECTION_CREATE = 8192;
   CONST SECTION_EDIT = 16384;
   CONST SECTION_MOVE = 32768;
   CONST SECTION_DELETE = 65536;
-  
+
   // RIGHTS: FILES
   CONST FILE_DOWNLOAD = 131072;
   CONST FILE_UPLOAD = 262144;
@@ -530,52 +526,52 @@ class dbIdeaProjectAccess extends dbConnectLE {
   CONST FILE_CREATE_DIR = 2097152;
   CONST FILE_RENAME_DIR = 4194304;
   CONST FILE_DELETE_DIR = 8388608;
-  
+
   // rights: admins
   const admin_change_rights = 16777216;
-  
+
   // default array for the access rights
   private $access_array = array(
-      'authenticated' => 0, 
-      'rights' => 0, 
+      'authenticated' => 0,
+      'rights' => 0,
       'project' => array(
-          'view' => self::PROJECT_VIEW, 
-          'create' => self::PROJECT_CREATE, 
-          'edit' => self::PROJECT_EDIT, 
-          'edit_html' => self::PROJECT_EDIT_HTML, 
-          'move' => self::PROJECT_MOVE, 
-          'move_group' => self::PROJECT_MOVE_GROUP, 
-          'lock' => self::PROJECT_EDIT, 
-          'delete' => self::PROJECT_DELETE, 
-          'view_protocol' => self::PROJECT_VIEW_PROTOCOL), 
+          'view' => self::PROJECT_VIEW,
+          'create' => self::PROJECT_CREATE,
+          'edit' => self::PROJECT_EDIT,
+          'edit_html' => self::PROJECT_EDIT_HTML,
+          'move' => self::PROJECT_MOVE,
+          'move_group' => self::PROJECT_MOVE_GROUP,
+          'lock' => self::PROJECT_EDIT,
+          'delete' => self::PROJECT_DELETE,
+          'view_protocol' => self::PROJECT_VIEW_PROTOCOL),
       'article' => array(
-          'view' => self::ARTICLE_VIEW, 
-          'create' => self::ARTICLE_CREATE, 
-          'edit' => self::ARTICLE_EDIT, 
-          'edit_html' => self::ARTICLE_EDIT_HTML, 
-          'move' => self::ARTICLE_MOVE, 
-          'move_section' => self::ARTICLE_MOVE_SECTION, 
-          'lock' => self::ARTICLE_LOCK, 
-          'delete' => self::ARTICLE_DELETE), 
+          'view' => self::ARTICLE_VIEW,
+          'create' => self::ARTICLE_CREATE,
+          'edit' => self::ARTICLE_EDIT,
+          'edit_html' => self::ARTICLE_EDIT_HTML,
+          'move' => self::ARTICLE_MOVE,
+          'move_section' => self::ARTICLE_MOVE_SECTION,
+          'lock' => self::ARTICLE_LOCK,
+          'delete' => self::ARTICLE_DELETE),
       'section' => array(
-          'view' => self::SECTION_VIEW, 
-          'create' => self::SECTION_CREATE, 
-          'edit' => self::SECTION_EDIT, 
-          'move' => self::SECTION_MOVE, 
-          'delete' => self::SECTION_DELETE), 
+          'view' => self::SECTION_VIEW,
+          'create' => self::SECTION_CREATE,
+          'edit' => self::SECTION_EDIT,
+          'move' => self::SECTION_MOVE,
+          'delete' => self::SECTION_DELETE),
       'file' => array(
-          'download' => self::FILE_DOWNLOAD, 
-          'upload' => self::FILE_UPLOAD, 
-          'delete_file' => self::FILE_DELETE_FILE, 
-          'rename_file' => self::FILE_RENAME_FILE, 
-          'create_dir' => self::FILE_CREATE_DIR, 
-          'rename_dir' => self::FILE_RENAME_DIR, 
+          'download' => self::FILE_DOWNLOAD,
+          'upload' => self::FILE_UPLOAD,
+          'delete_file' => self::FILE_DELETE_FILE,
+          'rename_file' => self::FILE_RENAME_FILE,
+          'create_dir' => self::FILE_CREATE_DIR,
+          'rename_dir' => self::FILE_RENAME_DIR,
           'delete_dir' => self::FILE_DELETE_DIR));
-  
+
   private $create_table = false;
-  
+
   protected $lang = NULL;
-  
+
   public function __construct($create_table = false) {
     global $I18n;
     $this->lang = $I18n;
@@ -601,15 +597,15 @@ class dbIdeaProjectAccess extends dbConnectLE {
     }
     $this->status_array = array(
         array(
-            'value' => self::STATUS_ACTIVE, 
-            'text' => $this->lang->translate('Active')), 
+            'value' => self::STATUS_ACTIVE,
+            'text' => $this->lang->translate('Active')),
         array(
-            'value' => self::STATUS_LOCKED, 
-            'text' => $this->lang->translate('Locked')), 
+            'value' => self::STATUS_LOCKED,
+            'text' => $this->lang->translate('Locked')),
         array(
-            'value' => self::STATUS_DELETED, 
+            'value' => self::STATUS_DELETED,
             'text' => $this->lang->translate('Deleted'))
-        );  
+        );
   } // __construct()
 
   /**
@@ -624,8 +620,8 @@ class dbIdeaProjectAccess extends dbConnectLE {
   	if ($access & $permission) return true;
   	return false;
   } // checkPermissions()
-  
-  
+
+
   /**
    * Walk throught self::access_array and sets all permissions for each access
    * right and return the complete array
@@ -656,12 +652,12 @@ class dbIdeaProjectAccess extends dbConnectLE {
   	}
   	return $access_array;
   } // getAccessArray
-  
+
 } // dbIdeaProjectAccess
 
 
 class dbIdeaProjectUsers extends dbConnectLE {
-  
+
   const field_id = 'user_id';
   const field_group_id = 'grp_id';
   const field_access = 'user_access';
@@ -670,33 +666,33 @@ class dbIdeaProjectUsers extends dbConnectLE {
   const field_register_id = 'register_id';
   const field_status = 'status';
   const field_timestamp = 'timestamp';
-  
+
   const status_active = 1;
   const status_locked = 2;
   const status_deleted = 4;
-  
+
   public $status_array;
   public $status_array_short;
-  
+
   const EMAIL_UNDEFINED = 0;
   const EMAIL_NO_EMAIL = 1;
   const EMAIL_IMMEDIATE = 2;
   const EMAIL_DAILY = 4;
   const EMAIL_WEEKLY = 8;
   const EMAIL_MONTHLY = 16;
-  
+
   public $email_info_array;
   public $email_command_array = array(
-      self::EMAIL_UNDEFINED => 'undefined', 
-      self::EMAIL_NO_EMAIL => 'no_email', 
-      self::EMAIL_IMMEDIATE => 'immediate', 
-      self::EMAIL_DAILY => 'daily', 
-      self::EMAIL_WEEKLY => 'weekly', 
+      self::EMAIL_UNDEFINED => 'undefined',
+      self::EMAIL_NO_EMAIL => 'no_email',
+      self::EMAIL_IMMEDIATE => 'immediate',
+      self::EMAIL_DAILY => 'daily',
+      self::EMAIL_WEEKLY => 'weekly',
       self::EMAIL_MONTHLY => 'monthly');
-  
+
   private $createTable = false;
   protected $lang = null;
-  
+
   public function __construct($createTable = false) {
     global $I18n;
     $this->lang = $I18n;
@@ -720,45 +716,45 @@ class dbIdeaProjectUsers extends dbConnectLE {
         }
       }
     }
-    
+
     date_default_timezone_set(CFG_TIME_ZONE);
-    
+
     $this->status_array = array(
         array(
-            'value' => self::status_active, 
-            'text' => $this->lang->translate('Active')), 
+            'value' => self::status_active,
+            'text' => $this->lang->translate('Active')),
         array(
-            'value' => self::status_locked, 
-            'text' => $this->lang->translate('Locked')), 
+            'value' => self::status_locked,
+            'text' => $this->lang->translate('Locked')),
         array(
-            'value' => self::status_deleted, 
+            'value' => self::status_deleted,
             'text' => $this->lang->translate('Deleted')));
-    
+
     $this->status_array_short = array(
-        self::status_active => $this->lang->translate('Active'), 
-        self::status_locked => $this->lang->translate('Locked'), 
+        self::status_active => $this->lang->translate('Active'),
+        self::status_locked => $this->lang->translate('Locked'),
         self::status_deleted => $this->lang->translate('Deleted'));
-    
+
     $this->email_info_array = array(
         self::EMAIL_UNDEFINED => array(
-            'value' => self::EMAIL_UNDEFINED, 
-            'text' => $this->lang->translate('- undefined -')), 
+            'value' => self::EMAIL_UNDEFINED,
+            'text' => $this->lang->translate('- undefined -')),
         self::EMAIL_NO_EMAIL => array(
-            'value' => self::EMAIL_NO_EMAIL, 
-            'text' => $this->lang->translate('no E-Mail')), 
+            'value' => self::EMAIL_NO_EMAIL,
+            'text' => $this->lang->translate('no E-Mail')),
         self::EMAIL_IMMEDIATE => array(
-            'value' => self::EMAIL_IMMEDIATE, 
-            'text' => $this->lang->translate('immediate E-Mail')), 
+            'value' => self::EMAIL_IMMEDIATE,
+            'text' => $this->lang->translate('immediate E-Mail')),
         self::EMAIL_DAILY => array(
-            'value' => self::EMAIL_DAILY, 
-            'text' => $this->lang->translate('daily E-Mail')), 
+            'value' => self::EMAIL_DAILY,
+            'text' => $this->lang->translate('daily E-Mail')),
         self::EMAIL_WEEKLY => array(
-            'value' => self::EMAIL_WEEKLY, 
-            'text' => $this->lang->translate('weekly E-Mail')), 
+            'value' => self::EMAIL_WEEKLY,
+            'text' => $this->lang->translate('weekly E-Mail')),
         self::EMAIL_MONTHLY => array(
-            'value' => self::EMAIL_MONTHLY, 
+            'value' => self::EMAIL_MONTHLY,
             'text' => $this->lang->translate('monthly E-Mail')));
-  
+
   } // __construct()
 
 
@@ -766,7 +762,7 @@ class dbIdeaProjectUsers extends dbConnectLE {
 
 
 class dbIdeaCfg extends dbConnectLE {
-  
+
   const field_id = 'cfg_id';
   const field_name = 'cfg_name';
   const field_type = 'cfg_type';
@@ -776,10 +772,10 @@ class dbIdeaCfg extends dbConnectLE {
   const field_status = 'cfg_status';
   const field_update_by = 'cfg_update_by';
   const field_update_when = 'cfg_update_when';
-  
+
   const status_active = 1;
   const status_deleted = 0;
-  
+
   const type_undefined = 0;
   const type_array = 7;
   const type_boolean = 1;
@@ -790,22 +786,22 @@ class dbIdeaCfg extends dbConnectLE {
   const type_path = 5;
   const type_string = 6;
   const type_url = 8;
-  
+
   public $type_array = array(
-      self::type_undefined => '-UNDEFINED-', 
-      self::type_array => 'ARRAY', 
-      self::type_boolean => 'BOOLEAN', 
-      self::type_email => 'E-MAIL', 
-      self::type_float => 'FLOAT', 
-      self::type_integer => 'INTEGER', 
-      self::type_list => 'LIST', 
-      self::type_path => 'PATH', 
-      self::type_string => 'STRING', 
+      self::type_undefined => '-UNDEFINED-',
+      self::type_array => 'ARRAY',
+      self::type_boolean => 'BOOLEAN',
+      self::type_email => 'E-MAIL',
+      self::type_float => 'FLOAT',
+      self::type_integer => 'INTEGER',
+      self::type_list => 'LIST',
+      self::type_path => 'PATH',
+      self::type_string => 'STRING',
       self::type_url => 'URL');
-  
+
   private $createTables = false;
   private $message = '';
-  
+
   const cfgMediaDir = 'cfgMediaDir';
   const cfgMediaProjectDir = 'cfgMediaProjectDir';
   const cfgKITcategory = 'cfgKITcategory';
@@ -837,195 +833,195 @@ class dbIdeaCfg extends dbConnectLE {
   const cfgWYSIWYGtoolbarAdmin = 'cfgWYSIWYGtoolbarAdmin';
   const cfgProjectNoShortDescription = 'cfgProjectNoShortDescription';
   const cfgWYSIWYGshowPermanent = 'cfgWYSIWYGshowPermanent';
-  
+
   public $config_array = array(
       array(
-          'idea_label_cfg_media_project_dir', 
-          self::cfgMediaProjectDir, 
-          self::type_string, 
-          '/kit_idea/project', 
-          'idea_hint_cfg_media_project_dir'), 
+          'idea_label_cfg_media_project_dir',
+          self::cfgMediaProjectDir,
+          self::type_string,
+          '/kit_idea/project',
+          'idea_hint_cfg_media_project_dir'),
       array(
-          'idea_label_cfg_media_dir', 
-          self::cfgMediaDir, 
-          self::type_string, 
-          '/kit_idea', 
-          'idea_hint_cfg_media_dir'), 
+          'idea_label_cfg_media_dir',
+          self::cfgMediaDir,
+          self::type_string,
+          '/kit_idea',
+          'idea_hint_cfg_media_dir'),
       array(
-          'idea_label_cfg_kit_category', 
-          self::cfgKITcategory, 
-          self::type_string, 
-          'kitIdea', 
-          'idea_hint_cfg_kit_category'), 
+          'idea_label_cfg_kit_category',
+          self::cfgKITcategory,
+          self::type_string,
+          'kitIdea',
+          'idea_hint_cfg_kit_category'),
       array(
-          'idea_label_cfg_kit_form_dlg_login', 
-          self::cfgKITformDlgLogin, 
-          self::type_string, 
-          'idea_login', 
-          'idea_hint_cfg_kit_form_dlg_login'), 
+          'idea_label_cfg_kit_form_dlg_login',
+          self::cfgKITformDlgLogin,
+          self::type_string,
+          'idea_login',
+          'idea_hint_cfg_kit_form_dlg_login'),
       array(
-          'idea_label_cfg_kit_form_dlg_account', 
-          self::cfgKITformDlgAccount, 
-          self::type_string, 
-          'idea_account', 
-          'idea_hint_cfg_kit_form_dlg_account'), 
+          'idea_label_cfg_kit_form_dlg_account',
+          self::cfgKITformDlgAccount,
+          self::type_string,
+          'idea_account',
+          'idea_hint_cfg_kit_form_dlg_account'),
       array(
-          'idea_label_cfg_kit_form_dlg_register', 
-          self::cfgKITformDlgRegister, 
-          self::type_string, 
-          'idea_register', 
-          'idea_hint_cfg_kit_form_dlg_register'), 
+          'idea_label_cfg_kit_form_dlg_register',
+          self::cfgKITformDlgRegister,
+          self::type_string,
+          'idea_register',
+          'idea_hint_cfg_kit_form_dlg_register'),
       array(
-          'idea_label_cfg_wysiwyg_editor_height', 
-          self::cfgWYSIWYGeditorHeight, 
-          self::type_string, 
-          '200px', 
-          'idea_hint_cfg_wysiwyg_editor_height'), 
+          'idea_label_cfg_wysiwyg_editor_height',
+          self::cfgWYSIWYGeditorHeight,
+          self::type_string,
+          '200px',
+          'idea_hint_cfg_wysiwyg_editor_height'),
       array(
-          'idea_label_cfg_wysiwyg_editor_width', 
-          self::cfgWYSIWYGeditorWidth, 
-          self::type_string, 
-          '100%', 
-          'idea_hint_cfg_wysiwyg_editor_width'), 
+          'idea_label_cfg_wysiwyg_editor_width',
+          self::cfgWYSIWYGeditorWidth,
+          self::type_string,
+          '100%',
+          'idea_hint_cfg_wysiwyg_editor_width'),
       array(
-          'idea_label_cfg_project_default_sections', 
-          self::cfgProjectDefaultSections, 
-          self::type_array, 
-          'Die Idee|secIdea', 
-          'idea_hint_cfg_project_default_sections'), 
+          'idea_label_cfg_project_default_sections',
+          self::cfgProjectDefaultSections,
+          self::type_array,
+          'Die Idee|secIdea',
+          'idea_hint_cfg_project_default_sections'),
       array(
-          'idea_label_cfg_compare_differ_prefix', 
-          self::cfgCompareDifferPrefix, 
-          self::type_string, 
-          '<span class="compare_differ">', 
-          'idea_hint_cfg_compare_differ_prefix'), 
+          'idea_label_cfg_compare_differ_prefix',
+          self::cfgCompareDifferPrefix,
+          self::type_string,
+          '<span class="compare_differ">',
+          'idea_hint_cfg_compare_differ_prefix'),
       array(
-          'idea_label_cfg_compare_differ_suffix', 
-          self::cfgCompareDifferSuffix, 
-          self::type_string, 
-          '</span>', 
-          'idea_hint_cfg_compare_differ_suffix'), 
+          'idea_label_cfg_compare_differ_suffix',
+          self::cfgCompareDifferSuffix,
+          self::type_string,
+          '</span>',
+          'idea_hint_cfg_compare_differ_suffix'),
       array(
-          'idea_label_cfg_compare_revisions', 
-          self::cfgCompareRevisions, 
-          self::type_boolean, 
-          '1', 
-          'idea_hint_cfg_compare_revisions'), 
+          'idea_label_cfg_compare_revisions',
+          self::cfgCompareRevisions,
+          self::type_boolean,
+          '1',
+          'idea_hint_cfg_compare_revisions'),
       array(
-          'idea_label_cfg_access_grp_default_1', 
-          self::cfgAccessGrpDefault_1, 
-          self::type_integer, 
-          '134352929', 
-          'idea_hint_cfg_access_grp_default'), 
+          'idea_label_cfg_access_grp_default_1',
+          self::cfgAccessGrpDefault_1,
+          self::type_integer,
+          '134352929',
+          'idea_hint_cfg_access_grp_default'),
       array(
-          'idea_label_cfg_access_grp_default_2', 
-          self::cfgAccessGrpDefault_2, 
-          self::type_integer, 
-          '137237665', 
-          'idea_hint_cfg_access_grp_default'), 
+          'idea_label_cfg_access_grp_default_2',
+          self::cfgAccessGrpDefault_2,
+          self::type_integer,
+          '137237665',
+          'idea_hint_cfg_access_grp_default'),
       array(
-          'idea_label_cfg_access_grp_default_3', 
-          self::cfgAccessGrpDefault_3, 
-          self::type_integer, 
-          '170850279', 
-          'idea_hint_cfg_access_grp_default'), 
+          'idea_label_cfg_access_grp_default_3',
+          self::cfgAccessGrpDefault_3,
+          self::type_integer,
+          '170850279',
+          'idea_hint_cfg_access_grp_default'),
       array(
-          'idea_label_cfg_access_grp_default_4', 
-          self::cfgAccessGrpDefault_4, 
-          self::type_integer, 
-          '1043333119', 
-          'idea_hint_cfg_access_grp_default'), 
+          'idea_label_cfg_access_grp_default_4',
+          self::cfgAccessGrpDefault_4,
+          self::type_integer,
+          '1043333119',
+          'idea_hint_cfg_access_grp_default'),
       array(
-          'idea_label_cfg_access_grp_default_5', 
-          self::cfgAccessGrpDefault_5, 
-          self::type_integer, 
-          '0', 
-          'idea_hint_cfg_access_grp_default'), 
+          'idea_label_cfg_access_grp_default_5',
+          self::cfgAccessGrpDefault_5,
+          self::type_integer,
+          '0',
+          'idea_hint_cfg_access_grp_default'),
       array(
-          'idea_label_cfg_mail_active', 
-          self::cfgMailActive, 
-          self::type_boolean, 
-          '1', 
-          'idea_hint_cfg_mail_active'), 
+          'idea_label_cfg_mail_active',
+          self::cfgMailActive,
+          self::type_boolean,
+          '1',
+          'idea_hint_cfg_mail_active'),
       array(
-          'idea_label_cfg_mail_default', 
-          self::cfgMailDefault, 
-          self::type_integer, 
-          '2', 
-          'idea_hint_cfg_mail_default'), 
+          'idea_label_cfg_mail_default',
+          self::cfgMailDefault,
+          self::type_integer,
+          '2',
+          'idea_hint_cfg_mail_default'),
       array(
-          'idea_label_cfg_mail_deliver_daily', 
-          self::cfgMailDeliverDaily, 
-          self::type_string, 
-          '06:00', 
-          'idea_hint_cfg_mail_deliver_daily'), 
+          'idea_label_cfg_mail_deliver_daily',
+          self::cfgMailDeliverDaily,
+          self::type_string,
+          '06:00',
+          'idea_hint_cfg_mail_deliver_daily'),
       array(
-          'idea_label_cfg_mail_deliver_weekly', 
-          self::cfgMailDeliverWeekly, 
-          self::type_string, 
-          '1|08:00', 
-          'idea_hint_cfg_mail_deliver_weekly'), 
+          'idea_label_cfg_mail_deliver_weekly',
+          self::cfgMailDeliverWeekly,
+          self::type_string,
+          '1|08:00',
+          'idea_hint_cfg_mail_deliver_weekly'),
       array(
-          'idea_label_cfg_mail_deliver_monthly', 
-          self::cfgMailDeliverMonthly, 
-          self::type_string, 
-          '1|10:00', 
-          'idea_hint_cfg_mail_deliver_monthly'), 
+          'idea_label_cfg_mail_deliver_monthly',
+          self::cfgMailDeliverMonthly,
+          self::type_string,
+          '1|10:00',
+          'idea_hint_cfg_mail_deliver_monthly'),
       array(
-          'idea_label_cfg_mail_package_size', 
-          self::cfgMailPackageSize, 
-          self::type_integer, 
-          '50', 
-          'idea_hint_cfg_mail_package_size'), 
+          'idea_label_cfg_mail_package_size',
+          self::cfgMailPackageSize,
+          self::type_integer,
+          '50',
+          'idea_hint_cfg_mail_package_size'),
       array(
-          'idea_label_cfg_article_use_abstract', 
-          self::cfgArticleUseAbstract, 
-          self::type_boolean, 
-          '1', 
-          'idea_hint_cfg_article_use_abstract'), 
+          'idea_label_cfg_article_use_abstract',
+          self::cfgArticleUseAbstract,
+          self::type_boolean,
+          '1',
+          'idea_hint_cfg_article_use_abstract'),
       array(
-          'idea_label_cfg_article_allow_minor_changes', 
-          self::cfgArticleAllowMinorChanges, 
-          self::type_boolean, 
-          '1', 
-          'idea_hint_cfg_article_allow_minor_changes'), 
+          'idea_label_cfg_article_allow_minor_changes',
+          self::cfgArticleAllowMinorChanges,
+          self::type_boolean,
+          '1',
+          'idea_hint_cfg_article_allow_minor_changes'),
       array(
-          'idea_label_cfg_project_name_plural', 
-          self::cfgProjectNamePlural, 
-          self::type_string, 
-          '', 
-          'idea_hint_cfg_project_name_plural'), 
+          'idea_label_cfg_project_name_plural',
+          self::cfgProjectNamePlural,
+          self::type_string,
+          '',
+          'idea_hint_cfg_project_name_plural'),
       array(
-          'idea_label_cfg_project_name_singular', 
-          self::cfgProjectNameSingular, 
-          self::type_string, 
-          '', 
-          'idea_hint_cfg_project_name_singular'), 
+          'idea_label_cfg_project_name_singular',
+          self::cfgProjectNameSingular,
+          self::type_string,
+          '',
+          'idea_hint_cfg_project_name_singular'),
       array(
-          'WYSIWYG toolbar, authors', 
-          self::cfgWYSIWYGtoolbarAuthor, 
-          self::type_string, 
-          'Author', 
-          'Select the toolbar which should be used for authors'), 
+          'WYSIWYG toolbar, authors',
+          self::cfgWYSIWYGtoolbarAuthor,
+          self::type_string,
+          'Author',
+          'Select the toolbar which should be used for authors'),
       array(
-          'WYSIWYG toolbar, admins', 
-          self::cfgWYSIWYGtoolbarAdmin, 
-          self::type_string, 
-          'Admin', 
-          'Select the toolbar which should be used for admins'), 
+          'WYSIWYG toolbar, admins',
+          self::cfgWYSIWYGtoolbarAdmin,
+          self::type_string,
+          'Admin',
+          'Select the toolbar which should be used for admins'),
       array(
-          'Projects: No short description', 
-          self::cfgProjectNoShortDescription, 
-          self::type_boolean, 
-          '0', 
-          'If set to true (1) kitIdea use the detailed project description also for the short description in the overview of the projects.'), 
+          'Projects: No short description',
+          self::cfgProjectNoShortDescription,
+          self::type_boolean,
+          '0',
+          'If set to true (1) kitIdea use the detailed project description also for the short description in the overview of the projects.'),
       array(
-          'WYSIWIG editor, show permanent', 
-          self::cfgWYSIWYGshowPermanent, 
-          self::type_boolean, 
-          '1', 
+          'WYSIWIG editor, show permanent',
+          self::cfgWYSIWYGshowPermanent,
+          self::type_boolean,
+          '1',
           'If set to true (1) the WYSIWYG editor is permanently visible for creating new articles if the user has enough rights.'));
-  
+
   public function __construct($createTables = false) {
     $this->createTables = $createTables;
     parent::__construct();
@@ -1058,12 +1054,12 @@ class dbIdeaCfg extends dbConnectLE {
       $this->checkConfig();
     }
   } // __construct()
-  
+
 
   public function setMessage($message) {
     $this->message = $message;
   } // setMessage()
-  
+
 
   /**
    * Get Message from $this->message;
@@ -1073,7 +1069,7 @@ class dbIdeaCfg extends dbConnectLE {
   public function getMessage() {
     return $this->message;
   } // getMessage()
-  
+
 
   /**
    * Check if $this->message is empty
@@ -1083,7 +1079,7 @@ class dbIdeaCfg extends dbConnectLE {
   public function isMessage() {
     return (bool) !empty($this->message);
   } // isMessage
-  
+
 
   /**
    * Aktualisiert den Wert $new_value des Datensatz $name
@@ -1109,7 +1105,7 @@ class dbIdeaCfg extends dbConnectLE {
     }
     return $this->setValue($new_value, $config[0][self::field_id]);
   } // setValueByName()
-  
+
 
   /**
    * Haengt einen Slash an das Ende des uebergebenen Strings
@@ -1122,7 +1118,7 @@ class dbIdeaCfg extends dbConnectLE {
     $path = substr($path, strlen($path) - 1, 1) == "/" ? $path : $path . "/";
     return $path;
   }
-  
+
   /**
    * Wandelt einen String in einen Float Wert um.
    * Geht davon aus, dass Dezimalzahlen mit ',' und nicht mit '.'
@@ -1137,14 +1133,14 @@ class dbIdeaCfg extends dbConnectLE {
     $float = floatval($string);
     return $float;
   }
-  
+
   public function str2int($string) {
     $string = str_replace('.', '', $string);
     $string = str_replace(',', '.', $string);
     $int = intval($string);
     return $int;
   }
-  
+
   /**
    * Ueberprueft die uebergebene E-Mail Adresse auf logische Gueltigkeit
    *
@@ -1161,7 +1157,7 @@ class dbIdeaCfg extends dbConnectLE {
       return false;
     }
   }
-  
+
   /**
    * Aktualisiert den Wert $new_value des Datensatz $id
    *
@@ -1181,7 +1177,7 @@ class dbIdeaCfg extends dbConnectLE {
     }
     if (sizeof($config) < 1) {
       $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->lang->translate('The record with the <b>ID {{ id }}</b> does not exists!', array(
-          'id', 
+          'id',
           $id))));
       return false;
     }
@@ -1248,7 +1244,7 @@ class dbIdeaCfg extends dbConnectLE {
     }
     return true;
   } // setValue()
-  
+
 
   /**
    * Gibt den angeforderten Wert zurueck
@@ -1268,7 +1264,7 @@ class dbIdeaCfg extends dbConnectLE {
     }
     if (sizeof($config) < 1) {
       $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->lang->translate('There is no record for the configuration of <b>{{ name }}</b>!', array(
-          'name', 
+          'name',
           $name))));
       return false;
     }
@@ -1303,7 +1299,7 @@ class dbIdeaCfg extends dbConnectLE {
     ;
     return $result;
   } // getValue()
-  
+
 
   public function checkConfig() {
     foreach ($this->config_array as $item) {
@@ -1337,16 +1333,16 @@ class dbIdeaCfg extends dbConnectLE {
 
 
 class dbIdeaTableSort extends dbConnectLE {
-  
+
   const field_id = 'sort_id';
   const field_table = 'sort_table';
   const field_value = 'sort_value';
   const field_item = 'sort_item';
   const field_order = 'sort_order';
   const field_timestamp = 'sort_timestamp';
-  
+
   private $create_tables = false;
-  
+
   public function __construct($create_tables = false) {
     $this->create_tables = $create_tables;
     parent::__construct();
@@ -1374,7 +1370,7 @@ class dbIdeaTableSort extends dbConnectLE {
 
 
 class dbIdeaStatusChange extends dbConnectLE {
-  
+
   const FIELD_ID = 'status_id';
   const FIELD_PROJECT_GROUP = 'project_group';
   const FIELD_PROJECT_ID = 'project_id';
@@ -1384,7 +1380,7 @@ class dbIdeaStatusChange extends dbConnectLE {
   const FIELD_INFO_DATE = 'status_info_date';
   const FIELD_STATUS = 'status_status';
   const FIELD_TIMESTAMP = 'status_timestamp';
-  
+
   const STATUS_UNKNOWN = 0;
   const STATUS_UNDELIVERED = 1;
   const STATUS_IMMEDIATE = 2;
@@ -1392,9 +1388,9 @@ class dbIdeaStatusChange extends dbConnectLE {
   const STATUS_WEEKLY = 8;
   const STATUS_MONTHLY = 16;
   const STATUS_MINOR_CHANGE = 32;
-  
+
   private $createTable = false;
-  
+
   public function __construct($create_table = false) {
     $this->setCreateTable($create_table);
     parent::__construct();
@@ -1419,7 +1415,7 @@ class dbIdeaStatusChange extends dbConnectLE {
     }
     date_default_timezone_set(CFG_TIME_ZONE);
   } // __construct()
-  
+
 
   /**
    * @return the $createTable
@@ -1427,7 +1423,7 @@ class dbIdeaStatusChange extends dbConnectLE {
   protected function getCreateTable() {
     return $this->createTable;
   }
-  
+
   /**
    * @param boolean $createTable
    */
