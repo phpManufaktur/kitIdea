@@ -7,6 +7,11 @@ Release 0.27 - 2012-06-19
 
 * added CHANGELOG
 * removed info.txt 
+* changed WebsiteBaker version check
+* updated header informations
+* changed license from GNU GPL to MIT
+* added LICENSE
+* added README.md
 
 Release 0.26 - 2012-02-24
 
