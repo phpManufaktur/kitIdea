@@ -3,11 +3,10 @@
 /**
  * kitIdea
  *
- * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @author Ralf Hertsch <ralf.hertsch@phpmanufaktur.de>
  * @link http://phpmanufaktur.de
- * @copyright 2011
- * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
- * @version $Id$
+ * @copyright 2011 - 2012
+ * @license MIT License (MIT) http://www.opensource.org/licenses/MIT
  */
 // load the kit_idea.jquery preset with LibraryAdmin
 include_once WB_PATH.'/modules/libraryadmin/include.php';
@@ -31,7 +30,7 @@ if (file_exists(WB_PATH.'/modules/kit_idea/class.frontend.php')) {
 	$params[kitIdeaFrontend::PARAM_LEPTON_GROUPS] = (isset($lepton_groups)) ? $lepton_groups : '';
 	$params[kitIdeaFrontend::PARAM_PROJECT_GROUP] = (isset($group)) ? $group : -1;
 	$params[kitIdeaFrontend::PARAM_LOG] = (isset($log)) ? strtolower($log) : '';
-	$params[kitIdeaFrontend::PARAM_USER_STATUS] = (isset($user_status) && (strtolower($user_status) == 'true')) ? true : false; 
+	$params[kitIdeaFrontend::PARAM_USER_STATUS] = (isset($user_status) && (strtolower($user_status) == 'true')) ? true : false;
 	if (!$idea->setParams($params)) return $idea->getError();
 	return $idea->action();
 }
