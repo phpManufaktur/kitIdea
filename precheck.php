@@ -39,7 +39,7 @@ $PRECHECK['WB_ADDONS'] = array(
   'libraryadmin' => array('VERSION' => '1.9', 'OPERATOR' => '>='),
 	'lib_jquery' => array('VERSION' => '1.25', 'OPERATOR' => '>='),
   'dbconnect_le'	=> array('VERSION' => '0.65', 'OPERATOR' => '>='),
-	'dwoo' => array('VERSION' => '0.11', 'OPERATOR' => '>='),
+	'dwoo' => array('VERSION' => '0.16', 'OPERATOR' => '>='),
 	'droplets' => array('VERSION' => '1.51', 'OPERATOR' => '>='),
 	'droplets_extension' => array('VERSION' => '0.16', 'OPERATOR' => '>='),
 	'kit_tools' => array('VERSION' => '0.15', 'OPRATOR' => '>='),

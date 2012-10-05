@@ -34,7 +34,7 @@ else {
 $module_directory     = 'kit_idea';
 $module_name          = 'kitIdea';
 $module_function      = 'tool';
-$module_version       = '0.27';
+$module_version       = '0.28';
 $module_status        = 'Beta';
 $module_platform      = '2.8';
 $module_author        = 'Ralf Hertsch, Berlin (Germany)';

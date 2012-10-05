@@ -3,6 +3,11 @@
 Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
+Release 0.28 - 2012-10-05
+
+* changed implementation of the Dwoo template engine
+* separated cronjob from KIT and add a own cronjob.php
+
 Release 0.27 - 2012-06-19
 
 * added CHANGELOG
